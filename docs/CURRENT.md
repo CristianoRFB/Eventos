@@ -1,8 +1,11 @@
 # CURRENT — Eventos 77
 
-**VERSÃO DOCUMENTAL ATIVA:** `docs/versions/v0.1.0-architecture/`  
-**ESTADO DO SISTEMA:** `PLANNED`, não implementado, sem banco, site, autenticação ou deploy real.
+**Design histórico:** `docs/versions/v0.1.0-architecture/` permanece preservado.
+**Execução ativa:** [MASTER_EXECUTION_STATUS](implementation/MASTER_EXECUTION_STATUS.md).
+**Estado neste checkpoint:** F0 `PARTIAL`; F1 `IN_PROGRESS`; F2–F11 `NOT_STARTED`; F12 `PARTIAL`. Runtime local e build inicial avançaram com o executor principal; PoC de login/auth e aceites operacionais A/B ainda pendentes. A evidência detalhada de runtime deve ser anexada pelo executor antes de PASS.
 
-Leia README, ARCHITECTURE, DATA_MODEL, SECURITY e DECISIONS_PENDING antes de começar a programar. O `codex/CODEX_GOAL_MASTER_EVENTOS_77_FULL_SYSTEM.txt` é a proposta de execução FUTURA; não equivale a autorização de criar recursos cloud pagos ou modificar outros repositórios.
+O usuário autorizou implementar no repositório `CristianoRFB/Eventos`, checkout `C:\OpenSSL\set\Eventos`, branch `codex/eventos77-full-system`, baseline `b90ece62e0d3c893dc6e95d6643fa7505dd25602`. Essa escolha substitui o nome Eventos-77 proposto no TXT; não é necessário perguntar o destino novamente. Leia [ADR-005](adr/ADR-005-authorized-repository-and-execution.md) para o registro de autorização e limites. Consoles Firebase/Cloudflare foram disponibilizados; o usuário pediu subdomínio Workers no futuro e foco inicial em desenvolver o sistema. Acesso ao console não prova integração ou provisionamento.
 
-A documentação de implementação futura deve ser atualizada somente após testes e evidências. Não declarar passagens F0–F12 como concluídas antes do Codex executar e registrar logs.
+O [GOAL MASTER](../codex/CODEX_GOAL_MASTER_EVENTOS_77_FULL_SYSTEM.txt) continua sendo a fonte de requisitos F0–F12. As [decisões pendentes](DECISIONS_PENDING.md), ADRs e especificação histórica são fontes de design, sem substituir evidência executada. [FEATURE_STATES](../FEATURE_STATES.md), [matriz de requisitos](implementation/REQUIREMENTS_TRACEABILITY.csv), [features](implementation/FEATURE_TRACEABILITY.csv) e [telas](implementation/SCREEN_TRACEABILITY.csv) acompanham cobertura planejada e real. Os [16 SVGs Mermaid renderizados](implementation/diagrams/README.md) representam o design preservado: render passou, reconciliação com runtime permanece PLANNED/NOT_STARTED. SVG histórico continua auxiliar de Graphviz.
+
+Não há release runtime aceito, screenshot real, domínio validado, staging ou produção comprovados neste checkpoint. Somente promover esses estados após comandos e jornadas executados com evidência rastreável. O próximo passo local é terminar scaffold/stack fixada, executar checks F0/F1 e realizar a PoC de auth no runtime Worker. Preço, quotas e trial Eventos 77 permanecem sem aprovação.

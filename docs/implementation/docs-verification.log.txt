@@ -1,0 +1,9 @@
+Eventos 77 documentation checks — 2026-10-14 America/Sao_Paulo
+Branch: codex/eventos77-full-system; baseline HEAD b90ece62e0d3c893dc6e95d6643fa7505dd25602; working tree execution.
+COMMAND: node scripts/docs-check.mjs
+PASS docs: 13 phases; 172 phase clauses; 65 global clauses; 38 features; 60 screens; 16 preserved Mermaid sources; 16 verified design renders.
+This validates documented provenance/coverage; it does not certify runtime or cloud acceptance.
+EXIT_CODE: 0
+
+COMMAND: node node_modules/eslint/bin/eslint.js scripts/docs-check.mjs scripts/render-diagrams.mjs
+EXIT_CODE: 0

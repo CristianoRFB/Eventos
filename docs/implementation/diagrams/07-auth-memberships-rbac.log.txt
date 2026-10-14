@@ -1,0 +1,8 @@
+Renderer: @mermaid-js/mermaid-cli 12.0.0
+Source: docs/versions/v0.1.0-architecture/diagrams/source/07-auth-memberships-rbac.mmd
+Source SHA-256: efb7c06dfbbe6f01e02a8818d7de15b2f59822e1451b8e609940cb35d29c569b
+Exit code: 0
+Classification: PLANNED_DESIGN; runtime reconciliation NOT_STARTED
+Generating single mermaid chart
+
+

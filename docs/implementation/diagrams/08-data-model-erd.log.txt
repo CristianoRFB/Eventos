@@ -1,0 +1,8 @@
+Renderer: @mermaid-js/mermaid-cli 12.0.0
+Source: docs/versions/v0.1.0-architecture/diagrams/source/08-data-model-erd.mmd
+Source SHA-256: 83a3668accd6b5bbe097b931ffda0b8c14ac8fd583e0aa56f3942b1bd5c4c54c
+Exit code: 0
+Classification: PLANNED_DESIGN; runtime reconciliation NOT_STARTED
+Generating single mermaid chart
+
+

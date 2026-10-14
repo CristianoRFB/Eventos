@@ -1,0 +1,52 @@
+Eventos 77 local pre-flight — 2026-10-14 America/Sao_Paulo
+Working directory: C:\OpenSSL\set\Eventos
+Captured during concurrent authorized implementation; working tree entries below are a point-in-time snapshot.
+
+COMMAND: git rev-parse --show-toplevel
+C:/OpenSSL/set/Eventos
+EXIT_CODE: 0
+
+COMMAND: git remote -v
+origin	https://github.com/CristianoRFB/Eventos.git (fetch)
+origin	https://github.com/CristianoRFB/Eventos.git (push)
+EXIT_CODE: 0
+
+COMMAND: git branch --show-current
+codex/eventos77-full-system
+EXIT_CODE: 0
+
+COMMAND: git status -sb
+## codex/eventos77-full-system
+ M docs/CURRENT.md
+?? .dev.vars.example
+?? .env.example
+?? .gitignore
+?? .node-version
+?? AGENTS.md
+?? app/
+?? docs/adr/ADR-005-authorized-repository-and-execution.md
+?? docs/implementation/
+?? drizzle.config.ts
+?? eslint.config.js
+?? migrations/
+?? package-lock.json
+?? package.json
+?? public/
+?? react-router.config.ts
+?? scripts/
+?? tsconfig.cloudflare.json
+?? tsconfig.json
+?? tsconfig.node.json
+?? vite.config.ts
+?? vitest.config.ts
+?? workers/
+?? wrangler.jsonc
+EXIT_CODE: 0
+
+COMMAND: git log -n 7 --oneline
+b90ece6 deploy
+EXIT_CODE: 0
+
+COMMAND: git rev-parse HEAD
+b90ece62e0d3c893dc6e95d6643fa7505dd25602
+EXIT_CODE: 0

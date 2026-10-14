@@ -1,0 +1,8 @@
+Renderer: @mermaid-js/mermaid-cli 12.0.0
+Source: docs/versions/v0.1.0-architecture/diagrams/source/16-saas-onboarding.mmd
+Source SHA-256: 41b6f5b834693a0fe6b043d31087418cb5176b38a75fbd5f6d50b30b9457379b
+Exit code: 0
+Classification: PLANNED_DESIGN; runtime reconciliation NOT_STARTED
+Generating single mermaid chart
+
+

@@ -1,0 +1,171 @@
+{
+  "classification": "PLANNED_DESIGN",
+  "runtimeReconciliation": "NOT_STARTED",
+  "renderer": "@mermaid-js/mermaid-cli",
+  "rendererVersion": "12.0.0",
+  "generatedAtUtc": "2026-10-14T17:15:16.426Z",
+  "userTimezone": "America/Sao_Paulo",
+  "note": "Rendered from preserved design sources; these SVGs do not prove implemented runtime or deployed resources.",
+  "diagrams": [
+    {
+      "id": "01-system-context",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/01-system-context.mmd",
+      "sourceSha256": "09e65704c309cb31c59ab369ad3a7e5fd3a17ab215fd8a3b33ec1b9373ba3c7e",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/01-system-context.svg",
+      "svgSha256": "b52f6f4d95b923962b662d7d3dc11c82ef847e3029105b9f9bd31cad74008b43",
+      "log": "docs/implementation/diagrams/01-system-context.log.txt"
+    },
+    {
+      "id": "02-system-container-deployment",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/02-system-container-deployment.mmd",
+      "sourceSha256": "80919361016fd730e677fd063e7b24e49207ddebb865c01155de2b445223f433",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/02-system-container-deployment.svg",
+      "svgSha256": "ee8535d7acf1e8f88c2b483aa4803bb7cbc2abee3c778464fdaf6f3ea048a0cb",
+      "log": "docs/implementation/diagrams/02-system-container-deployment.log.txt"
+    },
+    {
+      "id": "03-multitenant-boundaries",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/03-multitenant-boundaries.mmd",
+      "sourceSha256": "a542af774f311b3e9434eb72d299d01f38ba2c9be10e92b31bfa4e67443c5978",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/03-multitenant-boundaries.svg",
+      "svgSha256": "79c9db35e1ad0ded25aa6b0901ec9ebe053ae84e2966d197c669182a9b4f1e2b",
+      "log": "docs/implementation/diagrams/03-multitenant-boundaries.log.txt"
+    },
+    {
+      "id": "04-organization-event-edition",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/04-organization-event-edition.mmd",
+      "sourceSha256": "819d76453f7131ab3aad5a16fdcb39106a2a0482c33fdb9b42651ea08333adba",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/04-organization-event-edition.svg",
+      "svgSha256": "5af1ff5d7e996e3d4302e08976581f28ce316589218196dd32303136777e5724",
+      "log": "docs/implementation/diagrams/04-organization-event-edition.log.txt"
+    },
+    {
+      "id": "05-domain-resolution",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/05-domain-resolution.mmd",
+      "sourceSha256": "13ce7ae04efa876ce5753b028df8896777d765b93a80a7d8b731ad5378a1e0c8",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/05-domain-resolution.svg",
+      "svgSha256": "42b1433a2869f6225f9614b9d65f6d3d74b85a3343fd3798b80407afb40bda9e",
+      "log": "docs/implementation/diagrams/05-domain-resolution.log.txt"
+    },
+    {
+      "id": "06-custom-domain-lifecycle",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/06-custom-domain-lifecycle.mmd",
+      "sourceSha256": "265848bed671771473544f455d6db5e67860588171c7633deaa3e1f258641590",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/06-custom-domain-lifecycle.svg",
+      "svgSha256": "fa5a84df4750b789660007b055e4882add5a9ee68347658fcac8c6d57adcd7c7",
+      "log": "docs/implementation/diagrams/06-custom-domain-lifecycle.log.txt"
+    },
+    {
+      "id": "07-auth-memberships-rbac",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/07-auth-memberships-rbac.mmd",
+      "sourceSha256": "efb7c06dfbbe6f01e02a8818d7de15b2f59822e1451b8e609940cb35d29c569b",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/07-auth-memberships-rbac.svg",
+      "svgSha256": "6fb9693ae1e3a273e1ee745da7aad820ab0857178679005fcd9a41a76fcd815d",
+      "log": "docs/implementation/diagrams/07-auth-memberships-rbac.log.txt"
+    },
+    {
+      "id": "08-data-model-erd",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/08-data-model-erd.mmd",
+      "sourceSha256": "83a3668accd6b5bbe097b931ffda0b8c14ac8fd583e0aa56f3942b1bd5c4c54c",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/08-data-model-erd.svg",
+      "svgSha256": "913d7ae3105cc8c56743e65ca991a8eb7d3da2d9214d332d8e86a768411004af",
+      "log": "docs/implementation/diagrams/08-data-model-erd.log.txt"
+    },
+    {
+      "id": "09-public-website-rendering",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/09-public-website-rendering.mmd",
+      "sourceSha256": "d0371a440084f1784b3bbd91bad7033532659629b8b3c149afd306c8c259bb21",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/09-public-website-rendering.svg",
+      "svgSha256": "f84a2f4754ad49f487c4f4ca7abf3d7d30814d992934693cee45c8407f7c1463",
+      "log": "docs/implementation/diagrams/09-public-website-rendering.log.txt"
+    },
+    {
+      "id": "10-event-publishing-workflow",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/10-event-publishing-workflow.mmd",
+      "sourceSha256": "3e6eef7d288ee8811246fef280d198a111b66fc1251b7298b8e40af6f29713b0",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/10-event-publishing-workflow.svg",
+      "svgSha256": "174ab8edc6a4d592974e4de9c188a1ab7ca9b1915b5c3cd3f98a315835b09edb",
+      "log": "docs/implementation/diagrams/10-event-publishing-workflow.log.txt"
+    },
+    {
+      "id": "11-programming-schedule",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/11-programming-schedule.mmd",
+      "sourceSha256": "11eb81d1645b6d41356ce8f467d5aec74913c7e9b630032538d71a7be7e360c0",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/11-programming-schedule.svg",
+      "svgSha256": "769be1b57ec158ac88252dc1f6d6338df796ff289bd7c020356965e2f3c383fb",
+      "log": "docs/implementation/diagrams/11-programming-schedule.log.txt"
+    },
+    {
+      "id": "12-exhibitor-application-workflow",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/12-exhibitor-application-workflow.mmd",
+      "sourceSha256": "a204d02cae6bbf75c23bd507d67e01e9359b037c57f62f6ea1a75c6f815c11b2",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/12-exhibitor-application-workflow.svg",
+      "svgSha256": "5281230f2851e49ef3bf7386bef6e55a47161cc7aca732961b0d0b950f4f1ebe",
+      "log": "docs/implementation/diagrams/12-exhibitor-application-workflow.log.txt"
+    },
+    {
+      "id": "13-commercial-entitlements",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/13-commercial-entitlements.mmd",
+      "sourceSha256": "5743ce3aa4743901056280331ce2da680a7e26748869dcaa4ad1afe9934c4855",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/13-commercial-entitlements.svg",
+      "svgSha256": "49245162ef47a08bd500af7b55b19363e03170ae0890be3af3d309f93777c943",
+      "log": "docs/implementation/diagrams/13-commercial-entitlements.log.txt"
+    },
+    {
+      "id": "14-cicd-backup-rollback",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/14-cicd-backup-rollback.mmd",
+      "sourceSha256": "230471d21c87e16ab4bb3d82d45bc056c96883526a80d9f70c667d7513354fa4",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/14-cicd-backup-rollback.svg",
+      "svgSha256": "e7266844157862c8a81daa74d3bbeb75f30f3c716e2f6e28a9521f48fece10bd",
+      "log": "docs/implementation/diagrams/14-cicd-backup-rollback.log.txt"
+    },
+    {
+      "id": "15-end-to-end-request-sequence",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/15-end-to-end-request-sequence.mmd",
+      "sourceSha256": "0b260f49f5c5c192f4362daba26167c69910a4ca67e073a68a4582ca34b9d488",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/15-end-to-end-request-sequence.svg",
+      "svgSha256": "3e960c2340a1844ab8434efca342df928b49b7e24c147e3161c223c118f1f37b",
+      "log": "docs/implementation/diagrams/15-end-to-end-request-sequence.log.txt"
+    },
+    {
+      "id": "16-saas-onboarding",
+      "source": "docs/versions/v0.1.0-architecture/diagrams/source/16-saas-onboarding.mmd",
+      "sourceSha256": "41b6f5b834693a0fe6b043d31087418cb5176b38a75fbd5f6d50b30b9457379b",
+      "status": "PASS",
+      "exitCode": 0,
+      "svg": "docs/implementation/diagrams/16-saas-onboarding.svg",
+      "svgSha256": "ac5cb3194dfd117dfa719a211dc637a14498471118d711bc90ad4375579ad6df",
+      "log": "docs/implementation/diagrams/16-saas-onboarding.log.txt"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+Renderer: @mermaid-js/mermaid-cli 12.0.0
+Source: docs/versions/v0.1.0-architecture/diagrams/source/10-event-publishing-workflow.mmd
+Source SHA-256: 3e6eef7d288ee8811246fef280d198a111b66fc1251b7298b8e40af6f29713b0
+Exit code: 0
+Classification: PLANNED_DESIGN; runtime reconciliation NOT_STARTED
+Generating single mermaid chart
+
+
