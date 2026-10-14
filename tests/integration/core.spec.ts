@@ -1,0 +1,843 @@
+import {
+  expect,
+  request,
+  test,
+  type APIRequestContext,
+} from "@playwright/test";
+import { setTimeout as delay } from "node:timers/promises";
+
+const origin = "http://localhost:5173";
+const password = "TEST_ONLY-Local-2026!";
+type Account =
+  | "owner-a"
+  | "owner-b"
+  | "editor-a"
+  | "reviewer-a"
+  | "shared"
+  | "plataforma"
+  | "invitee";
+const clients = new Map<Account, APIRequestContext>();
+const setCookies = new Map<Account, string>();
+const unique = (prefix: string) =>
+  `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+test.describe.configure({ mode: "serial" });
+
+interface Settings {
+  id: string;
+  name: string;
+  timezone: string;
+  revision: number;
+  status: string;
+}
+interface Member {
+  id: string;
+  user_id: string;
+  role: string;
+  status: string;
+  revision: number;
+}
+interface EventRow {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+function client(account: Account): APIRequestContext {
+  const context = clients.get(account);
+  if (!context) throw new Error(`Missing local test context: ${account}`);
+  return context;
+}
+
+async function login(account: Account) {
+  const context = await request.newContext({
+    baseURL: origin,
+    extraHTTPHeaders: { Origin: origin },
+  });
+  const response = await authPost(context, "/api/auth/sign-in/email", {
+    email: `${account}@example.test`,
+    password,
+  });
+  expect(
+    response.status(),
+    `Local seed login for ${account}: ${await response.text()}`,
+  ).toBe(200);
+  return { context, cookie: response.headers()["set-cookie"] ?? "" };
+}
+
+async function authPost(
+  context: APIRequestContext,
+  path: string,
+  data: object,
+) {
+  for (let attempt = 0; ; attempt++) {
+    const response = await context.post(path, { data });
+    if (response.status() !== 429 || attempt >= 3) return response;
+    // Exercise the real limiter and respect its window instead of changing it.
+    const seconds = Number(response.headers()["retry-after"] ?? 10);
+    await delay(
+      Math.min(60, Math.max(1, Number.isFinite(seconds) ? seconds : 10)) *
+        1000 +
+        100,
+    );
+  }
+}
+
+test.beforeAll(async () => {
+  test.setTimeout(180_000);
+  for (const account of [
+    "owner-a",
+    "owner-b",
+    "editor-a",
+    "reviewer-a",
+    "shared",
+    "plataforma",
+    "invitee",
+  ] as const) {
+    const signedIn = await login(account);
+    clients.set(account, signedIn.context);
+    setCookies.set(account, signedIn.cookie);
+  }
+});
+
+test.afterAll(async () => {
+  await Promise.all([...clients.values()].map((context) => context.dispose()));
+});
+
+test("health and public SSR expose no private user, membership or infrastructure data", async () => {
+  const anonymous = await request.newContext({ baseURL: origin });
+  try {
+    const health = await anonymous.get("/healthz");
+    expect(health.status()).toBe(200);
+    expect(await health.json()).toEqual({ status: "ok" });
+    const page = await anonymous.get("/");
+    expect(page.status()).toBe(200);
+    const html = await page.text();
+    expect(html).toContain("Grandes encontros.");
+    expect(html).toContain("Uma gestão mais leve.");
+    expect(html).not.toMatch(
+      /owner-a@example|owner-b@example|BETTER_AUTH_SECRET|account-owner-a|member-a|Organizadora Aurora/,
+    );
+    expect(page.headers()["x-content-type-options"]).toBe("nosniff");
+    expect(page.headers()["x-frame-options"]).toBe("DENY");
+    expect(page.headers()["x-robots-tag"]).toContain("noindex");
+    expect(page.headers()["x-request-id"]).toBeTruthy();
+  } finally {
+    await anonymous.dispose();
+  }
+});
+
+test("anonymous and forged-session requests never gain administrative access", async () => {
+  const anonymous = await request.newContext({ baseURL: origin });
+  try {
+    for (const path of [
+      "/api/v1/me",
+      "/api/v1/orgs/org-a/settings",
+      "/api/v1/platform/organizations",
+    ]) {
+      expect((await anonymous.get(path)).status()).toBe(401);
+    }
+    const invalid = await anonymous.get("/api/v1/me", {
+      headers: { Cookie: "better-auth.session_token=forged.invalid.signature" },
+    });
+    expect(invalid.status()).toBe(401);
+    const session = await anonymous.get("/api/auth/get-session", {
+      headers: { Cookie: "better-auth.session_token=forged.invalid.signature" },
+    });
+    expect(session.status()).toBe(200);
+    expect(await session.json()).toBeNull();
+  } finally {
+    await anonymous.dispose();
+  }
+});
+
+test("signup stays closed and incorrect credentials cannot produce a session", async () => {
+  const anonymous = await request.newContext({
+    baseURL: origin,
+    extraHTTPHeaders: { Origin: origin },
+  });
+  try {
+    const signup = await authPost(anonymous, "/api/auth/sign-up/email", {
+      name: "Untrusted signup",
+      email: `${unique("signup")}@example.test`,
+      password,
+      role: "platform_owner",
+    });
+    expect([400, 403, 404]).toContain(signup.status());
+    const invalid = await authPost(anonymous, "/api/auth/sign-in/email", {
+      email: "owner-a@example.test",
+      password: "TEST_ONLY-wrong-password!",
+    });
+    expect(invalid.status()).toBe(401);
+    expect((await anonymous.get("/api/v1/me")).status()).toBe(401);
+  } finally {
+    await anonymous.dispose();
+  }
+});
+
+test("session cookie is host-only, HttpOnly and SameSite; session survives subsequent Worker requests", async () => {
+  const cookie = setCookies.get("owner-a") ?? "";
+  expect(cookie).toMatch(/httponly/i);
+  expect(cookie).toMatch(/samesite=lax/i);
+  expect(cookie).not.toMatch(/;\s*domain=/i);
+  const identity = await client("owner-a").get("/api/v1/me");
+  expect(identity.status()).toBe(200);
+  expect((await identity.json()).user.id).toBe("owner-a");
+  expect(identity.headers()["cache-control"]).toContain("no-store");
+  const refreshed = await client("owner-a").get("/api/auth/get-session");
+  expect(refreshed.status()).toBe(200);
+  expect((await refreshed.json()).user.id).toBe("owner-a");
+});
+
+test("tenant A and B API resources remain isolated under direct URL and ID tampering", async () => {
+  const a = client("owner-a");
+  const b = client("owner-b");
+  expect((await (await a.get("/api/v1/orgs/org-a/settings")).json()).id).toBe(
+    "org-a",
+  );
+  expect((await (await b.get("/api/v1/orgs/org-b/settings")).json()).id).toBe(
+    "org-b",
+  );
+  const eventsA = (await (
+    await a.get("/api/v1/orgs/org-a/events")
+  ).json()) as EventRow[];
+  const eventsB = (await (
+    await b.get("/api/v1/orgs/org-b/events")
+  ).json()) as EventRow[];
+  expect(eventsA.map((row) => row.id)).toContain("event-a");
+  expect(eventsA.map((row) => row.id)).not.toContain("event-b");
+  expect(eventsB.map((row) => row.id)).toContain("event-b");
+  expect(eventsB.map((row) => row.id)).not.toContain("event-a");
+  for (const resource of ["settings", "events", "members"]) {
+    const crossA = await a.get(`/api/v1/orgs/org-b/${resource}`);
+    const crossB = await b.get(`/api/v1/orgs/org-a/${resource}`);
+    expect(crossA.status()).toBe(403);
+    expect(crossB.status()).toBe(403);
+    expect(await crossA.text()).not.toContain("Horizonte");
+    expect(await crossB.text()).not.toContain("Aurora");
+  }
+  expect(
+    (await a.get("/api/v1/orgs/org-a/events/event-b/editions")).status(),
+  ).toBe(404);
+  expect(
+    (
+      await a.post("/api/v1/orgs/org-b/events", {
+        data: { name: "Tamper", slug: unique("tamper") },
+      })
+    ).status(),
+  ).toBe(403);
+});
+
+test("a shared identity selects either membership without merging event scopes", async () => {
+  const shared = client("shared");
+  const me = await shared.get("/api/v1/me/memberships");
+  expect(me.status()).toBe(200);
+  const data = await me.json();
+  expect(
+    data.memberships
+      .map((row: { organization_id: string }) => row.organization_id)
+      .sort(),
+  ).toEqual(["org-a", "org-b"]);
+  for (const suffix of ["a", "b"]) {
+    const events = await shared.get(`/api/v1/orgs/org-${suffix}/events`);
+    expect(events.status()).toBe(200);
+    expect((await events.json()).map((row: EventRow) => row.id)).toEqual([
+      `event-${suffix}`,
+    ]);
+    expect(
+      (
+        await shared.get(
+          `/api/v1/orgs/org-${suffix}/events/event-${suffix}/editions`,
+        )
+      ).status(),
+    ).toBe(200);
+    expect(
+      (
+        await shared.post(`/api/v1/orgs/org-${suffix}/events`, {
+          data: { name: "Denied", slug: unique("shared") },
+        })
+      ).status(),
+    ).toBe(403);
+  }
+});
+
+test("tenant invitation token is hashed, email bound, scoped, one-use and audited", async () => {
+  const owner = client("owner-a");
+  const created = await owner.post("/api/v1/orgs/org-a/invitations", {
+    data: {
+      email: "invitee@example.test",
+      role: "content_editor",
+      eventId: "event-a",
+    },
+  });
+  expect(created.status()).toBe(201);
+  const invite = (await created.json()) as {
+    id: string;
+    token: string;
+    expiresAt: string;
+  };
+  expect(invite.token).toMatch(/^[a-f0-9]{64}$/);
+  expect(new Date(invite.expiresAt).getTime()).toBeGreaterThan(Date.now());
+  const list = await (await owner.get("/api/v1/orgs/org-a/invitations")).json();
+  expect(list).toContainEqual(
+    expect.objectContaining({
+      id: invite.id,
+      role: "content_editor",
+      event_id: "event-a",
+      accepted_at: null,
+    }),
+  );
+  expect(JSON.stringify(list)).not.toContain(invite.token);
+  expect((await owner.get("/api/v1/orgs/org-b/invitations")).status()).toBe(
+    403,
+  );
+  expect(
+    (
+      await client("shared").post("/api/v1/orgs/org-a/invitations", {
+        data: { email: "invitee@example.test", role: "organization_owner" },
+      })
+    ).status(),
+  ).toBe(403);
+  expect(
+    (
+      await client("shared").post("/api/v1/orgs/org-a/invitations/accept", {
+        data: { token: invite.token },
+      })
+    ).status(),
+  ).toBe(404);
+  expect(
+    (
+      await client("invitee").post("/api/v1/orgs/org-a/invitations/accept", {
+        data: { token: invite.token },
+      })
+    ).status(),
+  ).toBe(200);
+  const memberships = await (
+    await client("invitee").get("/api/v1/me/memberships")
+  ).json();
+  expect(memberships.memberships).toContainEqual(
+    expect.objectContaining({
+      organization_id: "org-a",
+      role: "content_editor",
+    }),
+  );
+  expect(
+    (
+      await client("invitee").get("/api/v1/orgs/org-a/events/event-a/editions")
+    ).status(),
+  ).toBe(200);
+  expect(
+    (
+      await client("invitee").post("/api/v1/orgs/org-a/events", {
+        data: { name: "Escalada", slug: unique("escalated") },
+      })
+    ).status(),
+  ).toBe(403);
+  expect(
+    (
+      await client("invitee").post("/api/v1/orgs/org-a/invitations/accept", {
+        data: { token: invite.token },
+      })
+    ).status(),
+  ).toBe(404);
+  const audit = await (
+    await client("plataforma").get("/api/v1/platform/audit")
+  ).json();
+  expect(audit).toContainEqual(
+    expect.objectContaining({
+      organization_id: "org-a",
+      actor_id: "invitee-local",
+      action: "invitation.accepted",
+      resource_id: invite.id,
+    }),
+  );
+});
+
+test("private media stays behind tenant and event authorization and public media needs a license", async () => {
+  const owner = client("owner-a");
+  const png = Buffer.from(
+    "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000b4944415478da6364f80f0001050101274175c40000000049454e44ae426082",
+    "hex",
+  );
+  const base = "/api/v1/orgs/org-a/media";
+  const upload = await owner.post(base, {
+    data: png,
+    headers: {
+      "Content-Type": "image/png",
+      "X-Media-Owner-Type": "event",
+      "X-Media-Owner-Id": "event-a",
+    },
+  });
+  expect(upload.status(), await upload.text()).toBe(201);
+  const asset = (await upload.json()) as {
+    id: string;
+    mime: string;
+    width: number;
+    height: number;
+  };
+  expect(asset).toMatchObject({ mime: "image/png", width: 1, height: 1 });
+  const privateRead = await client("editor-a").get(`${base}/${asset.id}`);
+  expect(privateRead.status()).toBe(200);
+  expect(privateRead.headers()["content-type"]).toContain("image/png");
+  expect(privateRead.headers()["cache-control"]).toContain("no-store");
+  expect(Buffer.from(await privateRead.body())).toEqual(png);
+  expect(
+    (
+      await client("owner-b").get(`/api/v1/orgs/org-b/media/${asset.id}`)
+    ).status(),
+  ).toBe(404);
+
+  const event = await owner.post("/api/v1/orgs/org-a/events", {
+    data: { name: "Evento de escopo — fictício", slug: unique("scope") },
+  });
+  const { id: eventId } = (await event.json()) as { id: string };
+  const edition = await owner.post(
+    `/api/v1/orgs/org-a/events/${eventId}/editions`,
+    {
+      data: {
+        name: "Edição privada",
+        editionKey: unique("scope"),
+        city: "Cidade fictícia",
+        timeZone: "America/Sao_Paulo",
+        startAt: "2027-06-12T12:00:00.000Z",
+        endAt: "2027-06-12T22:00:00.000Z",
+      },
+    },
+  );
+  const { id: editionId } = (await edition.json()) as { id: string };
+  expect(
+    (
+      await client("editor-a").post(base, {
+        data: png,
+        headers: {
+          "Content-Type": "image/png",
+          "X-Media-Owner-Type": "edition",
+          "X-Media-Owner-Id": editionId,
+        },
+      })
+    ).status(),
+  ).toBe(403);
+
+  const unlicensed = await owner.post(base, {
+    data: png,
+    headers: {
+      "Content-Type": "image/png",
+      "X-Media-Visibility": "public",
+      "X-Media-Owner-Type": "organization",
+      "X-Media-Owner-Id": "org-a",
+    },
+  });
+  expect(unlicensed.status()).toBe(400);
+});
+
+test("editors and reviewers cannot escalate roles or create organization-wide events", async () => {
+  for (const account of ["editor-a", "reviewer-a"] as const) {
+    const scoped = client(account);
+    expect(
+      (await scoped.get("/api/v1/orgs/org-a/events/event-a/editions")).status(),
+    ).toBe(200);
+    expect((await scoped.get("/api/v1/orgs/org-a/members")).status()).toBe(403);
+    expect(
+      (
+        await scoped.post("/api/v1/orgs/org-a/events", {
+          data: { name: "Denied", slug: unique("staff") },
+        })
+      ).status(),
+    ).toBe(403);
+    expect(
+      (
+        await scoped.patch(`/api/v1/orgs/org-a/members/member-${account}`, {
+          data: { role: "organization_owner", status: "active", revision: 1 },
+        })
+      ).status(),
+    ).toBe(403);
+    expect((await scoped.get("/api/v1/platform/organizations")).status()).toBe(
+      403,
+    );
+  }
+});
+
+test("Platform Owner can administer globally but cannot read private tenant data without membership", async () => {
+  const platform = client("plataforma");
+  const organizations = await platform.get("/api/v1/platform/organizations");
+  expect(organizations.status()).toBe(200);
+  expect(
+    (await organizations.json()).map((row: { id: string }) => row.id),
+  ).toEqual(expect.arrayContaining(["org-a", "org-b"]));
+  expect((await platform.get("/api/v1/platform/audit")).status()).toBe(200);
+  expect((await platform.get("/api/v1/orgs/org-a/settings")).status()).toBe(
+    403,
+  );
+  expect((await platform.get("/api/v1/orgs/org-b/members")).status()).toBe(403);
+  expect(
+    (await client("owner-a").get("/api/v1/platform/organizations")).status(),
+  ).toBe(403);
+});
+
+test("cookie-authenticated writes reject missing Origin, foreign Origin and cross-site fetches", async () => {
+  const owner = client("owner-a");
+  const noOrigin = await request.newContext({
+    baseURL: origin,
+    storageState: await owner.storageState(),
+  });
+  try {
+    const payload = { name: "Cross site", slug: unique("csrf") };
+    expect(
+      (
+        await noOrigin.post("/api/v1/orgs/org-a/events", { data: payload })
+      ).status(),
+    ).toBe(403);
+    expect(
+      (
+        await owner.post("/api/v1/orgs/org-a/events", {
+          data: payload,
+          headers: { Origin: "https://attacker.example.test" },
+        })
+      ).status(),
+    ).toBe(403);
+    expect(
+      (
+        await owner.post("/api/v1/orgs/org-a/events", {
+          data: payload,
+          headers: { "Sec-Fetch-Site": "cross-site" },
+        })
+      ).status(),
+    ).toBe(403);
+    const events = (await (
+      await owner.get("/api/v1/orgs/org-a/events")
+    ).json()) as EventRow[];
+    expect(events.some((event) => event.slug === payload.slug)).toBe(false);
+  } finally {
+    await noOrigin.dispose();
+  }
+});
+
+test("strict input validation rejects forged ownership, SQL-shaped slugs and invalid timezones", async () => {
+  const owner = client("owner-a");
+  const settings = (await (
+    await owner.get("/api/v1/orgs/org-a/settings")
+  ).json()) as Settings;
+  expect(
+    (
+      await owner.post("/api/v1/orgs/org-a/events", {
+        data: { name: "Injected", slug: "';DROP TABLE events;--" },
+      })
+    ).status(),
+  ).toBe(400);
+  expect(
+    (
+      await owner.post("/api/v1/orgs/org-a/events", {
+        data: {
+          name: "Forged",
+          slug: unique("forged"),
+          organizationId: "org-b",
+        },
+      })
+    ).status(),
+  ).toBe(400);
+  expect(
+    (
+      await owner.patch("/api/v1/orgs/org-a/settings", {
+        data: {
+          name: settings.name,
+          timezone: "Invalid/Timezone",
+          revision: settings.revision,
+        },
+      })
+    ).status(),
+  ).toBe(400);
+  expect(
+    (
+      await owner.post("/api/v1/orgs/org-a/events", {
+        data: "not-json",
+        headers: { "Content-Type": "application/json" },
+      })
+    ).status(),
+  ).toBe(400);
+  expect(
+    (
+      await owner.post("/api/v1/orgs/org-a/events", { data: "name=wrong" })
+    ).status(),
+  ).toBe(415);
+  expect((await owner.get("/api/v1/orgs/org-a/events")).status()).toBe(200);
+});
+
+test("event creation persists, scopes duplicate slugs per tenant and limits staff to assigned events", async () => {
+  const slug = unique("persisted");
+  const payload = { name: "Encontro persistido — somente teste", slug };
+  const created = await client("owner-a").post("/api/v1/orgs/org-a/events", {
+    data: payload,
+  });
+  expect(created.status()).toBe(201);
+  const { id } = await created.json();
+  const after = (await (
+    await client("owner-a").get("/api/v1/orgs/org-a/events")
+  ).json()) as EventRow[];
+  expect(after).toContainEqual(
+    expect.objectContaining({ id, name: payload.name, slug }),
+  );
+  expect(
+    (
+      await client("owner-a").post("/api/v1/orgs/org-a/events", {
+        data: payload,
+      })
+    ).status(),
+  ).toBe(409);
+  expect(
+    (
+      await client("owner-b").post("/api/v1/orgs/org-b/events", {
+        data: payload,
+      })
+    ).status(),
+  ).toBe(201);
+  expect(
+    (
+      await client("editor-a").get(`/api/v1/orgs/org-a/events/${id}/editions`)
+    ).status(),
+  ).toBe(403);
+  const editorEvents = (await (
+    await client("editor-a").get("/api/v1/orgs/org-a/events")
+  ).json()) as EventRow[];
+  expect(editorEvents.map((row) => row.id)).not.toContain(id);
+});
+
+test("edition creation validates timing, timezone and external HTTPS ticket URLs", async () => {
+  const owner = client("owner-a");
+  const payload = {
+    name: "Edição de integração fictícia",
+    editionKey: unique("edition"),
+    city: "Cidade fictícia",
+    timeZone: "America/Sao_Paulo",
+    startAt: "2027-06-12T12:00:00.000Z",
+    endAt: "2027-06-12T22:00:00.000Z",
+    externalTicketUrl: "https://tickets.example.test/event",
+  };
+  const created = await owner.post(
+    "/api/v1/orgs/org-a/events/event-a/editions",
+    { data: payload },
+  );
+  expect(created.status()).toBe(201);
+  const { id } = await created.json();
+  const rows = await (
+    await owner.get("/api/v1/orgs/org-a/events/event-a/editions")
+  ).json();
+  expect(rows).toContainEqual(
+    expect.objectContaining({
+      id,
+      organization_id: "org-a",
+      event_id: "event-a",
+      time_zone: payload.timeZone,
+    }),
+  );
+  for (const invalid of [
+    { ...payload, editionKey: unique("invalid"), endAt: payload.startAt },
+    { ...payload, editionKey: unique("invalid"), timeZone: "Invalid/Zone" },
+    {
+      ...payload,
+      editionKey: unique("invalid"),
+      externalTicketUrl: "javascript:alert(1)",
+    },
+    {
+      ...payload,
+      editionKey: unique("invalid"),
+      externalTicketUrl: "http://tickets.example.test",
+    },
+  ]) {
+    expect(
+      (
+        await owner.post("/api/v1/orgs/org-a/events/event-a/editions", {
+          data: invalid,
+        })
+      ).status(),
+    ).toBe(400);
+  }
+  expect(
+    (
+      await owner.post("/api/v1/orgs/org-a/events/event-b/editions", {
+        data: { ...payload, editionKey: unique("foreign") },
+      })
+    ).status(),
+  ).toBe(404);
+});
+
+test("concurrent settings updates use compare-and-swap instead of losing an update", async () => {
+  const owner = client("owner-a");
+  const settings = (await (
+    await owner.get("/api/v1/orgs/org-a/settings")
+  ).json()) as Settings;
+  const input = {
+    name: settings.name,
+    timezone: settings.timezone,
+    revision: settings.revision,
+  };
+  const results = await Promise.all([
+    owner.patch("/api/v1/orgs/org-a/settings", { data: input }),
+    owner.patch("/api/v1/orgs/org-a/settings", { data: input }),
+  ]);
+  expect(results.map((response) => response.status()).sort()).toEqual([
+    200, 409,
+  ]);
+  const after = (await (
+    await owner.get("/api/v1/orgs/org-a/settings")
+  ).json()) as Settings;
+  expect(after.revision).toBe(settings.revision + 1);
+  expect(after.name).toBe(settings.name);
+});
+
+test("last-owner guard preserves an active owner and membership revocation takes effect in the existing session", async () => {
+  const owner = client("owner-a");
+  const members = (await (
+    await owner.get("/api/v1/orgs/org-a/members")
+  ).json()) as Member[];
+  const lastOwner = members.find((member) => member.id === "member-a")!;
+  expect(lastOwner).toBeTruthy();
+  const removeOwner = await owner.patch("/api/v1/orgs/org-a/members/member-a", {
+    data: {
+      role: "content_editor",
+      status: "active",
+      revision: lastOwner.revision,
+    },
+  });
+  expect(removeOwner.status()).toBe(409);
+  const editor = members.find((member) => member.user_id === "editor-a")!;
+  expect(
+    (await client("editor-a").get("/api/v1/orgs/org-a/settings")).status(),
+  ).toBe(200);
+  const revoked = await owner.patch(`/api/v1/orgs/org-a/members/${editor.id}`, {
+    data: { role: editor.role, status: "revoked", revision: editor.revision },
+  });
+  expect(revoked.status()).toBe(200);
+  try {
+    expect(
+      (await client("editor-a").get("/api/v1/orgs/org-a/settings")).status(),
+    ).toBe(403);
+    const me = await (
+      await client("editor-a").get("/api/v1/me/memberships")
+    ).json();
+    expect(me.memberships).toHaveLength(0);
+    expect(
+      (await client("owner-b").get("/api/v1/orgs/org-b/settings")).status(),
+    ).toBe(200);
+  } finally {
+    const current = (await (
+      await owner.get("/api/v1/orgs/org-a/members")
+    ).json()) as Member[];
+    const row = current.find((member) => member.id === editor.id)!;
+    expect(
+      (
+        await owner.patch(`/api/v1/orgs/org-a/members/${editor.id}`, {
+          data: { role: editor.role, status: "active", revision: row.revision },
+        })
+      ).status(),
+    ).toBe(200);
+  }
+  expect(
+    (await client("editor-a").get("/api/v1/orgs/org-a/settings")).status(),
+  ).toBe(200);
+});
+
+test("platform suspension immediately denies tenant access and reactivation preserves data", async () => {
+  const platform = client("plataforma");
+  const owner = client("owner-b");
+  const before = await (await owner.get("/api/v1/orgs/org-b/events")).json();
+  const orgs = (await (
+    await platform.get("/api/v1/platform/organizations")
+  ).json()) as Settings[];
+  const org = orgs.find((row) => row.id === "org-b")!;
+  expect(
+    (
+      await platform.patch("/api/v1/platform/organizations/org-b/status", {
+        data: { status: "suspended", revision: org.revision },
+      })
+    ).status(),
+  ).toBe(200);
+  try {
+    expect((await owner.get("/api/v1/orgs/org-b/settings")).status()).toBe(403);
+    expect((await owner.get("/api/v1/orgs/org-b/events")).status()).toBe(403);
+    expect(
+      (await client("owner-a").get("/api/v1/orgs/org-a/events")).status(),
+    ).toBe(200);
+  } finally {
+    const current = (await (
+      await platform.get("/api/v1/platform/organizations")
+    ).json()) as Settings[];
+    const row = current.find((item) => item.id === "org-b")!;
+    expect(
+      (
+        await platform.patch("/api/v1/platform/organizations/org-b/status", {
+          data: { status: "active", revision: row.revision },
+        })
+      ).status(),
+    ).toBe(200);
+  }
+  expect(await (await owner.get("/api/v1/orgs/org-b/events")).json()).toEqual(
+    before,
+  );
+});
+
+test("platform creation persists and critical mutations produce server audit records", async () => {
+  const platform = client("plataforma");
+  const payload = {
+    name: "Organizadora de teste — fictícia",
+    slug: unique("org-test"),
+    timezone: "America/Sao_Paulo",
+  };
+  const created = await platform.post("/api/v1/platform/organizations", {
+    data: payload,
+  });
+  expect(created.status()).toBe(201);
+  const { id } = await created.json();
+  const orgs = await (
+    await platform.get("/api/v1/platform/organizations")
+  ).json();
+  expect(orgs).toContainEqual(
+    expect.objectContaining({
+      id,
+      name: payload.name,
+      slug: payload.slug,
+      status: "active",
+    }),
+  );
+  const audit = await (await platform.get("/api/v1/platform/audit")).json();
+  expect(audit).toContainEqual(
+    expect.objectContaining({
+      organization_id: id,
+      actor_id: "platform-local",
+      action: "organization.created",
+      resource_id: id,
+    }),
+  );
+  expect(audit).toContainEqual(
+    expect.objectContaining({
+      organization_id: "org-a",
+      actor_id: "owner-a",
+      action: "event.created",
+    }),
+  );
+  expect(JSON.stringify(audit)).not.toMatch(
+    /password|session_token|TEST_ONLY-Local/,
+  );
+});
+
+test("sign-out revokes the server session so a captured cookie cannot be replayed", async () => {
+  // This extra session is intentionally isolated from the suite's owner session.
+  const { context } = await login("owner-b");
+  const state = await context.storageState();
+  const replay = await request.newContext({
+    baseURL: origin,
+    storageState: state,
+    extraHTTPHeaders: { Origin: origin },
+  });
+  try {
+    expect((await replay.get("/api/v1/me")).status()).toBe(200);
+    expect(
+      (await context.post("/api/auth/sign-out", { data: {} })).status(),
+    ).toBe(200);
+    expect((await context.get("/api/v1/me")).status()).toBe(401);
+    expect((await replay.get("/api/v1/me")).status()).toBe(401);
+    expect(await (await replay.get("/api/auth/get-session")).json()).toBeNull();
+    expect((await client("owner-b").get("/api/v1/me")).status()).toBe(200);
+  } finally {
+    await context.dispose();
+    await replay.dispose();
+  }
+});

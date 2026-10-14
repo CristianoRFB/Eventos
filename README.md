@@ -1,4 +1,44 @@
-# Eventos 77 — pacote de concepção v0.1.0
+# Eventos 77 — implementação em andamento
+
+Aplicação TypeScript + React Router SSR em Cloudflare Workers, D1/Drizzle e Better Auth.
+Uma organizadora é um tenant; eventos e edições permanecem separados. A branch de trabalho
+é `codex/eventos77-full-system` no repositório autorizado `CristianoRFB/Eventos`.
+
+## Desenvolvimento local
+
+Requer Node 24.11.1. Nenhuma conta cloud é necessária.
+
+```sh
+npm ci
+npm run setup:local
+npm run db:migrate:local
+npm run db:seed:local
+npm run dev
+```
+
+Abra `http://localhost:5173` (o host administrativo local é exato).
+As fixtures são fictícias: `owner-a@example.test`, `owner-b@example.test`,
+`editor-a@example.test`, `reviewer-a@example.test`, `shared@example.test` e
+`plataforma@example.test`, `invitee@example.test`, senha `TEST_ONLY-Local-2026!`. Estes acessos existem
+exclusivamente no banco local. O cadastro público permanece fechado.
+
+```sh
+npm run lint
+npm run typecheck
+npm test
+npm run test:integration
+npm run test:e2e
+npm run build
+npm run docs:check
+```
+
+O estado comprovado e as pendências de F0–F12 estão em
+[MASTER_EXECUTION_STATUS](docs/implementation/MASTER_EXECUTION_STATUS.md).
+CMS, agenda, formulários e domínios reais ainda dependem de implementação e validação.
+O pedido de subdomínio `workers.dev` está registrado para uma versão verificável;
+não há deploy nesta etapa. Secrets locais, banco e builds não entram no Git.
+
+## Pacote histórico de concepção v0.1.0
 
 **Status:** `DESIGN_PROPOSED / NO_RUNTIME / NO_DEPLOY / NO_CUSTOMER_ONBOARDED`  
 **Data:** 14 de outubro de 2026. **Não é código de aplicação.**
