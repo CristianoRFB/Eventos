@@ -164,6 +164,50 @@ test("one shared identity switches between two organizers without seeing unassig
   await screenshot(page, testInfo, "tenant-b");
 });
 
+test("CMS editor exposes private preview and revision history at this viewport", async ({
+  page,
+}, testInfo) => {
+  await signIn(page, "owner-a");
+  await page.getByRole("link", { name: /Organizadora Aurora/ }).click();
+  await page.getByRole("link", { name: /Encontro A — fictício/ }).click();
+  await page
+    .locator(
+      'a[href="/admin/org-a/events/event-a/editions/edition-a/cms"]',
+    )
+    .click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Conteúdo: Encontro A — edição fictícia 2027",
+    }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Nome do site")).toBeVisible();
+  await expect(page.getByLabel("Destaque principal")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Histórico publicado" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Publicar versão/ }),
+  ).toBeEnabled();
+  await expectNoHorizontalOverflow(page);
+  await screenshot(page, testInfo, "cms-editor");
+
+  const previewResponse = page.waitForResponse((response) =>
+    response.url().includes("/api/v1/orgs/org-a/editions/edition-a/preview"),
+  );
+  await page.getByRole("button", { name: "Abrir prévia privada" }).click();
+  expect((await previewResponse).status()).toBe(200);
+  await expect(page).toHaveURL(/\/preview\//);
+  await expect(
+    page.getByText(/Prévia privada · Organizadora Aurora/),
+  ).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    "noindex,nofollow",
+  );
+  await expectNoHorizontalOverflow(page);
+  await screenshot(page, testInfo, "cms-preview");
+});
+
 test("platform owner sees global organizations and private tenant access stays denied", async ({
   page,
 }, testInfo) => {

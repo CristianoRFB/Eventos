@@ -2,6 +2,12 @@ import { createRequestHandler } from "react-router";
 import { createAuth } from "../app/infrastructure/auth.server";
 import { handleApi } from "../app/services/api.server";
 import { requireAdminHost } from "../app/infrastructure/security.server";
+import {
+  resolvePublicSite,
+  servePreviewAsset,
+  servePublicAsset,
+  servePublicMetadata,
+} from "../app/services/content.server";
 import { ZodError } from "zod";
 
 const requestHandler = createRequestHandler(
@@ -13,6 +19,7 @@ export default {
   async fetch(request, env) {
     const requestId = crypto.randomUUID();
     let response: Response;
+    let publicRevision: number | null = null;
     try {
       const url = new URL(request.url);
       if (url.pathname === "/healthz")
@@ -28,10 +35,56 @@ export default {
         response = await createAuth(env).handler(authRequest);
       } else if (url.pathname.startsWith("/api/"))
         response = await handleApi(request, env);
-      else {
-        // No customer-domain fallback until a verified binding can resolve it.
-        requireAdminHost(request, env.ADMIN_ORIGIN);
+      else if (
+        url.origin === new URL(env.ADMIN_ORIGIN).origin &&
+        url.pathname.match(/^\/preview\/([^/]+)\/assets\/([^/]+)$/u)
+      ) {
+        const match = url.pathname.match(
+          /^\/preview\/([^/]+)\/assets\/([^/]+)$/u,
+        )!;
+        response = await servePreviewAsset(request, env, match[1]!, match[2]!);
+      } else if (url.origin === new URL(env.ADMIN_ORIGIN).origin)
         response = await requestHandler(request);
+      else if (url.pathname === "/robots.txt")
+        response = await servePublicMetadata(request, env, "robots");
+      else if (url.pathname === "/sitemap.xml")
+        response = await servePublicMetadata(request, env, "sitemap");
+      else if (url.pathname.startsWith("/assets/"))
+        response = await servePublicAsset(
+          request,
+          env,
+          decodeURIComponent(url.pathname.slice("/assets/".length)),
+        );
+      else if (/^\/(?:admin|login|platform|api)(?:\/|$)/u.test(url.pathname))
+        response = new Response("Página não encontrada", { status: 404 });
+      else {
+        const requestedSegments = url.pathname.split("/").filter(Boolean);
+        if (requestedSegments.length > 1)
+          throw new Response("Página não encontrada", { status: 404 });
+        let slug = "home";
+        if (requestedSegments.length === 1) {
+          try {
+            slug = decodeURIComponent(requestedSegments[0]!);
+          } catch {
+            throw new Response("Página não encontrada", { status: 404 });
+          }
+        }
+        // A custom host reaches the public SSR loader, which requires an active,
+        // ownership-verified binding before reading any tenant publication.
+        const publicSite = await resolvePublicSite(request, env);
+        publicRevision = publicSite.publicationRevision;
+        if (env.APP_ENV !== "local" && url.protocol !== "https:") {
+          response = Response.redirect(
+            `https://${publicSite.hostname}${url.pathname}${url.search}`,
+            308,
+          );
+        } else {
+          const publicUrl = new URL(
+            `/_public/${encodeURIComponent(slug)}${url.search}`,
+            url.origin,
+          );
+          response = await requestHandler(new Request(publicUrl, request));
+        }
       }
     } catch (error) {
       if (error instanceof Response) response = error;
@@ -70,8 +123,19 @@ export default {
     headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
     headers.set("X-Frame-Options", "DENY");
     headers.set("X-Request-Id", requestId);
-    headers.set("Cache-Control", "private, no-store");
-    headers.set("X-Robots-Tag", "noindex, nofollow");
+    if (publicRevision !== null && response.status < 400) {
+      headers.set(
+        "Cache-Control",
+        "public, max-age=60, s-maxage=60, stale-while-revalidate=30",
+      );
+      headers.set("X-Robots-Tag", "index, follow");
+      headers.set("X-Publication-Revision", String(publicRevision));
+      headers.set("Vary", "Host");
+    }
+    if (!headers.has("Cache-Control"))
+      headers.set("Cache-Control", "private, no-store");
+    if (!headers.has("X-Robots-Tag"))
+      headers.set("X-Robots-Tag", "noindex, nofollow");
     if (new URL(request.url).protocol === "https:")
       headers.set("Strict-Transport-Security", "max-age=31536000");
     return new Response(response.body, {

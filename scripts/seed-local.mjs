@@ -53,6 +53,22 @@ for (const [id, name, slug, color] of [
     `UPDATE event_assignments SET permissions_json='["event.read","edition.read","content.read","content.write","content.preview","media.read","media.write"]' WHERE id='shared-assignment-${suffix}';`,
   );
 }
+// Two active, explicitly synthetic local hosts exercise the public F4 router.
+// These .test bindings are fixtures only and are never created in Cloudflare.
+for (const suffix of ["a", "b"]) {
+  const orgId = `org-${suffix}`;
+  const eventId = `event-${suffix}`;
+  const editionId = `edition-${suffix}`;
+  statements.push(
+    `UPDATE events SET status='active' WHERE organization_id=${literal(orgId)} AND id=${literal(eventId)};`,
+  );
+  statements.push(
+    `INSERT OR IGNORE INTO editions(id,organization_id,event_id,edition_key,name,city,time_zone,start_at,end_at,status) VALUES (${literal(editionId)},${literal(orgId)},${literal(eventId)},'2027',${literal(`Encontro ${suffix.toUpperCase()} — edição fictícia 2027`)},'Cidade fictícia','America/Sao_Paulo','2027-06-12T12:00:00.000Z','2027-06-12T22:00:00.000Z','active');`,
+  );
+  statements.push(
+    `INSERT OR IGNORE INTO domain_bindings(id,organization_id,hostname,destination,destination_id,status,ownership_verified,hostname_status,ssl_status,dns_verified) VALUES (${literal(`binding-${suffix}`)},${literal(orgId)},${literal(`evento-${suffix}.example.test`)},'FIXED_EDITION',${literal(editionId)},'active',1,'active','active',1);`,
+  );
+}
 for (const [id, role] of [
   ["editor-a", "content_editor"],
   ["reviewer-a", "reviewer_staff"],

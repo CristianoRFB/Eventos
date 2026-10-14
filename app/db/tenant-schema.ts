@@ -506,3 +506,284 @@ export const mediaAssets = sqliteTable(
     check("media_assets_revision_check", sql`${table.revision} >= 1`),
   ],
 );
+
+/** Immutable editorial revisions. Page and section rows are normalized indexes
+ * of a revision; snapshot_json is the exact content that may be published. */
+export const contentDrafts = sqliteTable(
+  "content_drafts",
+  {
+    id: text("id").primaryKey(),
+    organizationId: organizationId(),
+    editionId: text("edition_id").notNull(),
+    revision: integer("revision").notNull(),
+    contentJson: text("content_json", { mode: "json" })
+      .$type<Record<string, unknown>>()
+      .notNull(),
+    createdBy: text("created_by")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    createdAt: text("created_at").notNull().default(utcNow),
+  },
+  (table) => [
+    unique("content_drafts_org_id_unique").on(table.organizationId, table.id),
+    unique("content_drafts_edition_revision_unique").on(
+      table.organizationId,
+      table.editionId,
+      table.revision,
+    ),
+    foreignKey({
+      name: "content_drafts_edition_scope_fk",
+      columns: [table.organizationId, table.editionId],
+      foreignColumns: [editions.organizationId, editions.id],
+    }).onDelete("restrict"),
+    check("content_drafts_revision_check", sql`${table.revision} >= 1`),
+    check(
+      "content_drafts_json_check",
+      sql`json_valid(${table.contentJson}) AND json_type(${table.contentJson}) = 'object'`,
+    ),
+  ],
+);
+
+export const contentPages = sqliteTable(
+  "pages",
+  {
+    id: text("id").primaryKey(),
+    organizationId: organizationId(),
+    draftId: text("draft_id").notNull(),
+    slug: text("slug").notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (table) => [
+    unique("pages_org_id_unique").on(table.organizationId, table.id),
+    unique("pages_draft_slug_unique").on(
+      table.organizationId,
+      table.draftId,
+      table.slug,
+    ),
+    foreignKey({
+      name: "pages_draft_scope_fk",
+      columns: [table.organizationId, table.draftId],
+      foreignColumns: [contentDrafts.organizationId, contentDrafts.id],
+    }).onDelete("restrict"),
+    check(
+      "pages_slug_check",
+      sql`${table.slug} = 'home' OR (${table.slug} = lower(${table.slug}) AND ${table.slug} NOT GLOB '*[^a-z0-9-]*' AND length(${table.slug}) BETWEEN 1 AND 100)`,
+    ),
+    check("pages_title_check", sql`length(trim(${table.title})) > 0`),
+  ],
+);
+
+export const contentSections = sqliteTable(
+  "sections",
+  {
+    id: text("id").primaryKey(),
+    organizationId: organizationId(),
+    pageId: text("page_id").notNull(),
+    type: text("type").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    contentJson: text("content_json", { mode: "json" })
+      .$type<Record<string, unknown>>()
+      .notNull(),
+  },
+  (table) => [
+    unique("sections_org_id_unique").on(table.organizationId, table.id),
+    foreignKey({
+      name: "sections_page_scope_fk",
+      columns: [table.organizationId, table.pageId],
+      foreignColumns: [contentPages.organizationId, contentPages.id],
+    }).onDelete("restrict"),
+    check(
+      "sections_type_check",
+      sql`${table.type} IN ('hero','cards','agenda','cta','faq','sponsors','gallery','text')`,
+    ),
+    check(
+      "sections_json_check",
+      sql`json_valid(${table.contentJson}) AND json_type(${table.contentJson}) = 'object'`,
+    ),
+  ],
+);
+
+export const contentFaqItems = sqliteTable(
+  "content_faq_items",
+  {
+    id: text("id").primaryKey(),
+    organizationId: organizationId(),
+    pageId: text("page_id").notNull(),
+    question: text("question").notNull(),
+    answer: text("answer").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (table) => [
+    unique("content_faq_org_id_unique").on(table.organizationId, table.id),
+    foreignKey({
+      name: "content_faq_page_scope_fk",
+      columns: [table.organizationId, table.pageId],
+      foreignColumns: [contentPages.organizationId, contentPages.id],
+    }).onDelete("restrict"),
+    check(
+      "content_faq_question_check",
+      sql`length(trim(${table.question})) > 0`,
+    ),
+    check("content_faq_answer_check", sql`length(trim(${table.answer})) > 0`),
+  ],
+);
+
+export const publications = sqliteTable(
+  "publications",
+  {
+    id: text("id").primaryKey(),
+    organizationId: organizationId(),
+    editionId: text("edition_id").notNull(),
+    sourceDraftId: text("source_draft_id").notNull(),
+    revision: integer("revision").notNull(),
+    snapshotJson: text("snapshot_json", { mode: "json" })
+      .$type<Record<string, unknown>>()
+      .notNull(),
+    createdBy: text("created_by")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    rollbackOfId: text("rollback_of_id"),
+    createdAt: text("created_at").notNull().default(utcNow),
+  },
+  (table) => [
+    unique("publications_org_id_unique").on(table.organizationId, table.id),
+    unique("publications_edition_id_unique").on(
+      table.organizationId,
+      table.editionId,
+      table.id,
+    ),
+    unique("publications_edition_revision_unique").on(
+      table.organizationId,
+      table.editionId,
+      table.revision,
+    ),
+    foreignKey({
+      name: "publications_edition_scope_fk",
+      columns: [table.organizationId, table.editionId],
+      foreignColumns: [editions.organizationId, editions.id],
+    }).onDelete("restrict"),
+    foreignKey({
+      name: "publications_draft_scope_fk",
+      columns: [table.organizationId, table.sourceDraftId],
+      foreignColumns: [contentDrafts.organizationId, contentDrafts.id],
+    }).onDelete("restrict"),
+    foreignKey({
+      name: "publications_rollback_scope_fk",
+      columns: [table.organizationId, table.rollbackOfId],
+      foreignColumns: [table.organizationId, table.id],
+    }).onDelete("restrict"),
+    check("publications_revision_check", sql`${table.revision} >= 1`),
+    check(
+      "publications_json_check",
+      sql`json_valid(${table.snapshotJson}) AND json_type(${table.snapshotJson}) = 'object'`,
+    ),
+  ],
+);
+
+export const editionPublicationPointers = sqliteTable(
+  "edition_publication_pointers",
+  {
+    organizationId: organizationId(),
+    editionId: text("edition_id").notNull(),
+    publicationId: text("publication_id").notNull(),
+    revision: integer("revision").notNull(),
+    updatedAt: text("updated_at").notNull().default(utcNow),
+  },
+  (table) => [
+    unique("edition_publication_pointers_pk").on(
+      table.organizationId,
+      table.editionId,
+    ),
+    foreignKey({
+      name: "edition_publication_edition_scope_fk",
+      columns: [table.organizationId, table.editionId],
+      foreignColumns: [editions.organizationId, editions.id],
+    }).onDelete("restrict"),
+    foreignKey({
+      name: "edition_publication_target_scope_fk",
+      columns: [table.organizationId, table.editionId, table.publicationId],
+      foreignColumns: [
+        publications.organizationId,
+        publications.editionId,
+        publications.id,
+      ],
+    }).onDelete("restrict"),
+    check("edition_publication_revision_check", sql`${table.revision} >= 1`),
+  ],
+);
+
+export const contentRedirects = sqliteTable(
+  "content_redirects",
+  {
+    id: text("id").primaryKey(),
+    organizationId: organizationId(),
+    editionId: text("edition_id").notNull(),
+    fromSlug: text("from_slug").notNull(),
+    toSlug: text("to_slug").notNull(),
+    statusCode: integer("status_code").notNull().default(301),
+    createdAt: text("created_at").notNull().default(utcNow),
+  },
+  (table) => [
+    unique("content_redirects_org_id_unique").on(
+      table.organizationId,
+      table.id,
+    ),
+    unique("content_redirects_source_unique").on(
+      table.organizationId,
+      table.editionId,
+      table.fromSlug,
+    ),
+    foreignKey({
+      name: "content_redirects_edition_scope_fk",
+      columns: [table.organizationId, table.editionId],
+      foreignColumns: [editions.organizationId, editions.id],
+    }).onDelete("restrict"),
+    check(
+      "content_redirects_code_check",
+      sql`${table.statusCode} IN (301, 302)`,
+    ),
+  ],
+);
+
+/** A row is routable only after each independent domain-verification gate passes. */
+export const domainBindings = sqliteTable(
+  "domain_bindings",
+  {
+    id: text("id").primaryKey(),
+    organizationId: organizationId(),
+    hostname: text("hostname").notNull(),
+    destination: text("destination", { enum: ["FIXED_EDITION"] }).notNull(),
+    destinationId: text("destination_id").notNull(),
+    status: text("status").notNull().default("requested"),
+    ownershipVerified: integer("ownership_verified", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    hostnameStatus: text("hostname_status"),
+    sslStatus: text("ssl_status"),
+    dnsVerified: integer("dns_verified", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    version: integer("version").notNull().default(1),
+    ...timestamps(),
+  },
+  (table) => [
+    unique("domain_bindings_hostname_unique").on(table.hostname),
+    unique("domain_bindings_org_id_unique").on(table.organizationId, table.id),
+    foreignKey({
+      name: "domain_bindings_edition_scope_fk",
+      columns: [table.organizationId, table.destinationId],
+      foreignColumns: [editions.organizationId, editions.id],
+    }).onDelete("restrict"),
+    check("domain_bindings_version_check", sql`${table.version} >= 1`),
+    check(
+      "domain_bindings_status_check",
+      sql`${table.status} IN ('requested','ownership_pending','tls_pending','dns_pending','active','suspended','releasing','released','failed')`,
+    ),
+    check(
+      "domain_bindings_hostname_check",
+      sql`length(${table.hostname}) BETWEEN 3 AND 253 AND ${table.hostname} = lower(${table.hostname})`,
+    ),
+  ],
+);

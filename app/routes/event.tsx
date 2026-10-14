@@ -42,6 +42,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         "organization_admin",
         "event_manager",
       ].includes(ctx.member.role),
+      canManageContent: [
+        "organization_owner",
+        "organization_admin",
+        "event_manager",
+        "content_editor",
+        "publisher",
+      ].includes(ctx.member.role),
     };
   } catch (error) {
     if (error instanceof Response && error.status === 401)
@@ -50,7 +57,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   }
 }
 export default function EventPage({ loaderData }: Route.ComponentProps) {
-  const { organization, event, editions, canCreate } = loaderData;
+  const { organization, event, editions, canCreate, canManageContent } =
+    loaderData;
   return (
     <Panel name={organization.name}>
       <a href={`/admin/${organization.id}`} className="muted">
@@ -76,6 +84,14 @@ export default function EventPage({ loaderData }: Route.ComponentProps) {
                   : "Data a definir"}{" "}
                 · {edition.status === "draft" ? "Rascunho" : edition.status}
               </p>
+              {canManageContent && (
+                <a
+                  className="cms-link"
+                  href={`/admin/${organization.id}/events/${event.id}/editions/${edition.id}/cms`}
+                >
+                  Conteúdo e publicação ↗
+                </a>
+              )}
             </div>
           </div>
         ))}

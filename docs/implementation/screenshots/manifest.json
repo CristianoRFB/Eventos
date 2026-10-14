@@ -1,0 +1,28 @@
+{
+  "captured_local_date": "2026-10-14",
+  "timezone": "America/Sao_Paulo",
+  "origin": "http://localhost:5173",
+  "commit": "21ce08b2a1c4a4389d5273e9bacec53ea027918f",
+  "command": "npm run test:e2e",
+  "browser": "Playwright Chromium",
+  "data": "Synthetic local fixtures and test-created records only; not a customer deployment.",
+  "screenshots": [
+    { "file": "public-desktop.png", "route": "/", "viewport": "1440x1000", "journey": "Public SSR" },
+    { "file": "public-mobile.png", "route": "/", "viewport": "390x844", "journey": "Public SSR" },
+    { "file": "login-desktop.png", "route": "/login", "viewport": "1440x1000", "journey": "Sign-in" },
+    { "file": "login-mobile.png", "route": "/login", "viewport": "390x844", "journey": "Sign-in" },
+    { "file": "organization-chooser-desktop.png", "route": "/admin", "viewport": "1440x1000", "journey": "Organization chooser" },
+    { "file": "organization-chooser-mobile.png", "route": "/admin", "viewport": "390x844", "journey": "Organization chooser" },
+    { "file": "organization-desktop.png", "route": "/admin/org-a", "viewport": "1440x1000", "journey": "Owner event management" },
+    { "file": "organization-mobile.png", "route": "/admin/org-a", "viewport": "390x844", "journey": "Owner event management" },
+    { "file": "tenant-access-denied-desktop.png", "route": "/admin/org-b", "viewport": "1440x1000", "journey": "Cross-tenant denial" },
+    { "file": "tenant-access-denied-mobile.png", "route": "/admin/org-b", "viewport": "390x844", "journey": "Cross-tenant denial" },
+    { "file": "two-memberships-desktop.png", "route": "/admin", "viewport": "1440x1000", "journey": "Shared identity memberships" },
+    { "file": "two-memberships-mobile.png", "route": "/admin", "viewport": "390x844", "journey": "Shared identity memberships" },
+    { "file": "tenant-b-desktop.png", "route": "/admin/org-b", "viewport": "1440x1000", "journey": "Assigned tenant B" },
+    { "file": "tenant-b-mobile.png", "route": "/admin/org-b", "viewport": "390x844", "journey": "Assigned tenant B" },
+    { "file": "platform-desktop.png", "route": "/platform", "viewport": "1440x1000", "journey": "Platform Owner" },
+    { "file": "platform-mobile.png", "route": "/platform", "viewport": "390x844", "journey": "Platform Owner" }
+  ],
+  "not_yet_implemented": ["Custom-domain", "CMS and preview", "Agenda", "Exhibitors and sponsors"]
+}

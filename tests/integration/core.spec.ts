@@ -5,6 +5,7 @@ import {
   type APIRequestContext,
 } from "@playwright/test";
 import { setTimeout as delay } from "node:timers/promises";
+import { starterContent, type ContentDocument } from "../../app/domain/content";
 
 const origin = "http://localhost:5173";
 const password = "TEST_ONLY-Local-2026!";
@@ -840,4 +841,350 @@ test("sign-out revokes the server session so a captured cookie cannot be replaye
     await context.dispose();
     await replay.dispose();
   }
+});
+
+test("CMS publishes immutable tenant snapshots, previews privately, and rolls back through verified hosts", async () => {
+  const ownerA = client("owner-a");
+  const ownerB = client("owner-b");
+  const cmsA = "/api/v1/orgs/org-a/editions/edition-a";
+  const cmsB = "/api/v1/orgs/org-b/editions/edition-b";
+  const initialDraft = (await (await ownerA.get(`${cmsA}/draft`)).json()) as {
+    revision: number;
+  };
+  const initialHistory = (await (
+    await ownerA.get(`${cmsA}/revisions`)
+  ).json()) as {
+    current: { revision: number } | null;
+  };
+  const initialDraftRevision = initialDraft.revision;
+  const initialPublicationRevision = initialHistory.current?.revision ?? 0;
+  const initialDraftB = (await (await ownerB.get(`${cmsB}/draft`)).json()) as {
+    revision: number;
+  };
+  const initialHistoryB = (await (
+    await ownerB.get(`${cmsB}/revisions`)
+  ).json()) as {
+    current: { revision: number } | null;
+  };
+  const initialDraftRevisionB = initialDraftB.revision;
+  const initialPublicationRevisionB = initialHistoryB.current?.revision ?? 0;
+  const doc = (
+    siteName: string,
+    heroTitle: string,
+    faqTitle: string,
+    redirects: ContentDocument["redirects"] = [],
+  ): ContentDocument => ({
+    ...structuredClone(starterContent),
+    siteName,
+    title: `${siteName} — informações oficiais`,
+    description: `Programação e informações de ${siteName}.`,
+    redirects,
+    pages: [
+      {
+        slug: "home",
+        title: "Início",
+        description: `Veja a próxima edição de ${siteName}.`,
+        sections: [
+          {
+            type: "hero",
+            title: heroTitle,
+            subtitle: "Evento de demonstração fictício.",
+          },
+          {
+            type: "text",
+            title: "Sobre",
+            body: "<script>window.__xss = true</script> texto literal seguro.",
+          },
+        ],
+      },
+      {
+        slug: "faq",
+        title: faqTitle,
+        description: "Respostas às dúvidas comuns.",
+        sections: [
+          {
+            type: "faq",
+            title: faqTitle,
+            items: [
+              {
+                question: "É real?",
+                answer: "Não. Esta é uma fixture local sintética.",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  const publicGet = (path: string, hostname: string) =>
+    ownerA.get(path, { headers: { Host: hostname }, maxRedirects: 0 });
+
+  expect(
+    (
+      await ownerB.post(`${cmsA}/draft`, {
+        data: { expectedRevision: 0, content: doc("Tenant B", "Falso", "FAQ") },
+      })
+    ).status(),
+  ).toBe(403);
+  expect(
+    (
+      await ownerA.post(`${cmsA}/draft`, {
+        data: {
+          expectedRevision: initialDraftRevision,
+          content: doc("A", "Sem licença", "FAQ", [
+            { fromSlug: "antiga", toSlug: "faq" },
+          ]),
+        },
+      })
+    ).status(),
+  ).toBe(201);
+
+  const draftA = await ownerA.get(`${cmsA}/draft`);
+  expect(draftA.status()).toBe(200);
+  const privatePng = Buffer.from(
+    "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000b4944415478da6364f80f0001050101274175c40000000049454e44ae426082",
+    "hex",
+  );
+  const uploaded = await ownerA.post("/api/v1/orgs/org-a/media", {
+    data: privatePng,
+    headers: {
+      "Content-Type": "image/png",
+      "X-Media-Owner-Type": "edition",
+      "X-Media-Owner-Id": "edition-a",
+    },
+  });
+  expect(uploaded.status(), await uploaded.text()).toBe(201);
+  const privateAsset = (await uploaded.json()) as { id: string };
+  const storedAsset = await ownerA.get(
+    `/api/v1/orgs/org-a/media/${privateAsset.id}`,
+  );
+  expect(storedAsset.status()).toBe(200);
+  expect(storedAsset.headers()["cache-control"]).toContain("no-store");
+  expect(Buffer.from(await storedAsset.body())).toEqual(privatePng);
+  const previewContent = doc(
+    "Encontro Aurora",
+    "V1 — primeira edição",
+    "Dúvidas Aurora",
+    [{ fromSlug: "antiga", toSlug: "faq", statusCode: 301 }],
+  );
+  previewContent.pages[0]!.sections = [
+    {
+      type: "hero",
+      title: "V1 — primeira edição",
+      subtitle: "Evento de demonstração fictício.",
+      imageAssetId: privateAsset.id,
+    },
+    ...previewContent.pages[0]!.sections.slice(1),
+  ];
+  const savedA = await ownerA.post(`${cmsA}/draft`, {
+    data: {
+      expectedRevision: initialDraftRevision + 1,
+      content: previewContent,
+    },
+  });
+  expect(savedA.status(), await savedA.text()).toBe(201);
+  const previewResponse = await ownerA.post(`${cmsA}/preview`, {
+    data: { draftRevision: initialDraftRevision + 2 },
+  });
+  expect(previewResponse.status()).toBe(200);
+  const preview = (await previewResponse.json()) as { url: string };
+  const previewPage = await ownerA.get(preview.url);
+  const previewHtml = await previewPage.text();
+  expect(previewPage.status()).toBe(200);
+  expect(previewPage.headers()["cache-control"]).toContain("no-store");
+  expect(previewPage.headers()["x-robots-tag"]).toContain("noindex");
+  expect(previewHtml).toContain("Prévia privada");
+  expect(previewHtml).toContain("V1 — primeira edição");
+  expect(previewHtml).toContain(
+    `/preview/${preview.url.split("/").pop()}/assets/${privateAsset.id}`,
+  );
+  expect(previewHtml).not.toContain("<script>window.__xss = true</script>");
+  const previewAsset = await ownerA.get(
+    `${preview.url}/assets/${privateAsset.id}`,
+  );
+  expect(previewAsset.status()).toBe(200);
+  expect(previewAsset.headers()["cache-control"]).toContain("no-store");
+  expect(Buffer.from(await previewAsset.body())).toEqual(privatePng);
+
+  const contentA = doc(
+    "Encontro Aurora",
+    "V1 — primeira edição",
+    "Dúvidas Aurora",
+    [{ fromSlug: "antiga", toSlug: "faq", statusCode: 301 }],
+  );
+  const publishedDraftA = await ownerA.post(`${cmsA}/draft`, {
+    data: { expectedRevision: initialDraftRevision + 2, content: contentA },
+  });
+  expect(publishedDraftA.status()).toBe(201);
+
+  const unlicensed = await ownerA.post(`${cmsA}/draft`, {
+    data: {
+      expectedRevision: initialDraftRevision + 3,
+      content: {
+        ...contentA,
+        redirects: [],
+        pages: [
+          {
+            ...contentA.pages[0]!,
+            sections: [
+              {
+                type: "hero",
+                title: "Imagem",
+                imageAssetId: "missing-public-license",
+              },
+            ],
+          },
+        ],
+      },
+    },
+  });
+  expect(unlicensed.status()).toBe(201);
+  const blockedPublish = await ownerA.post(`${cmsA}/publish`, {
+    data: {
+      draftRevision: initialDraftRevision + 4,
+      expectedPublicationRevision: initialPublicationRevision,
+    },
+  });
+  expect(blockedPublish.status()).toBe(400);
+
+  const publishedA = await ownerA.post(`${cmsA}/publish`, {
+    data: {
+      draftRevision: initialDraftRevision + 3,
+      expectedPublicationRevision: initialPublicationRevision,
+    },
+  });
+  expect(publishedA.status(), await publishedA.text()).toBe(201);
+  const v1 = (await publishedA.json()) as {
+    publicationId: string;
+    revision: number;
+  };
+  const hostA = "evento-a.example.test";
+  const firstPublic = await publicGet("/", hostA);
+  const firstHtml = await firstPublic.text();
+  expect(firstPublic.status(), firstHtml).toBe(200);
+  expect(firstPublic.headers()["x-robots-tag"]).toContain("index");
+  expect(firstPublic.headers()["cache-control"]).toContain("max-age=60");
+  expect(firstPublic.headers()["x-publication-revision"]).toBe(
+    String(initialPublicationRevision + 1),
+  );
+  expect(firstHtml).toContain("V1 — primeira edição");
+  expect(firstHtml).toContain(`<link rel="canonical" href="http://${hostA}/"`);
+  expect(firstHtml).not.toContain("<script>window.__xss = true</script>");
+  expect(firstHtml).toContain(
+    "&lt;script&gt;window.__xss = true&lt;/script&gt;",
+  );
+  expect((await publicGet("/robots.txt", hostA)).status()).toBe(200);
+  expect(await (await publicGet("/sitemap.xml", hostA)).text()).toContain(
+    `http://${hostA}/faq`,
+  );
+
+  const stalePublish = await ownerA.post(`${cmsA}/publish`, {
+    data: {
+      draftRevision: initialDraftRevision + 3,
+      expectedPublicationRevision: initialPublicationRevision,
+    },
+  });
+  expect(stalePublish.status()).toBe(409);
+
+  const contentA2 = doc(
+    "Encontro Aurora",
+    "V2 — atualização",
+    "Dúvidas Aurora",
+    [{ fromSlug: "antiga", toSlug: "faq", statusCode: 301 }],
+  );
+  const savedA2 = await ownerA.post(`${cmsA}/draft`, {
+    data: { expectedRevision: initialDraftRevision + 4, content: contentA2 },
+  });
+  expect(savedA2.status()).toBe(201);
+  const stillV1 = await publicGet("/", hostA);
+  expect(await stillV1.text()).toContain("V1 — primeira edição");
+  const publishedA2 = await ownerA.post(`${cmsA}/publish`, {
+    data: {
+      draftRevision: initialDraftRevision + 5,
+      expectedPublicationRevision: initialPublicationRevision + 1,
+    },
+  });
+  expect(publishedA2.status()).toBe(201);
+  expect(await (await publicGet("/", hostA)).text()).toContain(
+    "V2 — atualização",
+  );
+  const redirect = await publicGet("/antiga", hostA);
+  expect(redirect.status()).toBe(301);
+  expect(redirect.headers().location).toBe(`http://${hostA}/faq`);
+
+  const savedB = await ownerB.post(`${cmsB}/draft`, {
+    data: {
+      expectedRevision: initialDraftRevisionB,
+      content: doc("Encontro Horizonte", "Horizonte B1", "Dúvidas Horizonte"),
+    },
+  });
+  expect(savedB.status()).toBe(201);
+  const publishedB = await ownerB.post(`${cmsB}/publish`, {
+    data: {
+      draftRevision: initialDraftRevisionB + 1,
+      expectedPublicationRevision: initialPublicationRevisionB,
+    },
+  });
+  expect(publishedB.status()).toBe(201);
+  const race = await Promise.all([
+    ownerB.post(`${cmsB}/draft`, {
+      data: {
+        expectedRevision: initialDraftRevisionB + 1,
+        content: doc(
+          "Encontro Horizonte",
+          "Horizonte B2-A",
+          "Dúvidas Horizonte",
+        ),
+      },
+    }),
+    ownerB.post(`${cmsB}/draft`, {
+      data: {
+        expectedRevision: initialDraftRevisionB + 1,
+        content: doc(
+          "Encontro Horizonte",
+          "Horizonte B2-B",
+          "Dúvidas Horizonte",
+        ),
+      },
+    }),
+  ]);
+  expect(race.map((response) => response.status()).sort()).toEqual([201, 409]);
+  const publicB = await publicGet("/", "evento-b.example.test");
+  const htmlB = await publicB.text();
+  expect(publicB.status()).toBe(200);
+  expect(htmlB).toContain("Horizonte B1");
+  expect(htmlB).not.toContain("V2 — atualização");
+  expect(await (await publicGet("/", hostA)).text()).toContain(
+    "V2 — atualização",
+  );
+  expect((await publicGet("/", "nao-cadastrado.example.test")).status()).toBe(
+    404,
+  );
+  expect((await publicGet("/admin", "evento-a.example.test")).status()).toBe(
+    404,
+  );
+
+  const rollback = await ownerA.post(`${cmsA}/rollback`, {
+    data: {
+      targetPublicationId: v1.publicationId,
+      expectedPublicationRevision: initialPublicationRevision + 2,
+    },
+  });
+  expect(rollback.status(), await rollback.text()).toBe(201);
+  expect(await (await publicGet("/", hostA)).text()).toContain(
+    "V1 — primeira edição",
+  );
+  const history = await ownerA.get(`${cmsA}/revisions`);
+  expect(history.status()).toBe(200);
+  const entries = (await history.json()) as {
+    publications: { rollback_of_id: string | null; revision: number }[];
+    current: { revision: number };
+  };
+  expect(entries.current.revision).toBe(initialPublicationRevision + 3);
+  expect(entries.publications).toContainEqual(
+    expect.objectContaining({
+      rollback_of_id: v1.publicationId,
+      revision: initialPublicationRevision + 3,
+    }),
+  );
 });

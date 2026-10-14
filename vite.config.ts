@@ -12,4 +12,12 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  server: {
+    // Local-only .test authorities exercise tenant routing without publishing.
+    allowedHosts: [
+      "evento-a.example.test",
+      "evento-b.example.test",
+      "nao-cadastrado.example.test",
+    ],
+  },
 });

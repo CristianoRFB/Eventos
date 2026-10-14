@@ -22,6 +22,7 @@ import {
   uploadImage,
 } from "../infrastructure/media.server";
 import { readJsonBody } from "../infrastructure/request.server";
+import { handleContentApi } from "./content.server";
 
 const slug = z
   .string()
@@ -169,6 +170,17 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
   const [, orgId, resource] = match;
   if (resource === "invitations" || resource.startsWith("invitations/"))
     return handleInvitations(request, env, orgId, resource);
+  const contentRoute = resource.match(
+    /^editions\/([^/]+)\/(draft|preview|publish|rollback|revisions)$/,
+  );
+  if (contentRoute)
+    return handleContentApi(
+      request,
+      env,
+      orgId,
+      contentRoute[1],
+      contentRoute[2],
+    );
   if (resource === "media" && request.method === "POST") {
     const ownerType =
       request.headers.get("X-Media-Owner-Type") ?? "organization";
@@ -269,7 +281,10 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
           orgId,
           ownerType,
           ownerId,
-          eventId,
+          // Media has one polymorphic owner. Edition-owned assets are scoped
+          // through edition_id; carrying its event_id too violates the
+          // media_assets_owner_check constraint and duplicates that relation.
+          ownerType === "event" ? eventId : null,
           editionId,
           stored.visibility,
           stored.key,

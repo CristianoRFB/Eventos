@@ -4,31 +4,31 @@
 **Resultado integral:** `IN_PROGRESS`; não é `CORE_READY`, `READY_FOR_STAGING`, `READY_FOR_PILOT` nem `PRODUCTION_VERIFIED`.  
 **Checkout/origin:** `C:\OpenSSL\set\Eventos` / `https://github.com/CristianoRFB/Eventos.git`.  
 **Branch:** `codex/eventos77-full-system`.  
-**SHA baseline/local HEAD no início do checkpoint:** `b90ece62e0d3c893dc6e95d6643fa7505dd25602`. Implementação em working tree; nenhum commit de implementação é declarado neste checkpoint.
+**Baseline:** `b90ece62e0d3c893dc6e95d6643fa7505dd25602`; implementação local: `21ce08b2a1c4a4389d5273e9bacec53ea027918f`; documentação F0 preservada: `a989a35c8b39c95f20ecf4155553b772f83e3f1e`. Evidências reproduzidas estão no [checkpoint local](checkpoint-2026-10-14.md).
 
 ## Autorização e evidência inicial
 
-O usuário escolheu expressamente este checkout/repositório/branch após a divergência com o nome Eventos-77 proposto no briefing. [ADR-005](../adr/ADR-005-authorized-repository-and-execution.md) registra essa escolha. O pedido posterior disponibilizou os consoles Cloudflare/Firebase e indicou subdomínio Workers futuro, priorizando desenvolvimento agora. Nenhum banco, bucket, hostname, migration cloud ou deploy real foi comprovado ou criado por esta documentação.
+O usuário escolheu expressamente este checkout/repositório/branch após a divergência com o nome Eventos-77 proposto no briefing. [ADR-005](../adr/ADR-005-authorized-repository-and-execution.md) registra essa escolha. O pedido posterior disponibilizou os consoles Cloudflare/Firebase, indicou subdomínio Workers futuro e priorizou desenvolvimento. Todos os checks deste checkpoint usaram recursos locais/sintéticos; nenhum recurso, banco, bucket, hostname, migration cloud, DNS ou deploy real foi criado ou alterado. O runtime Firebase ainda não está integrado.
 
-O [pre-flight Git executado](preflight-git.txt) comprova raiz, remote, branch, status e HEAD no instante da captura; alterações simultâneas dos agentes autorizados tornam o status um snapshot, não uma declaração de árvore limpa posterior. A arquitetura inicial e as 16 fontes Mermaid foram preservadas. Ler documentação e inventariar requisitos é progresso F0; não prova aceites funcionais posteriores.
+O [pre-flight Git executado](preflight-git.txt) comprova raiz, remote, branch, status e HEAD no instante da captura. O código foi fixado no SHA acima. A arquitetura inicial e as 16 fontes Mermaid foram preservadas; os 16 diagramas de design foram renderizados. A matriz de requisitos separa progresso parcial das fases ainda não iniciadas.
 
 ## Status por fase
 
 | Fase | Status | Evidência atual | Aceite/impedimento e NEXT_STEP |
 |---|---|---|---|
-| F0 | PARTIAL | ADR-005; preflight-git.txt; matrizes; ENVIRONMENT_POLICY.md; docs-verification.log.txt | Destino autorizado e design preservado; docs:check passou. Falta consolidar versões efetivamente fixadas e evidências license/secrets/stack antes de PASS. |
-| F1 | IN_PROGRESS | Runtime/scaffold e build inicial avançaram com o executor principal; logs finais pendentes neste registro | Finalizar stack SSR, D1/R2 local, migrations e PoC auth; executar instalação/checks e jornada no runtime Worker. |
-| F2 | NOT_STARTED | Requisitos mapeados, sem prova de isolamento | Implementar memberships/RBAC/Platform Owner e executar A/B adversarial antes de F8. |
-| F3 | NOT_STARTED | Requisitos mapeados, sem aceite funcional | Eventos/edições/branding/mídia com FK composta e ACL; R2 real não provisionado. |
+| F0 | PARTIAL | ADR-005; preflight-git.txt; matrizes; `npm ci`; docs:check; versões no lockfile | Destino e branch autorizados; inventário e renders conferidos. Falta auditoria completa de licenças e fechamento documental. |
+| F1 | PARTIAL | [checkpoint local](checkpoint-2026-10-14.md); commit `21ce08b`; migrations `0000`/`0001`; 98 unitários; 19 integração; 8 E2E | SSR e login passaram no Worker local com D1/R2 local. Falta teste de expiração, Worker sem D1, restart/persistência explícitos e execução hosted da CI. |
+| F2 | PARTIAL | `tenant-schema.ts`; `tenant.server.ts`; `api.server.ts`; `invitations.server.ts`; integração A/B | Memberships, RBAC por evento, convite com token hash, Platform Owner, suspensão e audit passaram. Falta aceite de expiração do convite, gestão completa de papéis na UI e suporte operacional. |
+| F3 | PARTIAL | `0000_same_tinkerer.sql`; `api.server.ts`; `media.server.ts`; formulários de eventos/edições; testes locais | Eventos, edições, clone API, CAS e mídia local passaram em parte. Falta editor de marca, clone comprovado sem PII, variantes e reconciliação de R2. R2 real não provisionado. |
 | F4 | NOT_STARTED | Requisitos mapeados, sem aceite funcional | CMS/draft/preview/SSR/SEO, CAS concorrente e rollback editorial. |
 | F5 | NOT_STARTED | Requisitos mapeados, sem aceite funcional | Agenda/palcos/convidados/expositores/patrocínios; conflitos e timezone. |
 | F6 | NOT_STARTED | Requisitos mapeados, sem aceite funcional | Forms versionados, submissão idempotente, recibo privado, revisão e opt-in publicado. |
-| F7 | NOT_STARTED | Provider/resolver ainda sem prova | Implementar e testar fake/local; etapa real depende de autorização concreta Cloudflare/DNS/TLS/custo. Sem declarar F7 cloud PASS. |
+| F7 | PARTIAL | `app/domain/host.ts`; testes unitários de host; flags custom-domain desligadas | Parser e elegibilidade fail-closed testados sem provedor; binding, ownership, DNS, SSL e host real pendentes. Sem PASS cloud. |
 | F8 | NOT_STARTED | Catálogo produção NOT_APPROVED | Só iniciar após F2; mecânica TEST_ONLY pode ser provada sem inventar catálogo/preço/quotas/trial. Política permanece gate externo. |
-| F9 | NOT_STARTED | 60 telas preservadas e mapeadas | Concluir ações/persistência das 51 telas NOW e UX desktop/mobile; 9 NEXT continuam fora da UI operacional. |
-| F10 | NOT_STARTED | Estratégia de teste histórica e requisitos preservados | Hardening A/B, concorrência, falhas de provedores, backup/restore e medição; sem achado crítico pendente para release. |
+| F9 | PARTIAL | 9 estados de tela capturados em [manifesto](screenshots/manifest.json) | Auth, dashboard, organizadora, eventos e Platform Owner passam em desktop/mobile. A maioria das 51 telas NOW ainda não existe; 9 NEXT seguem fora da UI operacional. |
+| F10 | PARTIAL | 98 unitários; 19 integração; 8 E2E; lint/typecheck/build/audit | Isolamento, CAS, sessão, mídia e UX-base passaram. Falta cobertura integral, falhas de provedores, backup/restore e medição. |
 | F11 | NOT_STARTED | Consoles disponibilizados; nenhum recurso real é prova de aceite | Preparar templates locais. Staging/recursos/custos exigem escopo autorizado; produção tem autorização e homologação próprias. |
-| F12 | PARTIAL | Matrizes; 16 fontes preservadas e 16 SVGs Mermaid renderizados como design | Render passou; reconciliação runtime, documentação final, screenshots reais e runbooks ainda não iniciados. |
+| F12 | PARTIAL | Matrizes; 16 fontes e renders Mermaid; [16 screenshots locais](screenshots/manifest.json); [checkpoint](checkpoint-2026-10-14.md) | Docs e capturas das jornadas existentes foram atualizadas; runbooks, CMS, agenda, domínio e aceite completo ainda faltam. |
 
 Cada linha exige SHA de implementação, comando e código de saída, log/cenário, migrations, screenshot quando aplicável e rollback antes de promover PASS. Estados intermediários não reduzem o escopo original. O status da fase externa não impede desenvolvimento local independente.
 
@@ -44,30 +44,26 @@ Fonte: [GOAL MASTER](../../codex/CODEX_GOAL_MASTER_EVENTOS_77_FULL_SYSTEM.txt), 
 
 ## Comandos e resultados
 
-Executados neste checkpoint documental: comandos Git presentes em `preflight-git.txt`, leitura dos documentos canônicos, cálculo de hashes e geração das matrizes. [docs-verification.log.txt](docs-verification.log.txt) registra `node scripts/docs-check.mjs` exit 0 (13 fases, 172 cláusulas F, 65 globais, 38 features, 60 telas e 16 fontes/16 renders) e ESLint dirigido aos dois scripts documentais exit 0. `node scripts/render-diagrams.mjs` terminou exit 0, com 16 PASS e [manifesto/logs por diagrama](diagrams/manifest.json); duas prévias foram inspecionadas visualmente. A tentativa inicial de render falhou por opção `-w` removida no CLI 12; após conferir o help local, a execução corrigida com `--size` passou integralmente.
-
-Nenhum lint global, typecheck, teste unitário/integração/E2E, auth Worker, build, backup, smoke cloud ou homologação é declarado executado **por este registro documental**. Inserir logs reais dos executores conforme forem produzidos; não extrapolar verificações de docs para PASS de runtime.
-
-Scripts exigidos no contrato F1: `dev`, `lint`, `typecheck`, `test`, `test:integration`, `test:e2e`, `build`, `docs:diagrams`, `docs:check`, com `npm ci`. A existência do script não comprova sucesso. Fixação de Node/React Router/Wrangler/Drizzle/Better Auth precisa corresponder ao lock real, fonte oficial e PoC; não é aprovada apenas pelo nome de uma dependência.
+`node scripts/render-diagrams.mjs` terminou exit 0 no checkpoint F0, com 16 PASS e [manifesto/logs por diagrama](diagrams/manifest.json). No checkpoint atual, `npm ci`, lint, typecheck, 98 testes unitários, build, 19 testes de API no Worker local, 8 testes E2E, `docs:check`, `npm audit` e migration apply idempotente passaram; comandos e limites estão no [registro](checkpoint-2026-10-14.md). As dependências estão fixadas no `package-lock.json`; Better Auth + Drizzle + D1 passou no Worker local, sem alegar execução hosted da CI.
 
 ## Gates e recursos externos
 
 | Gate | Estado comprovado | Próxima evidência necessária |
 |---|---|---|
-| G0 source/branch | PARTIAL | Identidade Git e autorização presentes; completar F0/checks. |
-| G1 A/B | NOT_STARTED | Requests positivos/negativos em auth/RBAC/dados/assets/cache/forms/domínios. |
-| G2 schema/migrations | NOT_STARTED | SQL versionado, D1 local, FK composta e idempotência. |
+| G0 source/branch | PASS | Checkout/branch autorizados, pre-flight registrado e commits locais documentados. |
+| G1 A/B | PARTIAL | Auth/RBAC/dados/mídia testados; forms, domínios, cache público e superfícies futuras pendentes. |
+| G2 schema/migrations | PARTIAL | SQL versionado, D1 local, FKs compostas e apply sem migrations pendentes; modelo F4–F6 ainda falta. |
 | G3 CMS/publish/rollback | NOT_STARTED | Draft invisível, snapshot imutável, CAS concorrente, histórico recuperado. |
-| G4 domínio fail-closed | NOT_STARTED | Provider fake completo e, separadamente, host real com ownership+hostname+SSL+DNS. |
-| G5 E2E desktop/mobile | NOT_STARTED | Jornadas e telas NOW em viewports exigidos, com screenshots reais. |
-| G6 checks/docs | NOT_STARTED | Logs lint/typecheck/test/build/docs executados no estado correspondente. |
+| G4 domínio fail-closed | PARTIAL | Helpers/eligibilidade puros testados; provider fake completo e host real com ownership+hostname+SSL+DNS faltam. |
+| G5 E2E desktop/mobile | PARTIAL | 4 jornadas em cada viewport e 16 screenshots reais; telas NOW não cobertas ainda. |
+| G6 checks/docs | PASS | `npm ci`, lint, typecheck, Vitest, integração, E2E, build, audit e docs:check registrados no checkpoint local. |
 | G7 cloud autorizado | EXTERNAL_GATE_PENDING | Escopo e autorização das ações concretas; custo/plano validado no momento. |
 | G8 staging/produção | NOT_STARTED | URL/release/logs/smoke/backup/rollback e homologação; produção separada de staging. |
 
-Cloudflare D1/R2/custom hostnames reais: não provisionados por este checkpoint. Firebase: console disponibilizado, integração de runtime não provada. Nenhum preço/quota comercial aprovado; nenhuma conta real, email ou lead incorporado. Publicação futura Workers não é deploy realizado.
+Cloudflare D1/R2/custom hostnames reais: não provisionados. Firebase: console disponibilizado, integração de runtime não provada. Nenhum preço/quota comercial aprovado; nenhuma conta real, email ou lead incorporado. O futuro `workers.dev` não foi publicado.
 
 ## Rollback e próximo passo
 
-Migrations reais: **nenhuma executada por este checkpoint**. Retorno seguro: preservar working tree; revisar e reverter somente commits novos identificados depois do baseline. Não apagar arquivos de outro agente nem bancos/objetos reais. Cada migration e fase implementadas devem acrescentar rollback próprio.
+As migrations `0000` e `0001` foram aplicadas somente ao D1 local fictício; nenhuma migration cloud foi executada. Retorno seguro: preservar os dados locais e reverter somente commits novos identificados depois do baseline. Nenhum banco ou objeto real foi tocado. Cada fase futura deve acrescentar rollback próprio.
 
-**NEXT_STEP:** concluir F0 stack/docs/checks e scaffold F1, executar PoC de autenticação no Worker local com D1, R2 local/mock e dados A/B; registrar comandos/logs/IDs de migration e SHA reais. Só então avaliar PASS ou impedimento técnico e continuar F2. Manter o goal integral ativo até comprovação de todas as entregas exigidas, inclusive gates externos.
+**NEXT_STEP:** F4 — CMS estruturado com draft, preview privado, publicação atômica, ponteiro concorrente e rollback auditável; validar v1 → draft v2 → v2 → rollback v1. Depois ligar SSR público ao host verificado e continuar F5/F6. Manter o goal integral ativo até comprovação de todas as entregas e gates externos.
