@@ -1,0 +1,19 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Ciclo de dominio personalizado — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_request [label="Solicitado"];
+x_ownership [label="Validacao titularidade"];
+x_tls [label="SSL ativo"];
+x_dns [label="DNS verificado"];
+x_active [label="Ativo"];
+x_suspend [label="Suspenso"];
+x_release [label="Revogado"];
+x_request -> x_ownership;
+x_ownership -> x_tls;
+x_tls -> x_dns;
+x_dns -> x_active;
+x_active -> x_suspend;
+x_suspend -> x_active;
+x_active -> x_release;
+}

@@ -1,0 +1,24 @@
+sequenceDiagram
+  actor U as User
+  participant W as Worker/Auth
+  participant S as Session store D1
+  participant M as Memberships D1
+  participant P as Policy Guard
+  participant DB as Tenant Data D1
+  U->>W: sign in (admin host)
+  W->>S: create/rotate secure session
+  W-->>U: HttpOnly host-only cookie
+  U->>W: mutate event X in organization A
+  W->>S: verify session, csrf, expiry
+  W->>M: resolve active member + role in A
+  M-->>W: role and event scope
+  W->>P: authorize action and org active
+  alt permitted
+    P-->>W: permit
+    W->>DB: WHERE organization_id = A AND event_id = X
+    DB-->>W: saved revision
+    W-->>U: 200 + revision
+  else denied
+    P-->>W: deny
+    W-->>U: 403 no leak
+  end

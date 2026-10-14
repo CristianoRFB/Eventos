@@ -1,0 +1,9 @@
+EXECUTAR SOMENTE APÓS MINHA APROVAÇÃO — EVENTOS 77
+
+Leia `docs/CURRENT.md`, o pacote de arquitetura, `AGENTS.md` (se existir) e `codex/CODEX_GOAL_MASTER_EVENTOS_77_FULL_SYSTEM.txt` integralmente.
+
+Execute o GOAL por fases F0–F12 de maneira retomável sobre o projeto EVENTOS-77, sem tocar em outros SaaS. Confirme working directory, branch, origin, status e histórico. Se repositório remoto não existir ou faltar autorização para criá-lo, trabalhe localmente e marque o bloqueio; nunca crie remote, faça push, deploy, DNS, billing ou provisionamento cloud sem aprovação expressa.
+
+Comece pelos gates Core A×B / auth / publishing, documente evidências e checkpoints após cada fase. Preserve a árvore docs/versions/v0.1.0-architecture como design histórico; não declare telas/diagrams/screenshot como executados antes de criar código e testar. Cloudflare for SaaS real e produção exigem autorização separada.
+
+No fim de cada sessão, me entregue FASE/STATUS, SHA, resultados de testes, arquivos tocados, bloqueios e próximo ponto exato de retomada. Não repita auditoria ampla, não reabra pricing não aprovado e não invente funcionalidades comerciais.

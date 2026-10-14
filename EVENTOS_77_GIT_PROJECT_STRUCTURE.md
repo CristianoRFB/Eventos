@@ -1,0 +1,1 @@
+Use `docs/versions/v0.1.0-architecture/PROJECT_STRUCTURE.md`. O repo proposto é CristianoRFB/Eventos-77 e a branch Codex sugerida é `codex/eventos77-full-system`. Não há criação autorizada ou realizada.

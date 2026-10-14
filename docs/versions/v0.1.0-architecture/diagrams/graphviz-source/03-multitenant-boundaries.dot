@@ -1,0 +1,16 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Isolamento por organizadora — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_auth [label="Auth + memberships"];
+x_policy [label="RBAC server side"];
+x_orgA [label="Tenant A"];
+x_orgB [label="Tenant B"];
+x_dataA [label="Dados A"];
+x_dataB [label="Dados B"];
+x_auth -> x_policy;
+x_policy -> x_orgA;
+x_policy -> x_orgB;
+x_orgA -> x_dataA;
+x_orgB -> x_dataB;
+}

@@ -1,0 +1,1 @@
+Use `docs/versions/v0.1.0-architecture/PRODUCT_VISION.md`, `REQUIREMENTS.md`, `FEATURE_INVENTORY.md`, `ROADMAP.md` e `UX_SCREENS.md`. Estes arquivos são a especificação completa, todos DESIGN PROPOSED.

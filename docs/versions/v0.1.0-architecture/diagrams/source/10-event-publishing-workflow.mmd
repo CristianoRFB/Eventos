@@ -1,0 +1,12 @@
+stateDiagram-v2
+  [*] --> draft
+  draft --> preview: editor saves revision
+  preview --> draft: request changes
+  preview --> approved: publisher reviews
+  approved --> published: atomic publish pointer
+  published --> draft: create new revision
+  published --> archived: edition retired
+  archived --> published: authorized restore
+  published --> rolled_back: restore earlier snapshot
+  rolled_back --> published: publish rollback snapshot
+  note right of published: Visitors see only immutable publication revision

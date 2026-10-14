@@ -1,0 +1,21 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Organizadora / Eventos / Edicoes — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_org [label="Organizadora (Tenant)"];
+x_event1 [label="Evento A"];
+x_event2 [label="Evento B"];
+x_e26 [label="Edicao 2026"];
+x_e27 [label="Edicao 2027"];
+x_e30 [label="Edicao 2030"];
+x_domains [label="Dominios"];
+x_content [label="Conteudo publicado"];
+x_org -> x_event1;
+x_org -> x_event2;
+x_org -> x_domains;
+x_event1 -> x_e26;
+x_event1 -> x_e27;
+x_event2 -> x_e30;
+x_e27 -> x_content;
+x_domains -> x_e27;
+}

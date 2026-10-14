@@ -1,0 +1,2 @@
+# ADR-003 — Global Standard v01 e limites locais
+**Status: PADRÃO GLOBAL APROVADO; POLÍTICA EVENTOS NÃO APROVADA.** Aplicar PlanCatalog local, canUse, getLimit, status, overrides, demo, downgrade preservando dados e atribuição manual. F8 só depois de Core A×B e aprovação de features/limites reais. Não executar billing, trial arbitrário, limite fictício ou prêmio pago por segurança. Não copiar valores de outras verticais.

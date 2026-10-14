@@ -1,0 +1,13 @@
+flowchart TB
+  PL[Platform] --> ORG[Organization = Tenant]
+  ORG --> MEM[Memberships]
+  ORG --> BR[Brand Profiles]
+  ORG --> E1[Event: Anime Aurora]
+  ORG --> E2[Event: Geek City]
+  ORG --> D[Domain Bindings]
+  E1 --> ED1[Edition 2026]
+  E1 --> ED2[Edition 2027]
+  E2 --> ED3[Edition 2026]
+  ED1 --> CONT[Agenda / Guests / Exhibitors / Public Pages]
+  D -->|destination| E1
+  D -->|destination| ED3

@@ -1,0 +1,458 @@
+################################################################################
+# CODEX GOAL MASTER — EVENTOS 77 — FULL SYSTEM
+# Preparado em 2026-10-14 | v0.1.0-architecture
+# STATUS: READY_FOR_CODEX_REVIEW; NOT EXECUTED; DESIGN ONLY
+# Repo pretendido: CristianoRFB/Eventos-77 (a confirmar antes da execução)
+# Branch proposta: codex/eventos77-full-system
+################################################################################
+
+VOCÊ É CODEX, O AGENTE IMPLEMENTADOR. ESTE DOCUMENTO É UM GOAL EXECUTÁVEL FUTURO,
+NÃO PROVA DE CÓDIGO EXISTENTE. SÓ INICIE IMPLEMENTAÇÃO SE O USUÁRIO EXPRESSAMENTE
+ENVIAR ESTE ARQUIVO NO AMBIENTE DE CÓDIGO E AUTORIZAR A EXECUÇÃO.
+
+RESULTADO DESEJADO:
+Um SaaS Eventos 77 multi-tenant, white-label, com UMA codebase/deploy por ambiente,
+organização como tenant, múltiplos eventos/edições, CMS + SSR SEO, programação,
+convidados, expositores, domínio próprio Cloudflare for SaaS quando habilitado,
+auth/RBAC, Platform Owner, auditoria e Global Standard v01 sem billing automático.
+O resultado REAL só é declarado completo após testes, homologação, domínios reais,
+deploy de produção, monitoramento e validação externa, cada um com prova e aprovação.
+
+FONTE CANÔNICA INICIAL: ZIP/documentação arquitetural v0.1.0-architecture.
+ANTES DE CODAR: docs/CURRENT.md, docs/DECISIONS_PENDING.md, ADRs,
+PRODUCT_VISION, REQUIREMENTS, DATA_MODEL, DATABASE_STRUCTURE, AUTH_RBAC,
+MULTI_TENANCY, CUSTOM_DOMAINS, SECURITY, WHITE_LABEL, FEATURE_INVENTORY,
+UX_SCREENS, USER_JOURNEYS, DIAGRAMS_MANIFEST, TEST_STRATEGY,
+EVENTOS_77_HANDOFF.md. Estes documentos são ESCOPO PROPOSTO, não runtime.
+Se a implementação alterar decisões importantes, fazer ADR e atualizar docs;
+não alterar decisão aprovada de tenant=organizadora sem pedir aprovação.
+
+LIMITES DE AUTORIDADE DO AGENTE:
+ALLOWED quando o usuário pedir IMPLEMENTAR no workspace correto: criar/editar
+código local do novo Eventos-77, testes e docs; usar dados fictícios; executar
+lint/build/test/e2e locais, migrar bancos locais; criar commits em branch nova
+se repositório autorizado. Proibido sem autorização separada: GitHub remoto
+(create repo/PR/merge/push), Cloudflare DNS/custom hostname/R2/D1 reais, rodar
+migrations em staging/prod, cobrar/registrar serviço pago, criar usuários reais,
+publicar site ou demo com marca de terceiros, enviar email/WhatsApp, deletar
+conteúdo real, incorporar lead como cliente. Se ambíguo, BLOCKED_EXTERNAL.
+
+GIT PRE-FLIGHT: pwd; git rev-parse --show-toplevel; git remote -v; git branch
+--show-current; git status -sb; git log -n 7 --oneline. NUNCA rodar git reset
+--hard, git clean -fd, git push --force, nem substituir worktree preexistente.
+Se destino já possuir alterações não suas, registrar e pedir instrução. Evitar
+merge automático em main. Não modificar Cosmaker, Caravana, Sorveteria ou
+qualquer outra vertical com Codex rodando em outro PC. Branch exclusiva e
+commits por F; não depender de um commit único gigante.
+
+STATUS: NOT_STARTED, IN_PROGRESS, PASS, PARTIAL, FAIL, BLOCKED_EXTERNAL,
+DEFERRED. Toda fase precisa de `docs/implementation/MASTER_EXECUTION_STATUS.md`
+com SHA local, branch, data, comandos, evidência, impedimento e NEXT_STEP.
+Não promover PASS por falta de erro visível: exigir critérios objetivos.
+
+ARQUITETURA PROPOSTA, NÃO FATO IMPLEMENTADO:
+- TypeScript + React Router SSR + Cloudflare Workers (framework Cloudflare atual);
+- D1 SQLite + Drizzle (migrations versionadas, scoping por organization_id);
+- R2 assets com ACL em servidor e assets públicos publicados separados;
+- Better Auth/Drizzle D1 como preferência SUJEITA a prova de compatibilidade
+  Worker/ReactRouter/D1, CSRF e sessão; se falhar, decidir alternativa por ADR;
+- Cloudflare for SaaS custom hostnames com validação de propriedade + SSL + DNS
+  e Worker fallback origin em zona autorizada; 
+- central admin host fixo; hosts de clientes só conteúdo público SSR;
+- PlanCatalog local conforme padrão global, mas preços/quotas Eventos 77 NÃO
+  APROVADOS. NUNCA gerar gating que inventa preços ou bloqueia segurança;
+- external ticketing URL only no MVP; sem gateway próprio, fiscal, marketplace,
+  SMS/WhatsApp, cross-vertical DB ou app nativo.
+
+REGRAS DE NEGÓCIO IMUTÁVEIS:
+- `organization` = TENANT. Evento e edição são entidades próprias. Hostname
+  não é tenant e tem destination explícito para organizadora/evento/edição.
+- `organization_id` escopa todo dado tenant-owned, inclusive uploads, forms,
+  logs e queries; não confiar em organizationId fornecido pelo browser.
+- Memberships/RBAC por tenant, usuário pode pertencer a duas orgs sem misturar.
+- Host desconhecido, não verificado, SSL pending ou org suspensa: fail closed
+  sem fallback; nenhuma informação privada cross-tenant em cache SSR/R2.
+- Snapshot editorial só se torna público após publish autorizado; preview
+  privado não indexável; rollback seguro e histórico preservado.
+- Segurança, isolamento, auth e integridade NUNCA variam por plano.
+- Sem criar novo deploy, banco ou Worker por cliente.
+- Sem imagens de cliente real/lead publicadas sem autorização e licença.
+
+GATES TRANSVERSAIS OBRIGATÓRIOS:
+G0 Source e branch corretos; G1 segurança A×B; G2 esquema e migrations coerentes;
+G3 jornada CMS + publicação e rollback; G4 domínio validado e fail-closed;
+G5 E2E desktop/mobile; G6 lint/typecheck/test/build + docs; G7 cloud real só
+com aprovação; G8 produção/homologação reais, sem claims falsos.
+
+DEFINITION OF DONE GLOBAL:
+- Todos os NOW que foram aprovados funcionais com ações reais server-side,
+  persistência, validações e UX states; não apenas shells.
+- Tests automatizados positivos/negativos de tenant A/B; roles, uploads, forms,
+  host resolution, SEO, publish concorrente e domínio.
+- Documentação vigente reflete código: screenshots REAIS, schemas/diagrams
+  Mermaid editáveis renderizados, manifestos e runbooks atualizados.
+- Staging e produção nunca são considerados concluídos só por commit ou build;
+  comprovar provider, URL, release, logs, conta real autorizada e smoke.
+- Pendências externas claras não impedem tarefas locais independentes, mas
+  BLOQUEIAM declaração final de "100% em produção".
+
+FORMA DE RELATAR CADA FASE:
+`FXX STATUS`, arquivos afetados, migration IDs, testes executados + logs,
+SHA/branch, cenários passados/falhados, screenshots quando aplicável, riscos,
+decisões humanas, próxima fase segura, rollback e links verificáveis.
+
+################################################################################
+# ORDEM DE EXECUÇÃO. TRABALHAR ATÉ O LIMITE DO WORKSPACE; RETOMAR SEM REFAZER.
+################################################################################
+
+===================================================================================
+F0 — PRE-FLIGHT, REPO E DECISÕES DE ARQUITETURA
+===================================================================================
+
+OBJETIVO. Verificar se `CristianoRFB/Eventos-77` já existe (público/privado acessível), confirmar checkout correto, usar branch isolada; se repo não existir criar SOMENTE pasta e Git local com autorização de implementação. Não criar remoto GitHub por conta própria. Consolidar ADR-001 a ADR-004 como baseline de design, adaptando stack apenas por falha fundamentada. Registrar recursos externos ainda não provisionados.
+
+IMPLEMENTAÇÃO:
+1. Ler documento global e scripts; identificar escopo NOW, NEXT, DEFERRED. Conferir se há código novo anterior ao GOAL e PRESERVÁ-LO.
+2. Montar plano de milestones e matriz requisito -> arquivo -> teste -> evidência. Conservar `.mmd` do briefing e registrar os 16 como PLANNED.
+3. Fixar versão alvo de Node/React Router/Wrangler/Drizzle conforme suporte oficial no dia da execução; não colar instruções desatualizadas.
+4. Definir ambiente local/staging/prod, hostname reservado e política de `.env.example`, secrets, CORS, cookies, CSP.
+5. Verificar dependência Better Auth + adapter Workers/D1/Drizzle antes de fixar permanentemente. Planejar PoC F1.
+
+ARQUIVOS: AGENTS.md, README.md, docs/CURRENT.md, docs/implementation/MASTER_EXECUTION_STATUS.md, docs/adr/*.md, package metadata se autorizado, `FEATURE_STATES.md` e `.gitignore`.
+
+ACEITE: árvore local correto, branch não conflita, docs apontam versão, nada de dados reais/credenciais, inventário do escopo com status NOT_STARTED e architecture decision sem custo não aprovado.
+TESTES: git status/remote/branch; arquivo fonte docs:check (se ainda não houver runtime, validação de paths); sanity de licença e secrets; instrução de rollback e arquivos tocados.
+BLOQUEIO: worktree com alterações de terceiros; identificação incerta do repo; Stack depender de serviço pago não autorizado. Não inventar PASS.
+ROLLBACK: preservar working tree e reversão apenas de commits novos documentados, sem reset destrutivo.
+
+
+===================================================================================
+F1 — SCAFFOLD REPRODUZÍVEL, D1/R2 LOCAL E POC DE AUTENTICAÇÃO
+===================================================================================
+
+OBJETIVO. Construir uma aplicação full-stack utilizável LOCALMENTE, com route SSR pública simples, painel protegido, D1 local e R2 mock/local, sem produção.
+
+IMPLEMENTAÇÃO:
+1. Iniciar Cloudflare Workers React Router SSR via template oficial atual; configurar TypeScript strict, eslint/prettier, Vitest, Playwright, Wrangler local, D1 binding e storage adapter. Não usar SPA-only como SSR.
+2. Modelar as tabelas do auth provider escolhido e realizar PoC completa: signup fechado/admin criado localmente, login, logout, refresh session, sessão revogada, CSRF, invalid token e cookies host-only. Testar no Worker real local (não somente Node).
+3. Integrar Drizzle, schema de organization e migrations, `sqlite foreign_keys`, query parameterizada, seeding exclusivamente sintético Tenant A e B; testes de FK composta.
+4. Criar config `.env.example` sem valores reais, bindings por ambiente e scripts `dev`, `lint`, `typecheck`, `test`, `test:integration`, `test:e2e`, `build`, `docs:diagrams`, `docs:check`; usar nomes reais acordados nos package scripts.
+5. Criar CI de PR com cache seguro sem segredos, dependências auditadas, build reproducível `npm ci` e teste smoke SSR.
+6. Preparar feature flags operacionais disabled por padrão e health endpoint sem exibir segredos/banco.
+
+CONTRATOS: `GET /healthz` público genérico; auth via endpoints do provider; `GET /` em host de teste renderiza SSR funcional com dados demo, sem se afirmar publicado em Cloudflare.
+ARQUIVOS: app/root/routes, workers/app, db/schema/migrations, infrastructure/auth|db|r2, package-lock, wrangler (template), test/*.spec, .github/workflows/ci.yml.
+ACEITE: `npm ci` + lint + typecheck + tests + build realmente executados; PoC auth no runtime Worker passa, migration local idempotente; não há login aberto de platform_owner em produção.
+TESTES NEGATIVOS: token revogado, session perdida/expirada, CSRF, SQL injection, R2 sem binding e Worker sem D1 devem falhar de maneira controlada. Testar restart de app e persistência local.
+BLOQUEIO: auth library incompatível no Worker; propor ADR de substituição, não improvisar auth inseguro.
+ROLLBACK: voltar aos commits anteriores, migrations locais em DB temporária, sem tocar bancos reais.
+
+
+===================================================================================
+F2 — TENANT RESOLVER, MEMBERSHIPS, RBAC E PLATFORM OWNER
+===================================================================================
+
+OBJETIVO. Materializar fundação de segurança A×B, com Platform Owner, owner e staff, permissões por evento/edição e org membership revogável.
+
+IMPLEMENTAÇÃO:
+1. Criar `organizations`, `memberships`, `invitations`, `event_assignments` e audit; guard `requireUser`, `requireMembership`, `requirePermission`, `requireOrganizationActive`, `requireEventScope`. Usar chave interna id estável, nunca slug/host como permissão.
+2. Criar Platform Owner por mecanismo admin-out-of-band com seed LOCAL, sem self-service público e sem claims arbitrários vindos do browser; suporte read-only por padrão e auditado.
+3. Dashboard global funcional lista/cria/suspende/reactiva organizations, inicia convite ao owner, dá contexto explícito de suporte. Evitar exclusão destrutiva. Owner local configura papéis e convites, last-owner guard, expiração.
+4. Criação de Org A/B com branding distinto e membros separados em transação. Membership de A em B dá 403, e sessão compartilhada só dá acesso aos tenants de membership ativa.
+5. Middleware seleciona org por route admin fixa ou host público verificado. Host de evento não autentica painel e não compartilha cookie da plataforma.
+6. Registrar audit logs críticos em DB (quem, ação, escopo, antes/depois saneado), sem permitir forjar audit no cliente.
+
+ENDPOINTS: `/api/v1/platform/organizations`, `/api/v1/platform/organizations/:id/status`, `/api/v1/orgs/:orgId/members`, `/api/v1/orgs/:orgId/invitations`, `/api/v1/orgs/:orgId/settings`; enforce server em cada um.
+ARQUIVOS: db/tenants + auth, services/authz|tenant, repositories org/membership, routes platform/admin, tests/security/tenant-isolation.*, docs/SECURITY/STATUS.
+ACEITE: 2 tenants reais locais e dois owners distintos, ambos operam simultaneamente sem alteração de código; nenhum acesso A→B; Platform Owner criado fora do fluxo público; status suspend preserva dados; convite expirado é negado.
+TESTES: direct API tampering, URL trocada, membership inativa, membro com papel menor, troca de role não autorizada, último owner, sessão revogada e audit log. Nenhum frontend-only check é aceitável.
+BLOQUEIO: se tenancy não for comprovada, NÃO iniciar entitlement F8 nem declarar CORE_READY.
+ROLLBACK: desabilitar novas operações por feature flag e migrar reversivelmente, preservando IDs/logs.
+
+
+===================================================================================
+F3 — MODELO DE ORGANIZADORA, EVENTOS, EDIÇÕES, MARCAS E MÍDIA SEGURA
+===================================================================================
+
+OBJETIVO. Dados persistidos de organizadora com múltiplos eventos/edições, editor de identidade e biblioteca de mídia tenant-safe.
+
+IMPLEMENTAÇÃO:
+1. Criar schema + migrations e repositories de `brand_profiles`, `events`, `editions`, `venues`, `media_assets` com FK `(org_id,id)`, unique slug/edition key e archive não destrutivo. Contexto de edição preserva timezone IANA e armazenamento UTC.
+2. Criar dashboard/painel da organizadora com eventos e edições reais, formulário de criação/edição/duplicação, estados draft/archived, herança org > event > edition e safe fallback dos tokens.
+3. Implementar `POST/PUT/PATCH` com Zod no servidor e optimistic lock. Clone de edição deve copiar conteúdo/base autorizado, não submissões privadas nem dados pessoais de expositor.
+4. R2: upload atrás de middleware membership/role, object key gerado no servidor com prefixo org, validar tamanho/magic bytes/MIME, metadata de licença, public/private e autorização de GET. Variantes/resize e limpeza reconciliada; não abrir bucket privado.
+5. Gerar dados A/B distintos e verificar owner A não pode usar assetId B, slug B ou eventId B. Não hardcode de marca em UI.
+6. Marcas como perfis opcionais, sem multiplos codebases. Se o MVP for simples, um perfil org default + tokens event override é suficiente; registrar ADR.
+
+ENDPOINTS: `/api/v1/orgs/:orgId/events`, `/api/v1/orgs/:orgId/events/:id/editions`, `/api/v1/orgs/:orgId/brands`, `/api/v1/orgs/:orgId/media`, `/api/v1/orgs/:orgId/editions/:id/clone`.
+ARQUIVOS: db/schema/events, services/media|events, infrastructure/r2, routes/admin/events|media, tests/integration/db|upload.
+ACEITE: owner cria duas edições num evento + outro evento, lista correta; imagens públicas e privadas respeitam policy; clone não inclui PII; updates concorrentes geram 409.
+TESTES: bad mime/magic, overly large file, referenced asset cross-tenant, forged org/edition, invalid timezone, duplicate slug, missing R2 binding. Dados de A persistem enquanto B é modificado.
+BLOQUEIO: R2 real externo não está habilitado -> testar com local/mock, marcar `CLOUD_R2_NOT_PROVISIONED`; não chamar persistência local de produção.
+ROLLBACK: migration reversible quando seguro, salvar inventário de objetos e não apagar objeto real automaticamente.
+
+
+===================================================================================
+F4 — CMS ESTRUTURADO, SSR PÚBLICO, SEO E PUBLICAÇÃO ATÔMICA
+===================================================================================
+
+OBJETIVO. Tornar o site público uma renderização por domínio/evento/edição com páginas funcionais, preview privado e publicação transacional; nenhum site fictício apresentado como cliente real.
+
+IMPLEMENTAÇÃO:
+1. Schema `content_drafts`, `pages`, `sections`, `publications`, `edition_publication_pointers`, FAQs e fontes de slug/redirect. Conteúdo de bloco validado por Zod (hero, cards, agenda, CTA externo, FAQ, patrocínio, galerias etc.). Render safe HTML, sem script arbitrário de cliente.
+2. SSR React Router loaders resolvem host, verificam binding active e org, destino, ponteiro publicado; site no custom domain não busca dados do painel. Sitemap/robots, metadata OG, canonical e structured data real; previews com token curto/noindex/no-store.
+3. Editar -> salvar revision draft -> preview -> aprovar/publish. Publish cria snapshot imutável + CAS pointer numa transação D1 e registra audit. Após publish invalidar cache por host+edition+revision; falha de invalidação gera warning e TTL curto coerente.
+4. Rollback seleciona snapshot anterior, cria revision de rollback auditável e troca ponteiro. Edição arquivada mantém URL histórica e não assume automaticamente destino CURRENT_EDITION sem política explícita.
+5. React UI pública white-label com home, edições, agenda, convidados, expositores, ingressos (link externo), FAQ, local/acessibilidade, patrocinadores e regulamentos; loading/empty/error/suspended/404.
+6. White-label tokens isolados, font allowlist, contraste AA, imagem responsiva e versão mobile. Nenhuma cópia de personagens, fotos e logos de terceiro como demo sem direito.
+
+ENDPOINTS: `/api/v1/orgs/:orgId/editions/:id/draft`, `/preview`, `/publish`, `/rollback`, `/revisions`; GET public `/*`, `/sitemap.xml`, `/robots.txt`, `/edicoes`, `/faq` sob host resolvido.
+ARQUIVOS: content schema/repository, public loaders/components, CMS admin, routes/api/publish, SEO utils, test SSR snapshots and revisions.
+ACEITE: edição A publica snapshot v1, faz draft v2 mas visitante ainda vê v1, publica v2 e rollback para v1; host A nunca serve snapshot B; canonical por domínio correto; preview seguro e não indexável.
+TESTES: conteúdo malicioso XSS, double publish, optimistic concurrency 409, object license missing, hostname desconhecido, caching host B vs A, redirects, SEO robots, teclado mobile.
+BLOQUEIO: se não houver mecanismo de render SSR confiável no Worker, ajustar ADR antes de publicar; nunca fingir SEO com SPA vazia.
+ROLLBACK: trocar ponteiro para último snapshot conhecido com log, sem descartar revisões.
+
+
+===================================================================================
+F5 — PROGRAMAÇÃO, PALCOS, CONVIDADOS, EXPOSITORES E PATROCINADORES
+===================================================================================
+
+OBJETIVO. Completar operação de agenda de evento com dados reais e página pública coerente, sem sobreposições de palco/recursos aprovadas por acidente.
+
+IMPLEMENTAÇÃO:
+1. Schema e CRUD de `venues`, `stages`, `program_items`, `guests`, `participations`, `exhibitors`, `edition_sponsors`; foreign keys compostas e role scoped.
+2. Program item valida início/fim, faixa dentro do evento, timezone, palco/venue pertence à edição, guest pertence à mesma org; conflict detection transacional/optimistic lock antes de aceitar revisão. Indicar todos os conflitos e bloquear publish quando configurado.
+3. Admin permite calendário por dia e palco, drag/reorder se seguro, edição por formulário acessível e estados pending/public/revision. O público vê agenda do SNAPSHOT publicado com filtros responsivos, sem variação privada ao vivo.
+4. Convidados exibem bio, foto licenciada e atrações; participações múltiplas por edição. Expositores/Artist Alley podem ser editoriais ou provenientes de applications aprovadas e opt-in explícito.
+5. Patrocinadores e logos com licença/links válidos, categoria/ordem; FAQ, informações de local, contato e acessibilidade obrigatórios onde aplicável.
+6. Export/import (se NOW concretamente necessário) deve validar formato e não aplicar IDs de outro tenant; se além do escopo, registrar NEXT.
+
+ENDPOINTS: `/api/v1/orgs/:orgId/editions/:id/stages`, `/program`, `/guests`, `/exhibitors`, `/sponsors` e respectivos CRUD; GET público `/programacao`, `/convidados`, `/expositores`, `/patrocinadores`.
+ARQUIVOS: schema operations, services/scheduler, UI admin/program + public, validation, tests timezone/concurrency.
+ACEITE: 2 dias de edição, 2 palcos, programação sem colisão, render por dia e palco; tentativa de conflito no mesmo palco e guest retorna erro específico; convidados com perfil aprovado; A não vê dados B.
+TESTES: mudança de hora DST, datas UTC, convidados em locais distintos, duração 0, palco B, status suspenso, merge de agenda concorrente, URLs de sponsor maliciosas; views mobile e keyboard.
+BLOQUEIO: dados ilegítimos/imagens sem licença não serão publicados como demonstração pública.
+ROLLBACK: agendas são drafts/revisões, rollback via pointer de publicação.
+
+
+===================================================================================
+F6 — FORMULÁRIOS, SUBMISSÕES PRIVADAS E PIPELINE DE REVISÃO
+===================================================================================
+
+OBJETIVO. Fazer do módulo de inscrição de expositor um fluxo real, mas SEM bilheteria/pagamento e sem publicar PII por engano.
+
+IMPLEMENTAÇÃO:
+1. Criar `form_definitions`, `form_fields` versionados, `form_submissions`, `exhibitor_applications`, metadata de consentimento e anexos privados; status `open/closed`, prazo, retenção documentada, limite de submissões quando aprovado.
+2. Builder mínimo para organizadora selecionar campos com validação Zod (texto curto, email profissional, URL, categoria, checkbox, upload permitido), campos obrigatórios e texto de privacidade por edição. Não aceitar HTML/JS arbitrário ou CPF por default.
+3. A submissão pública é idempotente e rate limited; usar Turnstile quando houver configuração, honeypot e defesa proporcional; em local/staging, provider fake, mas produzir ensaio contra spam/race. Nunca usar token de recibo previsível.
+4. Staff com event assignment correto vê fila e respostas permitidas, decide approved/rejected/needs_info, registra audit com razão; applicant acompanha somente seu recibo privado expiráveis. Não enviar emails reais até integração autorizada.
+5. Aprovar application NÃO publica automaticamente dados pessoais; apenas perfil público aprovado, consentimento de listagem separado, e publicação editorial posterior.
+6. Implementar export do mínimo necessário pelo role autorizado com audit; export bulk e exclusão de dado pessoal seguem retenção e LGPD.
+
+ENDPOINTS: `/api/v1/public/forms/:publishedId/submit`, `/api/v1/public/applications/:receipt/status`, `/api/v1/orgs/:orgId/forms`, `/api/v1/orgs/:orgId/applications/:id/review`.
+ARQUIVOS: forms/services/models, applicant routes, admin/review, storage private, retention contract/test.
+ACEITE: formulário publicado, submissão válida e recibo, staff analisa, candidato recebe estado sem ver outras submissões; diretório público recebe SOMENTE perfil com consentimento e publicado.
+TESTES: spam, CSRF aplicável, XSS, limite, upload cross tenant, token revogado/expirado, form closed, concorrência submit idempotente, campos malformados, exclusão/withdraw conforme política.
+BLOQUEIO: provedor email/antispam real exige consentimento/key e pode ficar desabilitado, mas validação local e spam-defense mínima não podem ser puladas.
+ROLLBACK: estados de submissão são auditáveis; excluir publicação pública sem apagar registro privado obrigatório.
+
+
+===================================================================================
+F7 — CLOUDFLARE FOR SAAS, RESOLVER POR DOMÍNIO E CICLO DNS/TLS
+===================================================================================
+
+OBJETIVO. Permitir uma org ter domínios próprios e subdomínios sem deploy separado. Primeiro fazer resolver/provider fake e testes; Cloudflare real só depois de autorização externa explícita.
+
+IMPLEMENTAÇÃO:
+1. Implementar `domains` com hostname exato normalizado, unique global, `organization_id`, destino enum e destinationId, status, providerHostnameId, ownership validation state, SSL state, DNS state, assigned canonical; registrar domínio não concede propriedade automaticamente.
+2. `DomainResolver` no Worker valida host confiável, reserved names, IDNA, porta permitida, dot final, hostname exclusivo, org active, destination owned; Host header desconhecido retorna 404/421 e NUNCA fallback para outro tenant.
+3. Implementar adapter `CloudflareCustomHostnamesProvider` com provider fake e client API sem token na UI. `requested -> ownership_pending -> tls_pending -> dns_pending -> active`; reconhecer hostname.status != SSL status. Guard DNS target e SSL active + host active antes de live.
+4. Rota `admin/domains` cria pedido, mostra instrução TXT/CNAME segura quando provider habilitado, polling/status, error/retry/revoke/release. Idempotência e audit para takeover, reassignment, stale pending, provider timeout.
+5. Backend Cloudflare future support: Worker wildcard route configurada no zone SaaS, fallback origin e custom hostnames segundo documentação oficial; não exigir route para cada host; não afirmar apex gratuito. Prefira `www` no piloto; DNS root requer decisão explícita do cliente.
+6. Canonical, sitemap/robots e cache estritos por host/destino/revisão; `workers.dev` não indexável por padrão. Admin host separado de públicos, nenhum cookie domain-wide.
+7. Construir testes end-to-end de duas orgs em hosts locais (`a.example.test`, `b.example.test`), diferentes destinations, host spoof e estados pendentes. Teste API real em staging somente após aprovação, com zona/DNS/senha de Cloudflare fornecidos por UI segura.
+
+ENDPOINTS: `/api/v1/orgs/:orgId/domains` create/status/retry/release, `/api/v1/platform/domains` monitor, público rotas resolvidas pelo Host.
+ARQUIVOS: middleware/host, service/domain-resolver, provider/cloudflare, domains schema, UI admin/domains, tests/domains, docs/CUSTOM_DOMAINS.
+ACEITE LOCAL: provider fake prova lifecycle completo e falha segura, hostname A nunca renderiza conteúdo de B. ACEITE CLOUD: aprovação para custos, host e SSL status ACTIVE e DNS correto, um hostname real responde HTTPS canônico em staging.
+TESTES: pending ownership/SSL, stale DNS, conflict, registered-domain takeover, IDNA, host injection, duplicate hostname, TLS failure, cloud API retry, disable/delete provider and rollback.
+BLOQUEIO: sem pagamento/domain/account => `BLOCKED_EXTERNAL_CLOUDFLARE` apenas para passo real; continuar outras fases locais. Nunca chamar F7 real PASS antes dos testes externos.
+ROLLBACK: desativar binding local, purgar cache, preservar audit, remover custom hostname no provider com confirmação posterior, não sequestrar DNS de terceiro.
+
+
+===================================================================================
+F8 — GLOBAL STANDARD V01 DE PLANOS, ENTITLEMENTS, DEMO E DOWNGRADE
+===================================================================================
+
+OBJETIVO. Implementar a MECÂNICA comercial global sem inventar uma política de Eventos 77. Executar somente após F2 security gate e decisão APPROVED sobre catálogo/eventuais limites.
+
+IMPLEMENTAÇÃO:
+1. Contrato local `PlanDefinition`, `TenantCommercialState`, `SubscriptionStatus`, `TenantOverrides`, PlanCatalog. Funções canUse/getLimit resolvem catálogo + override + status. Semântica: 0 proíbe; null sem teto comercial definido; valor ausente/erro bloqueia ou retorna contrato explícito, não presume ilimitado.
+2. Criar keys candidatas (sem ativar quotas falsas): `events_active`, `staff_active`, `custom_domains_active`, `forms_active`, `storage_bytes`; preço mensal/anual opcionais só após aprovação. Gating front para UX, backend real em criação/atualização, sem reduzir proteção básica.
+3. ManualPlanAssignment exclusivo de Platform Owner com audit e motivo, optimistic version. Sem gateway/checkout, sem recontato automático, sem pagamento real.
+4. DemoMode com empresa TOTALMENTE fictícia e dados sintéticos, `subscriptionStatus=demo`, efeitos externos (mensagem, domínios reais, cobrança) desabilitados.
+5. Trial só se vertical aprovar; se não, status implementado conceitualmente mas sem expiração inventada. Suspension commercial separada de ops incident status.
+6. Downgrade preserva todas as edições/publicações/arquivos; novos recursos acima do limite bloqueados em transação, leitura/export conforme política e segurança.
+7. É proibido inventar preço/limite para fazer teste verde: fixture `TEST_ONLY` pode verificar mecânica mas precisa estar claramente isolada e jamais alimentar plano de produção.
+
+ENDPOINTS: `/api/v1/platform/organizations/:id/commercial-state`, `/api/v1/orgs/:orgId/plan` (read), guard create events/domain/forms; não expor valor secreto de outros tenants.
+ARQUIVOS: src/domain/commercial, schema commercial/counters, guard backend/UI, test/commercial/*.test, docs pricing/feature states.
+ACEITE: testes com catálogo de TEST_ONLY mostram Entitlements, overrides, suspensão, demo, limite e downgrade sem deletar; os preços de produção continuam NOT_APPROVED e sem gating arbitrário; audit registra todas as mutações.
+TESTES: A vs B, forged planId, concurrent create quota, forced downgrade, suspended/demo misuse, missing catalog, 0/null limits, feature planned but not built cannot unlock, no security gated.
+BLOQUEIO: se owner não aprovou distribuição comercial, concluir abstração e demonstrar TEST_ONLY, marcar `F8_PARTIAL_POLICY_NOT_APPROVED` e não mostrar valores inventados em site público.
+ROLLBACK: restaurar estado comercial com nova alteração auditada, sem excluir eventos/dados.
+
+
+===================================================================================
+F9 — PAINÉIS COMPLETOS, USABILIDADE, REPORTS E ADMINISTRAÇÃO OPERACIONAL
+===================================================================================
+
+OBJETIVO. Fechar telas NOW do público/admin/platform, estados vazios, buscas, listas, relatórios mínimos, export controlado e experiência consistente PC/mobile.
+
+IMPLEMENTAÇÃO:
+1. Cobrir `SCREENS_INVENTORY.csv` e `FEATURE_INVENTORY.csv`: toda tela NOW funcional com loader + action + persistência. Se NEXT/DEFERRED, esconder de UI pública ou rotular explicitamente indisponível, nunca botão decorativo.
+2. Dashboard proprietário/organizador: eventos/edições, andamento, pendências de publicação, submissions, agenda, domínios, status de equipe, auditoria mínima. Dashboard Platform Owner: tenants/status/tentativas domínio/abuso/audit.
+3. Error/empty/loading/403/404/suspended/archived, mensagens humanizadas, table pagination/filters, acessibilidade teclado e screen readers, mobile 320/390/768/1440.
+4. Analytics público apenas agregado e não invasivo se for NOW; se NEXT, apenas métricas técnicas operacionais com acesso próprio e sem dados sensíveis.
+5. Relatórios/exportação de submissions restritos por RBAC e scope (CSV injection mitigation, logs). Módulos NEXT só implementar se forem aprovados e reduzirem dor real.
+6. Backend não aceita `user.role`, `price`, `tenantId` ou `publication.status` como autoridade arbitrária na UI; requer guards.
+
+ENDPOINTS: `/api/v1/orgs/:orgId/dashboard`, `/api/v1/platform/overview`, `/api/v1/orgs/:orgId/reports` (se habilitado), health/status; distinguir público/privado.
+ARQUIVOS: app/admin/platform/components, services/report, docs/UX_SCREENS, tests/e2e.
+ACEITE: owner A navega 5 fluxos operacionais end-to-end; visitante navega agenda/convidados/ingressos responsivos; Platform Owner administra dois tenants sem vazamento; nenhum menu aponta a rota vazia como implementada.
+TESTES: `playwright` desktop/mobile, a11y axe (quando adequado), keyboard, contraste, screenreader labels, report A/B, CSV injection, 5xx recoverable.
+BLOQUEIO: API não implementada por escopo NEXT permanece fora da UI operacional, documentada.
+ROLLBACK: UX componente sem alterar migrations; regressões encontradas impedem PASS.
+
+
+===================================================================================
+F10 — SEGURANÇA, BACKUP, PERFORMANCE E QA 360º
+===================================================================================
+
+OBJETIVO. Hardening transversal: não confundir build verde com produto vendável.
+
+IMPLEMENTAÇÃO:
+1. Inventariar superfície pública/privada, revisão CSP/HSTS/CSRF/XSS/SSRF/open redirects, auth permissions/IDOR, host and cache poisoning, file upload validators, DNS takeover, secrets, dependency audit sem `--force`.
+2. Executar matriz adversarial Org A×B em API, R2, domains, publications, applications, exports, counts e sessions; papéis com permissões distintas.
+3. Testar cron/program concurrency, publication CAS, migrations D1, idempotency e limits. Criar SLO base e logs sanitizados + request id sem PII.
+4. Simular falhas dos provedores Cloudflare/R2/D1, sem vazar detalhes de tenant; layout de 404/503 seguros e policy de maintenance.
+5. Backup lógico D1 + inventário R2 e restore em staging/test DB. D1 Time Travel é uma ferramenta adicional, não substitui backup. Documentar RPO/RTO somente após teste real e decisão comercial.
+6. Fazer testes PC/mobile de cada jornada, medir bundle/LCP e leitura D1; otimizar consulta/resolvers e caching por host/snapshot; não adotar Redis/Queues sem necessidade.
+7. Rodar npm ci, lint, types, unit/integration, security, E2E, build, docs:check e script Mermaid quando disponível. Toda falha registrada no status; não omitir.
+
+ARQUIVOS: tests/*, scripts/check, deployment/runbooks, docs/SECURITY, PERFORMANCE, QA_EVIDENCE; versões reais dos diagramas e screenshot manifest.
+ACEITE: zero falha crítica aberta de isolamento/autorização/domínio/PII, suíte final aprovada em ambiente reproduzível e backup+restore ensaiado; plano de incidente e logs úteis.
+TESTES: propriedade + fuzz host IDNA, two-tenant malicious cases, concurrency flood, rate limit, malformed uploads, integration down; Playwright desktop/mobile; snapshots editorial; caso XSS HTML.
+BLOQUEIO: vulnerabilidade crítica sem mitigação => não lançar; serviços externos sem conta => teste de staging real BLOCKED_EXTERNAL, não fingir que foi feito.
+ROLLBACK: versionar migrations/test baseline; possuir plano testado de recuperação para dados, sem destruir clientes.
+
+
+===================================================================================
+F11 — STAGING REAL, DOMÍNIOS, AUTORIZAÇÃO DE DEPLOY E HOMOLOGAÇÃO
+===================================================================================
+
+OBJETIVO. Validar o sistema fora do computador antes de venda; F11 contempla ações EXTERNAS que exigem aprovações humanas separadas e podem permanecer BLOCKED sem impedir documentação.
+
+ANTES DE AGIR: solicitar explicitamente aprovação para cada criação de recursos Cloudflare (zone, Workers, D1, R2, Custom Hostnames), configuração de meio de pagamento, DNS, contas de usuário reais, email provider, instalação de GitHub secrets, domínio e deploy de staging/produção. Verificar quota/custo oficial no momento. Se usuário não autorizou, NÃO CRIAR.
+
+IMPLEMENTAÇÃO APÓS APROVAÇÃO:
+1. Preparar scripts/templates de infraestrutura e comandos copy/paste de provisionamento, minimamente privilegiados. Criar separate `staging` com dados fictícios, secrets por environment, CI que exige approval.
+2. Aplicar migration D1 staging, subir Worker/SSR, R2 e autenticação real; testar convite/admin por login autorizado.
+3. Configurar Cloudflare for SaaS fallback origin e Worker wildcard routes na zone controlada conforme docs, cadastrar um hostname de TESTE do próprio usuário, fazer validação de ownership, `hostname.status=active`, `ssl.status=active`, DNS certo.
+4. Validar `www` e apex conforme recurso disponível, SSL HTTPS, canonical, redirects, cache, dados A×B e proteções de upload.
+5. Fazer teste assistido de uma organizadora fictícia + edição + site publicado + expositor; se possível fazer piloto com cliente autorizado e contrato, nunca lead desconhecido.
+6. Somente depois de staging UAT PASS, solicitar autorização EXPLÍCITA DE DEPLOY PRODUCTION, com backup/migrations/cutover/monitoramento/rollback reais. Staging autorizado ≠ prod autorizado.
+7. Verificar URL pública, certificação, logs e smoke pós deploy. Registrar dados técnicos e redigir checklist de credenciais sem revelá-las.
+
+ARQUIVOS: wrangler environments, migration scripts, CI deploy gate, docs/DEPLOYMENT, STATUS, DOMAIN_READINESS, smoke logs, screenshots reais se houver runtime.
+ACEITE STAGING: URLs verificáveis, DNS/SSL `active`, auth/RBAC, upload R2 e E2E completo, smoke OK, rollback ensaiado. ACEITE PROD: autorização explícita adicional, provider deploy ID, URL, timestamps, logs, health smoke e monitoramento.
+TESTES: host real desconhecido/inativo, fonte/certificado e CNAME, CI stage, rollback, backup/restore staging, fluxo de conteúdo e submissions, no secrets in logs.
+BLOQUEIO: sem conta Cloudflare, billing consent, domínio, permissão GitHub ou cliente de homologação => marcar `BLOCKED_EXTERNAL`, trazer pedido objetivo sem parar coding docs independentes.
+ROLLBACK: deploy anterior, DB restore validado se necessário e política de DNS sem sequestrar domínio alheio.
+
+
+===================================================================================
+F12 — DOCUMENTAÇÃO CANÔNICA, DIAGRAMAS MERMAID RENDERIZADOS E SCREENSHOTS REAIS
+===================================================================================
+
+OBJETIVO. Documentar o que existe DE FATO depois da implementação, com proveniência de cada evidência e handoff que outro Codex possa continuar sem reauditar tudo.
+
+IMPLEMENTAÇÃO:
+1. Atualizar `docs/CURRENT.md` para versão runtime correta e links; não sobrescrever design como se fosse screenshot real. Preservar v0.1.0-architecture como histórico.
+2. Reconciliar o modelo D1 REAL com DATA_MODEL/DATABASE_STRUCTURE; registrar migrations, tabelas, índices, auth, domínio, R2 e repositório. Arquitetura de código e de infraestrutura real documentadas como tal.
+3. Validar e renderizar 16 fontes Mermaid `.mmd` usando versão fixada de mermaid-cli no repo, exportar `.svg` (e PNG opcional), com manifesto e verificação de erro de sintaxe. Substituir SVGs auxiliares DOT por SVGs gerados da fonte Mermaid após validação.
+4. Fazer screenshots REAIS: público desktop/mobile, painel organizadora, auth, Platform Owner, domínios, CMS, agenda, expositores, erros, A/B. Cada screenshot tem origem/URL, commit, viewport e data; NUNCA representar mockup como implementação.
+5. Se houver imagens criativas de design, registrar `generated/` em separado com etiqueta CONCEPT, não misturar com `screenshots/`.
+6. Leads: só material de pesquisa público permitido; `LEAD_CONTEXT.md`, `LEAD_REFERENCE_SUMMARY.md`, `LEAD_VISUAL_DIRECTION.md`, e imagens propostas em pasta lead. Nenhum tenant criado automaticamente para empresas sem autorização.
+7. Gerar `docs:check` e evidência, runbooks de cloud, incidentes, release, backups/restore, desenvolvimento local, como criar segundo tenant sem editar código, domínio customizado assistido, limites operacionais.
+8. Encerrar master status com cada fase PASS/PARTIAL/BLOCKED; nunca escrever COMPLETE quando produção/deploy pendente. Registrar próximos Codex goals (quando necessário) sem reiniciar auditoria geral.
+
+ARQUIVOS: docs/versions/v0.2.0-implemented/* (nome só se marco arquitetural justificá-lo), docs/DIAGRAMS_MANIFEST.md, docs/LEADS_MANIFEST.md, screenshots/, generated/, `README.md`, `AGENTS.md`, status, scripts/docs-check.mjs.
+ACEITE: links e screenshots verificáveis, Mermaid render FIEL, nenhuma foto falsamente classificada, testes docs/check, guia de import e checklist de release, relatório do estado real.
+TESTES: docs lint, paths/manifest hash, renderização SVG, imagem abrir/legível, README status vs código, fontes antigas como historical; diffs sem segredo/PII.
+BLOQUEIO: sem app executável não produzir screenshots e marcar NOT_APPLICABLE/NOT_RUN, não inventar imagens de interface como prova.
+ROLLBACK: preservar documentação de versão anterior, não apagar histórico.
+
+################################################################################
+# CRITÉRIOS DE ACEITE TRANSVERSAIS — MATRIZ DE PROVAS
+################################################################################
+
+Para cada F:
+- `FXX=PASS` somente com testes realmente executados e artefatos no commit/branch;
+- diagramas representam estado planejado até reconciliação com código;
+- módulos NEXT/DEFERRED não viram shells enganadores com botão que não faz nada;
+- idempotência: provisionamento, convite, publisher, domínio, form submission,
+  external provider retries e upgrades não duplicam efeitos;
+- uso multi-PC: checkpoint e push autorizados sem conflitar com outras branches;
+- rotas públicas jamais incorporam cookies do admin ou dados privados;
+- analytics/SEO/cache por hostname sempre respeitam destino/edição;
+- falha parcial DNS/SSL não publica o domínio novo;
+- Cloudflare for SaaS Free inclui quota hostnames mas exige método de
+  pagamento para ativação não-Enterprise conforme documentação vigente;
+  não tratar como serviço sem custo nem simular domínios próprios.
+
+MATRIZ DE ENDPOINTS DE REFERÊNCIA (roteadores finais podem adaptar paths):
+AUTH: `/api/auth/*`, `/api/v1/me`, `/api/v1/me/memberships`.
+PLATFORM: `/api/v1/platform/organizations`, `/api/v1/platform/organizations/:id`,
+`/api/v1/platform/organizations/:id/commercial`, `/api/v1/platform/domains`,
+`/api/v1/platform/audit`.
+ORG: `/api/v1/orgs/:orgId/settings`, `/members`, `/invitations`, `/brands`,
+`/events`, `/events/:eventId`, `/events/:eventId/editions`, `/editions/:editionId`,
+`/editions/:editionId/draft`, `/preview`, `/revisions`, `/publish`, `/rollback`,
+`/stages`, `/program`, `/guests`, `/exhibitors`, `/forms`, `/applications`,
+`/sponsors`, `/media`, `/domains`, `/usage`, `/reports`.
+PUBLIC HOST: `/`, `/edicoes`, `/programacao`, `/convidados`, `/expositores`,
+`/expositores/inscricao`, `/patrocinadores`, `/ingressos`, `/faq`,
+`/regulamento`, `/local`, `/robots.txt`, `/sitemap.xml`.
+NÃO IMPLEMENTAR todos os endpoints só porque aparecem nesta matriz:
+NOW conforme Feature Inventory, NEXT/DEFERRED documentado e sem UI enganadora.
+
+MATRIZ DE PERMISSÕES de referência:
+- platform_owner exclusivo global, não auto-atribuível;
+- org owner/admin administram somente org; manager só eventos atribuídos;
+- content editor escreve drafts, publisher publica; reviewer revê submissões;
+- public visitor lê snapshot e envia forms limitados; não autentica como staff;
+- autorização real: session + membership active + organization active +
+  event assignment quando aplicável + action + resource ownership.
+
+ESTRUTURA DE GOAL EXIT REPORT:
+1. Repo / origin / branch / SHA;
+2. F0–F12 tabela de status e caminhos de evidência;
+3. features NOW REAL / PARTIAL / NOT_STARTED / BLOCKED;
+4. testes rodados e contagem, logs, browser, DOM, mobile, domain real;
+5. fonte de verdade `docs/CURRENT.md` + links;
+6. cloud criado e custos/autorização (se houve), envs e URLs;
+7. riscos críticos, migração, rollback, backups;
+8. questões pontuais que dependem do usuário;
+9. `NEXT_STEP` exato, sem nova auditoria gigantesca;
+10. decisão explícita: READY_FOR_STAGING, READY_FOR_PILOT ou
+    PRODUCTION_VERIFIED, somente com critérios objetivamente satisfeitos.
+
+ATENÇÃO D1: preferência por CAS SQL (`UPDATE ... WHERE revision = :expected`) e
+`D1Database.batch()` preparado para conjuntos atômicos quando aplicável,
+validação de `changes == 1`. NÃO supor interactive transactions abrangendo
+requests ou round-trips; provar no D1 local e Cloudflare staging autorizado.
+Rever arquitetura com ADR se a concorrência exigir coordenador externo.
+
+FIM DO GOAL MASTER — EVENTOS 77.

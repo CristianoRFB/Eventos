@@ -1,0 +1,12 @@
+flowchart TD
+  EDIT[Editor enters event + date + stage + times] --> VAL[Validate timezone, duration, edition ownership]
+  VAL --> AVAIL{Stage overlap / guest clash?}
+  AVAIL -->|yes| CONFLICT[Show actionable conflict; block publish]
+  AVAIL -->|no| SAVE[Save draft under tenant + revision]
+  SAVE --> PREVIEW[Preview per day / stage]
+  PREVIEW --> REVIEW[Editorial approval]
+  REVIEW --> PUB[Atomic publish snapshot]
+  PUB --> CDN[Invalidate affected host+edition cache]
+  CDN --> SITE[Public schedule SSR]
+  classDef warn fill:#fff2d9,stroke:#aa7b19;
+  class CONFLICT warn

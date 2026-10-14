@@ -1,0 +1,19 @@
+sequenceDiagram
+  actor Browser
+  participant Edge as Cloudflare Edge
+  participant App as Worker SSR
+  participant Host as Host Resolver
+  participant DB as D1 Public Snapshots
+  participant R2 as R2 Assets
+  Browser->>Edge: GET https://customer-event.com/programacao
+  Edge->>App: request with original trusted host
+  App->>Host: canonical hostname -> tenant+destination
+  Host->>DB: check active mapping and publication pointer
+  DB-->>Host: org/event/edition + snapshot revision
+  Host-->>App: read-only publication context
+  App->>DB: fetch public snapshot (tenant scoped)
+  App->>R2: get referenced published public image metadata
+  App-->>Edge: SSR HTML canonical+no private data
+  Edge-->>Browser: response host-specific caching
+  Note over Edge,App: Cache key must include host, edition, revision
+  Note over DB,R2: Draft/private assets never served publicly

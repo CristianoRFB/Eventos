@@ -1,0 +1,3 @@
+# Glossário
+
+Tenant/organização: entidade jurídica/operacional administradora de eventos. Evento: marca/conceito recorrente. Edição: realização com data/local/projeto editorial. Hostname: nome DNS exato. Binding: registro de hostname com destino explícito. Publication pointer: referência a snapshot público imutável. RBAC: permissão baseada em papel e escopo. Platform Owner: operador global do SaaS. Demo: tenant fictício seguro. Entitlement: direito contratual; flag operacional: capacidade habilitada; implemented state: realmente codificado. SSR: HTML servido/renderizado no Worker. CDN: cache de conteúdo estático público. DCV: validação de controle de domínio/certificado. R2: objetos. D1: SQLite managed. ADR: decisão arquitetural registrada.

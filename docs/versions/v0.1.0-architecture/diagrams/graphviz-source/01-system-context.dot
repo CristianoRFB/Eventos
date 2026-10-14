@@ -1,0 +1,19 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Contexto do Eventos 77 — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_visitante [label="Site publico"];
+x_produtora [label="Painel organizadora"];
+x_expositor [label="Formulario expositores"];
+x_owner [label="Platform Owner"];
+x_app [label="Eventos77
+Cloudflare Worker"];
+x_data [label="D1 + R2"];
+x_site [label="Dominios de eventos"];
+x_visitante -> x_site;
+x_site -> x_app;
+x_produtora -> x_app;
+x_expositor -> x_app;
+x_owner -> x_app;
+x_app -> x_data;
+}

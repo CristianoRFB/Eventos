@@ -1,0 +1,14 @@
+stateDiagram-v2
+  [*] --> draft_form
+  draft_form --> open: publish form and consent text
+  open --> submitted: verified antiabuse submit
+  submitted --> under_review: staff opens queue
+  under_review --> needs_info: request clarification
+  needs_info --> under_review: applicant update token
+  under_review --> approved: authorized review
+  under_review --> rejected: authorized review
+  approved --> public_opt_in: explicit public listing permission
+  public_opt_in --> published_profile: public profile published
+  open --> closed: deadline / disable
+  submitted --> withdrawn: applicant withdraws
+  approved --> withdrawn: withdrawal processed

@@ -1,0 +1,16 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Publicacao editorial — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_draft [label="Draft"];
+x_preview [label="Preview privado"];
+x_approved [label="Aprovado"];
+x_published [label="Snapshot publicado"];
+x_roll [label="Rollback / Historico"];
+x_draft -> x_preview;
+x_preview -> x_approved;
+x_approved -> x_published;
+x_published -> x_draft;
+x_published -> x_roll;
+x_roll -> x_published;
+}

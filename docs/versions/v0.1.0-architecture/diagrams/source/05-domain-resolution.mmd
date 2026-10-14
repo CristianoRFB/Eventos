@@ -1,0 +1,16 @@
+flowchart TD
+  REQ[HTTPS Request] --> NR[Normalize Host / trusted proxy boundary]
+  NR --> RESERVED{Reserved admin host?}
+  RESERVED -->|yes| ADMIN[Session auth / platform routes]
+  RESERVED -->|no| MATCH{Exact active hostname binding?}
+  MATCH -->|yes| CF{Cloudflare hostname + SSL active?}
+  CF -->|yes| TEN{Organization active?}
+  CF -->|no| FAIL[421 or 404 no fallback]
+  TEN -->|yes| DEST[Resolve destination org event edition]
+  TEN -->|no| SUSP[Safe suspended page]
+  MATCH -->|no| SUB{Platform subdomain known?}
+  SUB -->|yes| TEN
+  SUB -->|no| FAIL
+  DEST --> PUB[Published snapshot only / SSR]
+  classDef deny fill:#ffe3e3,stroke:#b34141,color:#652121;
+  class FAIL,SUSP deny

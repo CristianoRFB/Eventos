@@ -1,0 +1,12 @@
+flowchart TB
+  PO[Platform Owner] -->|provisiona e audita| SYS[Eventos 77 SaaS]
+  ORG[Organizadora proprietaria] -->|administra eventos e edicoes| SYS
+  ED[Editor / Equipe] -->|edita agenda e conteudo| SYS
+  PUB[Publico / Visitantes] -->|consulta sites por dominio| SYS
+  EXP[Expositor / Artista] -->|envia inscricoes| SYS
+  SYS --> CF[Cloudflare Workers / SaaS / R2 / D1]
+  SYS --> AUTH[Provedor de autenticacao no Worker]
+  SYS -.-> TICK[Bilheteria externa por link]
+  SYS -.-> MAIL[Email transacional futuro opcional]
+  classDef sys fill:#daf0ed,stroke:#23847e,color:#16332f;
+  class SYS sys

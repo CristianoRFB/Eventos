@@ -1,0 +1,15 @@
+stateDiagram-v2
+  [*] --> requested
+  requested --> ownership_pending: reserve unique hostname
+  ownership_pending --> tls_pending: ownership validated
+  ownership_pending --> failed: bad or expired verification
+  tls_pending --> dns_pending: Cloudflare SSL active
+  dns_pending --> active: DNS points to target + both statuses active
+  dns_pending --> failed: timeout / invalid DNS
+  failed --> ownership_pending: authorized retry
+  active --> suspended: operator or abuse action
+  suspended --> active: revalidate and authorize
+  active --> releasing: customer removal request
+  suspended --> releasing: owner removes
+  releasing --> released: revoke mapping then delete provider hostname
+  released --> [*]

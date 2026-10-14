@@ -1,0 +1,15 @@
+flowchart LR
+  DEV[Codex branch] --> PR[PR + CI lint types tests]
+  PR --> QA{All gates passed?}
+  QA -->|no| FIX[Fix without hiding failure]
+  FIX --> PR
+  QA -->|yes| STAGE[Staging deploy on approval]
+  STAGE --> E2E[Real host + TLS + user smoke]
+  E2E --> GATE{Human approval to prod?}
+  GATE -->|no| STANDBY[Blocked external / checkpoint]
+  GATE -->|yes| BACKUP[D1 checkpoint / R2 inventory]
+  BACKUP --> DEPLOY[Production release]
+  DEPLOY --> SMOKE[Post-deploy smoke + observability]
+  SMOKE --> FAIL{Critical incident?}
+  FAIL -->|yes| ROLLBACK[Rollback code + recover data by plan]
+  FAIL -->|no| DONE[Release documented]

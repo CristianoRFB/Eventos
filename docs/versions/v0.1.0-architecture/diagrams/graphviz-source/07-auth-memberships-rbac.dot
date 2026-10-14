@@ -1,0 +1,16 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Fluxo de autorizacao — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_session [label="Cookie Host-only"];
+x_validate [label="Sessao + CSRF"];
+x_member [label="Membership ativa"];
+x_guard [label="Role + recurso + org"];
+x_query [label="SQL escopado"];
+x_deny [label="403 / 404 seguro"];
+x_session -> x_validate;
+x_validate -> x_member;
+x_member -> x_guard;
+x_guard -> x_query;
+x_guard -> x_deny;
+}

@@ -1,0 +1,16 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Inscricao de expositor — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_form [label="Formulario publicado"];
+x_submit [label="Submissao protegida"];
+x_review [label="Analise por equipe"];
+x_approved [label="Aprovado"];
+x_denied [label="Recusado"];
+x_profile [label="Perfil publico com opt-in"];
+x_form -> x_submit;
+x_submit -> x_review;
+x_review -> x_approved;
+x_review -> x_denied;
+x_approved -> x_profile;
+}

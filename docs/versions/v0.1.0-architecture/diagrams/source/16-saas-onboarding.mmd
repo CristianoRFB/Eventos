@@ -1,0 +1,16 @@
+flowchart TD
+  PO[Platform Owner authorized] --> CREATE[Create organization transaction]
+  CREATE --> INV[Invite organization owner expiring token]
+  INV --> ACCEPT[Owner authenticates & accepts]
+  ACCEPT --> BRAND[Set profile, logo, theme, legal contacts]
+  BRAND --> EVENT[Create event and edition]
+  EVENT --> CMS[Fill agenda, guests, FAQs and ticket link]
+  CMS --> PVIEW[Private preview + editorial checks]
+  PVIEW --> SUB[Activate platform subdomain]
+  SUB --> OPT{Optional custom domain?}
+  OPT -->|yes| DNS[Verify ownership, DNS, SSL]
+  DNS --> CERT{Ready and approved?}
+  CERT -->|yes| PUB[Publish site]
+  CERT -->|no| HOLD[Hold activation; keep subdomain]
+  OPT -->|no| PUB
+  PUB --> OPS[Operational support / monitoring]

@@ -1,0 +1,2 @@
+# ADR-004 — Snapshot público imutável
+**Status: RECOMENDAÇÃO.** Conteúdo editorial possui drafts revisionados e `publication_pointer` atomicamente atualizado numa transação D1. Público consome somente snapshot e assets aprovados. Benefícios: preview protegido, rollback e SEO estável, sem publicação parcial. Custo: armazenar revisões/snapshots e reconciliar imagens; roteiros e imagens precisam guardar referência à revisão. Retry idempotente de publicação por requestId + revisionVersion.

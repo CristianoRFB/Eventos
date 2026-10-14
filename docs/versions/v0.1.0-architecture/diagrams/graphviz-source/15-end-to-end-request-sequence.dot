@@ -1,0 +1,18 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Cadeia da requisicao — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_visit [label="Visitante HTTPS"];
+x_cf [label="Cloudflare SaaS"];
+x_worker [label="Worker"];
+x_domain [label="Dominios D1"];
+x_pub [label="Snapshot publicado"];
+x_assets [label="R2 publico"];
+x_html [label="HTML SSR"];
+x_visit -> x_cf;
+x_cf -> x_worker;
+x_worker -> x_domain;
+x_domain -> x_pub;
+x_pub -> x_assets;
+x_pub -> x_html;
+}

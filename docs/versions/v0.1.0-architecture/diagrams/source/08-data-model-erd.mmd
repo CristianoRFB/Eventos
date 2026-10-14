@@ -1,0 +1,25 @@
+erDiagram
+  ORGANIZATIONS ||--o{ MEMBERSHIPS : owns
+  USERS ||--o{ MEMBERSHIPS : participates
+  ORGANIZATIONS ||--o{ BRAND_PROFILES : configures
+  ORGANIZATIONS ||--o{ EVENTS : produces
+  EVENTS ||--o{ EDITIONS : has
+  EDITIONS ||--o{ PROGRAM_ITEMS : schedules
+  EDITIONS ||--o{ STAGES : uses
+  STAGES ||--o{ PROGRAM_ITEMS : hosts
+  EDITIONS ||--o{ PARTICIPATIONS : invites
+  GUESTS ||--o{ PARTICIPATIONS : participates
+  EDITIONS ||--o{ EXHIBITOR_APPLICATIONS : accepts
+  EDITIONS ||--o{ PUBLICATIONS : publishes
+  ORGANIZATIONS ||--o{ DOMAINS : routes
+  ORGANIZATIONS ||--o{ MEDIA_ASSETS : stores
+  ORGANIZATIONS ||--o{ AUDIT_EVENTS : records
+  ORGANIZATIONS ||--o| COMMERCIAL_STATES : subscribes
+  ORGANIZATIONS { string id PK string slug UK string status string name }
+  USERS { string id PK string email UK }
+  MEMBERSHIPS { string id PK string organization_id FK string user_id FK string role string status }
+  EVENTS { string id PK string organization_id FK string slug string name }
+  EDITIONS { string id PK string organization_id FK string event_id FK string status string timezone }
+  DOMAINS { string id PK string hostname UK string organization_id FK string destination_id string lifecycle }
+  PROGRAM_ITEMS { string id PK string organization_id FK string edition_id FK string stage_id FK string starts_at string ends_at }
+  PUBLICATIONS { string id PK string organization_id FK string edition_id FK int revision string published_at }

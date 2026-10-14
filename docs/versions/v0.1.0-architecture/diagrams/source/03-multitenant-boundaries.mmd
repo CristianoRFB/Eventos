@@ -1,0 +1,12 @@
+flowchart LR
+  Auth[User session] --> M[Membership check]
+  Admin[Platform Owner] --> P[Global policy + audit]
+  P --> OA[Organization A]
+  P --> OB[Organization B]
+  M -->|tenant A access| OA
+  M -->|tenant B access| OB
+  OA --> DA[(Org A events / files / forms)]
+  OB --> DB[(Org B events / files / forms)]
+  DA -.->|cross tenant DENY| DB
+  classDef deny fill:#ffe8e8,stroke:#b84040,color:#641b1b;
+  class DB deny

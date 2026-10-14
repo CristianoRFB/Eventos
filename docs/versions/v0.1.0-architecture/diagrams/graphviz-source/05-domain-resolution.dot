@@ -1,0 +1,20 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Resolucao segura por hostname — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_host [label="Host normalizado"];
+x_exact [label="Binding exato / subdominio"];
+x_ssl [label="Cloudflare + TLS ativos"];
+x_tenant [label="Tenant ativo"];
+x_dest [label="Evento / edicao de destino"];
+x_site [label="Snapshot publico SSR"];
+x_reject [label="Fail closed 404/421"];
+x_host -> x_exact;
+x_exact -> x_ssl;
+x_exact -> x_reject;
+x_ssl -> x_tenant;
+x_ssl -> x_reject;
+x_tenant -> x_dest;
+x_tenant -> x_reject;
+x_dest -> x_site;
+}

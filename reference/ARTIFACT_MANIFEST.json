@@ -1,0 +1,556 @@
+{
+  "generated_on": "2026-10-14",
+  "status": "DESIGN_ONLY",
+  "artifacts": [
+    {
+      "path": "EVENTOS_77_DATA_MODEL_AND_RBAC.md",
+      "bytes": 116,
+      "sha256": "082ecd4a73911ee0f19017d0dd1a284c13814bd9013966313bc43fed6ece5b35"
+    },
+    {
+      "path": "EVENTOS_77_DECISIONS_AND_RISKS.md",
+      "bytes": 100,
+      "sha256": "04b6cad43067f4ef223133d1c255f9102b41c9809d39d8807b8aacd107198d17"
+    },
+    {
+      "path": "EVENTOS_77_GIT_PROJECT_STRUCTURE.md",
+      "bytes": 209,
+      "sha256": "2f7cffd52bb0764bb95b01af193f9434f88d758dac970edb98067cd0eafc57d5"
+    },
+    {
+      "path": "EVENTOS_77_HANDOFF.md",
+      "bytes": 2146,
+      "sha256": "b4908630e3c1eda6e397252fe974fd910c56961fb8bca1820d86d7de8f800ac4"
+    },
+    {
+      "path": "EVENTOS_77_PRODUCT_BLUEPRINT.md",
+      "bytes": 205,
+      "sha256": "c5097ce98598734fef4bc182072170fd0b2a02f93d184742ee9dce533bc9d4ae"
+    },
+    {
+      "path": "EVENTOS_77_README.md",
+      "bytes": 616,
+      "sha256": "38ae78c562420f115f6c838d7febf47c41a8016202cc2cf99a1ead1987dc76cd"
+    },
+    {
+      "path": "EVENTOS_77_SCREENS_AND_FLOWS.md",
+      "bytes": 76,
+      "sha256": "86fc5d10595c5c1de57f2772cd1f00b52f0f78aa5b2992f658cf79b2c872aaf7"
+    },
+    {
+      "path": "EVENTOS_77_SYSTEM_ARCHITECTURE.md",
+      "bytes": 197,
+      "sha256": "d81fef153f00e869e70fe1396168e486bccada38cb61bf499d6337057ab6eb2f"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1834,
+      "sha256": "b1df4aa920bcea640ddbe99030bdf1cd77432639cdde2ad73e4a2f1f78fd86b7"
+    },
+    {
+      "path": "codex/CODEX_GOAL_MASTER_EVENTOS_77_FULL_SYSTEM.txt",
+      "bytes": 44972,
+      "sha256": "c61531b24532c3a5b1bb615fc0158b99b9a334ed32346e57c50937654fa0cbd1"
+    },
+    {
+      "path": "codex/CODEX_START_EVENTOS_77.txt",
+      "bytes": 1181,
+      "sha256": "8c344d3e932a517968d2184a3fe1a98d6bebe039066dce66986e94935ff6db28"
+    },
+    {
+      "path": "docs/CURRENT.md",
+      "bytes": 674,
+      "sha256": "39c72849fd0b9e6c92d9e92340c1d29f616798f6ef4a0c06ad65d3572e15f030"
+    },
+    {
+      "path": "docs/DECISIONS_PENDING.md",
+      "bytes": 1663,
+      "sha256": "6f4652b5c8e7e71f190759be0218f08d25d3daa03a58462cdb619a22c84ba7d8"
+    },
+    {
+      "path": "docs/DIAGRAMS_MANIFEST.md",
+      "bytes": 196,
+      "sha256": "0fd20beb8a7f89f0127d92e068b404ac18e99840d1c6dc514f05480ab4a42c74"
+    },
+    {
+      "path": "docs/LEADS_MANIFEST.md",
+      "bytes": 712,
+      "sha256": "06425367e43a612b194db220812a665f0be059c6a78b74d249a2cce61d0ca9b1"
+    },
+    {
+      "path": "docs/adr/ADR-001-cloudflare-worker-d1.md",
+      "bytes": 816,
+      "sha256": "476915a7a313a77dd2cbf524d6a880fdeed5583c4bea5f2e15a6b73226e6dd6e"
+    },
+    {
+      "path": "docs/adr/ADR-002-tenant-domain-and-edition.md",
+      "bytes": 557,
+      "sha256": "42f34bb8d1b093e80ac04dc68a120479a2597491c29dfb04fb084ab893767646"
+    },
+    {
+      "path": "docs/adr/ADR-003-global-commercial-standard.md",
+      "bytes": 442,
+      "sha256": "6cde5448c5ca3795f711f542fe42930d87042e107be989341e0c1f64a200efa0"
+    },
+    {
+      "path": "docs/adr/ADR-004-editions-publishing.md",
+      "bytes": 511,
+      "sha256": "0c08b07fd87500ac75fc0bf0e5adf585ae6cc7b40cdd1e6451c7156b934a7a3d"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/ARCHITECTURE.md",
+      "bytes": 5889,
+      "sha256": "2bfadabf95b4dbe323002b5a78fec1d0f718c5028ef42d2fe0b6be0e500abe39"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/AUTH_RBAC.md",
+      "bytes": 2820,
+      "sha256": "35e8a5c8518b772d96e045b25a4967a109f3f0178e70f4bd70c7dd7219e5e586"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/CUSTOM_DOMAINS.md",
+      "bytes": 4274,
+      "sha256": "1b7051f9bbb3b9868f2c6352bea6d128d0a006b03150102107e11855a6ab268b"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/DATABASE_STRUCTURE.md",
+      "bytes": 2292,
+      "sha256": "4cc2a71ff4b4b4bfa96cf71febe5e709507138190067292c9d86767081a96d0e"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/DATA_DICTIONARY.csv",
+      "bytes": 4631,
+      "sha256": "7626593028a23ccd6cd2e31f3247c0ec5fe6094c3b6e4b1f84e0d4c92e2b41ea"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/DATA_MODEL.md",
+      "bytes": 10264,
+      "sha256": "b1bb13d8f202202f1e31a827b43ebd19b3b2a5ac22d5ff09faf955c26b5d0817"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/DEPLOYMENT.md",
+      "bytes": 136,
+      "sha256": "7a692bbf3d265c93dc0f236aa43f5f100842107ed2726e74c707d3f3353b8692"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/DEVOPS_DEPLOYMENT.md",
+      "bytes": 1822,
+      "sha256": "d1d1db50947b7cb32bddb2c167be2b5475585d88ad6a911263f9c08c1688338d"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/FEATURE_INVENTORY.csv",
+      "bytes": 4625,
+      "sha256": "f6c4aedeff46981b5a22c41815528b8a65ca304b091d8b3e2953164ed3e6f769"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/FEATURE_INVENTORY.md",
+      "bytes": 3599,
+      "sha256": "be77a80ed193f4a6e625f8ef5d9a5e09f5844feaeb690bcbbf6667fd74c23656"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/GENERATED_VISUALS.md",
+      "bytes": 674,
+      "sha256": "2552c8553c162cb79c42291cf69e644843507a2329c827b25c7edb9b37c63a63"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/GLOSSARY.md",
+      "bytes": 772,
+      "sha256": "98a24f3dd4788adf9b6efb5f9bae949200d6caa4f4f615ef4dd747dd0818ab74"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/INTEGRATIONS.md",
+      "bytes": 1259,
+      "sha256": "671e9660b5d10687007adffc5233edc7eb3e3cc5ab8997b7736fd63ec2900b86"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/LEADS_OVERVIEW.md",
+      "bytes": 644,
+      "sha256": "b11af0b4670e7872422a4159962e4ec74717c7ca9b7b9a8f57217c86a47f7086"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/MIGRATIONS_BACKUP_RESTORE.md",
+      "bytes": 751,
+      "sha256": "3f4b2a2fcab739ca47202153d149b496457d4dd6f7b06d09678a2da149e1310d"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/MULTI_TENANCY.md",
+      "bytes": 1771,
+      "sha256": "4aa1a50ef528c777dfce38901c384b2f6dc37fb99231b26ab16a74534001d4be"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/PRICING_PROPOSAL.md",
+      "bytes": 1642,
+      "sha256": "534bce839759a8bb7063950a5117e45777024c8230777df46401e94bb0072891"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/PRODUCT_VISION.md",
+      "bytes": 2450,
+      "sha256": "6ee7caec43b10c1858d8b45113c9b393229ef0715d0574ec6d2c2e38d4f4a48b"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/PROJECT_STRUCTURE.md",
+      "bytes": 1645,
+      "sha256": "a802bc411967e9cd9c095a9af92774d126e18200d5fe6a8bb17735291dc40b9d"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/RBAC_MATRIX.csv",
+      "bytes": 1597,
+      "sha256": "90e93a2aeb3dd88fbd8204ecc331c1ff11faeb3fdb379ce4d58fb2318259e72b"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/README.md",
+      "bytes": 964,
+      "sha256": "742e96c7e2f605069d8f0bc696e9dea4986bdc83885c17f6d80e4946707c5f2b"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/REQUIREMENTS.md",
+      "bytes": 2448,
+      "sha256": "a5e4b55e77f22b5a1eee04b8a0836e3f93c70de6819cde29c6ab7f1df9cc0780"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/RISKS_AND_DECISIONS.md",
+      "bytes": 2756,
+      "sha256": "03d292e61f1867174458b58e2a2274e8c9ea49a9c36e0828602dfa007166a3e8"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/RISKS_REGISTER.csv",
+      "bytes": 1530,
+      "sha256": "6e573e71e83260530f4dfee7b5291d9edd04cf42ad7240a3503d779a4a799392"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/ROADMAP.md",
+      "bytes": 1460,
+      "sha256": "6bca1ecd96254df8e2268e9c46dd35cae775984322ea986b452b7b8570753fbc"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/SCREENS_INVENTORY.csv",
+      "bytes": 4828,
+      "sha256": "f37825dd3e869704ce98b8dddbe1b34b6f5fb8cc700c7cbb5827854eba0335b0"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/SECURITY.md",
+      "bytes": 3190,
+      "sha256": "5d6500eed652986bad82388d4150efafc5ba6e6cfed41d7519e98dd2b39ec7b5"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/SEO_CONTENT_PUBLICATION.md",
+      "bytes": 1336,
+      "sha256": "6bbffae096c39653499c81959b6fe5ae67fc6813d111a070b8bf081b4a8b305a"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/STATUS.md",
+      "bytes": 1021,
+      "sha256": "e991f0c9a1588266840e90b5489061b78214f29d5a5769f7a56cb47fc502c19d"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/TEST_STRATEGY.md",
+      "bytes": 2380,
+      "sha256": "762a46e8a0d4b3d8011742fa384fd14f7b76cb84abe3a5211f7b8768106ea312"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/USER_JOURNEYS.md",
+      "bytes": 3849,
+      "sha256": "e019d3dd159599e6264dd82e2c3074767136795b166c44043e7fcb0985ab28b8"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/UX_SCREENS.md",
+      "bytes": 7364,
+      "sha256": "10cd8302d36d94b2bac328963acfa94294dd4229cc9e4e5545ec4bbc25c60ba5"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/WHITE_LABEL.md",
+      "bytes": 1659,
+      "sha256": "c43fdb29665f345f1090e2ec0f16975fccb99b3329f5d5e7658087b908a56981"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/DIAGRAMS_MANIFEST.md",
+      "bytes": 3046,
+      "sha256": "137816a44cf943122ade4b1ff925a54099ec00c399422238022c04146f8246ee"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/01-system-context.dot",
+      "bytes": 751,
+      "sha256": "66c2f32ab02bfaadde76b397c73723f507e9111fc655ad7f8af8263752a86139"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/02-system-container-deployment.dot",
+      "bytes": 700,
+      "sha256": "6bc37a86b0d1120befc5d2cacb51ec252657ebfdb19d6d42b22fbdb571bb2156"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/03-multitenant-boundaries.dot",
+      "bytes": 649,
+      "sha256": "0a04a082940124e498aca198fc20427493f1888a8887965a573fab5e6cea26fd"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/04-organization-event-edition.dot",
+      "bytes": 783,
+      "sha256": "98ffda4e9843b338ed1e3f4a4bbaa5a4a871a733bb116170966a30292455e55f"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/05-domain-resolution.dot",
+      "bytes": 806,
+      "sha256": "d1345b3003f0a296791c28c233334f042361c61ca17579f85d63812814315044"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/06-custom-domain-lifecycle.dot",
+      "bytes": 747,
+      "sha256": "cbb290124ca9bb57fbcec970561972d26e557e1c2cbe06f72ca9d0ae3e80b8ca"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/07-auth-memberships-rbac.dot",
+      "bytes": 689,
+      "sha256": "b8e7f5ab01d56d241a7e6b57497ebfdf6d2a5700362b20c40cb075661ed43e5f"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/08-data-model-erd.dot",
+      "bytes": 805,
+      "sha256": "109abde882e83dec163317ef4a0711c6171c4c2efbfdcd99800d2da3cdb28d26"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/09-public-website-rendering.dot",
+      "bytes": 666,
+      "sha256": "93fbdbf45d84eb13f572a6a4477c892041a2cb005d97fa8e0a049e815e2c7b1f"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/10-event-publishing-workflow.dot",
+      "bytes": 680,
+      "sha256": "99e7e4fcfdeb47ef914301af59463c262e5158ee8b3dde7f1c73e70f914960a2"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/11-programming-schedule.dot",
+      "bytes": 650,
+      "sha256": "fe85a00e71a11c477c2662634641ad4cba90deb55ab94a8f8b76161e1248f4f0"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/12-exhibitor-application-workflow.dot",
+      "bytes": 702,
+      "sha256": "454d744f8bb984bfa37d0074b94e33d12287205df26a863ce34b5380093bb530"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/13-commercial-entitlements.dot",
+      "bytes": 713,
+      "sha256": "598e0872250cc637a3ad9e565c20f530a71054909967399fd15a883a620e4b2c"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/14-cicd-backup-rollback.dot",
+      "bytes": 709,
+      "sha256": "0cf32964c5af569cdd88a774862235fb1ee857b1ed2ecb4d17c203ac833f0a8c"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/15-end-to-end-request-sequence.dot",
+      "bytes": 694,
+      "sha256": "75ae42dcda08f76c7e447b3b8c242689076527ec7cbf6abb2e8ee8f1732148ec"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/graphviz-source/16-saas-onboarding.dot",
+      "bytes": 847,
+      "sha256": "cbb2360489be7c4e9ec12e4709d38bbd38eb9b93448760d4012a10c608498929"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/01-system-context.svg",
+      "bytes": 6012,
+      "sha256": "7186c44fd7b9722f11ca3bffc374c084c4bf11361ea9b319b9d36527e6f24aef"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/02-system-container-deployment.svg",
+      "bytes": 5685,
+      "sha256": "56f54be7166195f57e151778bbb8db70af99fa4cecf51c856dd986157a66a7d4"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/03-multitenant-boundaries.svg",
+      "bytes": 4768,
+      "sha256": "4d5ee1ee08f2b24f0a43bb26abd6bbbfa966e8a075c488cda20571d4e45178fb"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/04-organization-event-edition.svg",
+      "bytes": 6627,
+      "sha256": "4c02f1b76dccec3bcb231d861f7d34f0478f4fc28aaf9d7c3376585ae3ab43ac"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/05-domain-resolution.svg",
+      "bytes": 6360,
+      "sha256": "113d8d8fd36908fb3c29f864d323c5245f1c5269af8d42c2242b5d45c98a4485"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/06-custom-domain-lifecycle.svg",
+      "bytes": 5878,
+      "sha256": "09dc3427832280c5ca916c9116bc87844d6ca45425855597b63e03127f7ff966"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/07-auth-memberships-rbac.svg",
+      "bytes": 4899,
+      "sha256": "2f7d639de2b6c809dabe3bdef0e4e71b90739919f4ab795ac7c841480e70a097"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/08-data-model-erd.svg",
+      "bytes": 7341,
+      "sha256": "b547f89925f801a93697bc8a3bf1ad20a3def05357575f664ad24f7f88445575"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/09-public-website-rendering.svg",
+      "bytes": 4840,
+      "sha256": "ebf4da1c30dd95edec7639f28d7ba77883cb27f8f167e97481d60a2b8a501498"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/10-event-publishing-workflow.svg",
+      "bytes": 4773,
+      "sha256": "871db4d46ea63a81ddbac293bc89a8f96af12a75ab3eb57a527df332fcb4c0aa"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/11-programming-schedule.svg",
+      "bytes": 4037,
+      "sha256": "4f49e9706301e6a2d4a13731520306d3896788f250ec47c8dd5b7797e275d0fb"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/12-exhibitor-application-workflow.svg",
+      "bytes": 4873,
+      "sha256": "32b9866c4c313fcc088019982b0ff615af20b800f31c759788617b46b5c56dcd"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/13-commercial-entitlements.svg",
+      "bytes": 4996,
+      "sha256": "c60e8050b512ebca4ea966ec24c1afdc8c0ec713033967751dea803057c46622"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/14-cicd-backup-rollback.svg",
+      "bytes": 5399,
+      "sha256": "b5f7788ffb4c3150de65c52fdb5afdf89e16e00c1c6e64349775a6f411c8d389"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/15-end-to-end-request-sequence.svg",
+      "bytes": 5480,
+      "sha256": "0732661d0fd61b0615489ed5354de4eb841b96e569913acc95d865e3695f6b47"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/rendered/16-saas-onboarding.svg",
+      "bytes": 6301,
+      "sha256": "b81a2fe6de8012ebba171f63077fe79f90207413376e3b82fb3e27a630f326cb"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/01-system-context.mmd",
+      "bytes": 595,
+      "sha256": "09e65704c309cb31c59ab369ad3a7e5fd3a17ab215fd8a3b33ec1b9373ba3c7e"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/02-system-container-deployment.mmd",
+      "bytes": 653,
+      "sha256": "80919361016fd730e677fd063e7b24e49207ddebb865c01155de2b445223f433"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/03-multitenant-boundaries.mmd",
+      "bytes": 416,
+      "sha256": "a542af774f311b3e9434eb72d299d01f38ba2c9be10e92b31bfa4e67443c5978"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/04-organization-event-edition.mmd",
+      "bytes": 399,
+      "sha256": "819d76453f7131ab3aad5a16fdcb39106a2a0482c33fdb9b42651ea08333adba"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/05-domain-resolution.mmd",
+      "bytes": 686,
+      "sha256": "13ce7ae04efa876ce5753b028df8896777d765b93a80a7d8b731ad5378a1e0c8"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/06-custom-domain-lifecycle.mmd",
+      "bytes": 710,
+      "sha256": "265848bed671771473544f455d6db5e67860588171c7633deaa3e1f258641590"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/07-auth-memberships-rbac.mmd",
+      "bytes": 707,
+      "sha256": "efb7c06dfbbe6f01e02a8818d7de15b2f59822e1451b8e609940cb35d29c569b"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/08-data-model-erd.mmd",
+      "bytes": 1448,
+      "sha256": "83a3668accd6b5bbe097b931ffda0b8c14ac8fd583e0aa56f3942b1bd5c4c54c"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/09-public-website-rendering.mmd",
+      "bytes": 868,
+      "sha256": "d0371a440084f1784b3bbd91bad7033532659629b8b3c149afd306c8c259bb21"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/10-event-publishing-workflow.mmd",
+      "bytes": 518,
+      "sha256": "3e6eef7d288ee8811246fef280d198a111b66fc1251b7298b8e40af6f29713b0"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/11-programming-schedule.mmd",
+      "bytes": 574,
+      "sha256": "11eb81d1645b6d41356ce8f467d5aec74913c7e9b630032538d71a7be7e360c0"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/12-exhibitor-application-workflow.mmd",
+      "bytes": 648,
+      "sha256": "a204d02cae6bbf75c23bd507d67e01e9359b037c57f62f6ea1a75c6f815c11b2"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/13-commercial-entitlements.mmd",
+      "bytes": 569,
+      "sha256": "5743ce3aa4743901056280331ce2da680a7e26748869dcaa4ad1afe9934c4855"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/14-cicd-backup-rollback.mmd",
+      "bytes": 630,
+      "sha256": "230471d21c87e16ab4bb3d82d45bc056c96883526a80d9f70c667d7513354fa4"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/15-end-to-end-request-sequence.mmd",
+      "bytes": 712,
+      "sha256": "0b260f49f5c5c192f4362daba26167c69910a4ca67e073a68a4582ca34b9d488"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/diagrams/source/16-saas-onboarding.mmd",
+      "bytes": 732,
+      "sha256": "41b6f5b834693a0fe6b043d31087418cb5176b38a75fbd5f6d50b30b9457379b"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/generated/concepts/README.md",
+      "bytes": 262,
+      "sha256": "42197fd2cdf6c67c699ea4817a794a9d895761571497dd8fc8e582b2a4cf45a3"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/generated/covers/README.md",
+      "bytes": 262,
+      "sha256": "42197fd2cdf6c67c699ea4817a794a9d895761571497dd8fc8e582b2a4cf45a3"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/generated/lead-adapted/README.md",
+      "bytes": 262,
+      "sha256": "42197fd2cdf6c67c699ea4817a794a9d895761571497dd8fc8e582b2a4cf45a3"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/generated/mockups/README.md",
+      "bytes": 262,
+      "sha256": "42197fd2cdf6c67c699ea4817a794a9d895761571497dd8fc8e582b2a4cf45a3"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/leads/README.md",
+      "bytes": 262,
+      "sha256": "42197fd2cdf6c67c699ea4817a794a9d895761571497dd8fc8e582b2a4cf45a3"
+    },
+    {
+      "path": "docs/versions/v0.1.0-architecture/screenshots/README.md",
+      "bytes": 160,
+      "sha256": "a2455e4e3dbd0ca201142d6c135e255723f42e42f87dbcaf19d58e6b422fa19b"
+    },
+    {
+      "path": "reference/EXAMPLE_TENANT_MODEL_DESIGN_ONLY.json",
+      "bytes": 1353,
+      "sha256": "fc68349cebc172ffd13b33a9c3107d00e1aebb497af74efcf38df01f9290bc4b"
+    },
+    {
+      "path": "reference/ORIGINAL_BRIEF_SOURCE.md",
+      "bytes": 670,
+      "sha256": "20ce94b81ba678d38cc7abf4c6daa7d487b08017739f8a99699f48646ae3696e"
+    },
+    {
+      "path": "reference/SOURCES_VERIFIED_2026-10-14.md",
+      "bytes": 3128,
+      "sha256": "0d95aaa8a18c4f8108f379a7a551d2fd52bae20859f308b8fa21790adddaba9b"
+    }
+  ]
+}

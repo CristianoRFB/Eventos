@@ -1,0 +1,18 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Release seguro — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_pr [label="PR + CI"];
+x_stage [label="Staging"];
+x_uat [label="E2E + dominio"];
+x_approval [label="Aprovacao humana"];
+x_backup [label="Backup testado"];
+x_prod [label="Deploy prod"];
+x_rollback [label="Rollback se necessario"];
+x_pr -> x_stage;
+x_stage -> x_uat;
+x_uat -> x_approval;
+x_approval -> x_backup;
+x_backup -> x_prod;
+x_prod -> x_rollback;
+}

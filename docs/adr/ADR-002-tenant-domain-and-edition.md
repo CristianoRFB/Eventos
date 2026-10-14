@@ -1,0 +1,2 @@
+# ADR-002 — Tenant/organização, eventos, edições, domínio
+**Status: DECISÃO DE CONTEXTO DO PROJETO.** Tenant = organizadora. Event = marca/conceito; Edition = edição em data/local específicos. Hostname é alias verificado e mapeia destino EXPLÍCITO, nunca tenant por semelhança de nome. Subdomínio da plataforma e domínio próprio coexistem, com canonical único por publicação. Benefício: um produtor opera múltiplos eventos/edições. Risco: mais complexidade de CMS; mitigação por controle explícito de ownership e schema composto.

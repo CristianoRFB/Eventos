@@ -1,0 +1,39 @@
+feature_id,module,persona,purpose,data,screens,permission,priority,depends,acceptance
+F-01,platform,Platform Owner,org provision e suspension,organizations,platform/organizations,platform.organizations.write,NOW,tenant/RBAC,A+B ativas/inativas sem delete
+F-02,platform,Platform Owner,invite owner,invitations,platform/organizations/:id/invite,platform.invite,NOW,auth/session,token one-time expiry
+F-03,platform,Platform Owner,audit critical,audit_events,platform/audit,platform.audit.read,NOW,secure logging,immutable actor/resource
+F-04,platform,Org Owner,memberships / roles,memberships,admin/team,org.members.manage,NOW,session/RBAC,last owner guard
+F-05,platform,Org Owner,organization profile,organizations,admin/settings,org.settings.write,NOW,tenancy,can edit own only
+F-06,tenant,Org Owner,branding tokens,brand_profiles,admin/branding,org.brand.write,NOW,R2 assets,two distinct themes A/B
+F-07,tenant,Event Manager,event CRUD,events,admin/events,event.write,NOW,org role,slug scoped unique
+F-08,tenant,Event Manager,edition CRUD clone,editions,admin/events/:id/editions,edition.write,NOW,events,clone excludes PII
+F-09,tenant,Org Owner,domain onboarding,domains,admin/domains,domain.manage,NOW,CF provider,DNS SSL gating
+F-10,public,Visitor,home by hostname,publications,/,public.read,NOW,SSR/resolver,no fallback other tenant
+F-11,public,Visitor,SEO meta/sitemap,publications,/robots.txt /sitemap.xml,public.read,NOW,SSR,host canonical only
+F-12,public,Visitor,editions history,editions,/edicoes,public.read,NOW,publish,archive safe
+F-13,content,Content editor,page section editor,content_drafts,admin/cms,content.write,NOW,revision,preview + valid blocks
+F-14,content,Publisher,atomic publish/rollback,publications,admin/cms/publish,content.publish,NOW,tx db,snapshot versioned
+F-15,content,Content editor,asset upload,media_assets,admin/media,media.upload,NOW,R2,mime size license validated
+F-16,program,Event Manager,stage/venue CRUD,stages,admin/program/stages,program.manage,NOW,edition,tenant scoped
+F-17,program,Event Manager,program scheduling,program_items,admin/program,program.write,NOW,timezone,conflict blocked
+F-18,program,Visitor,agenda by day stage,publications,/programacao,public.read,NOW,SSR/publish,filterable mobile
+F-19,guests,Event Manager,guest profiles,guests,admin/guests,guest.write,NOW,media/consent,private/public separated
+F-20,guests,Visitor,guest catalog,publications,/convidados,public.read,NOW,publish,approved only
+F-21,expo,Org Staff,application form builder,form_definitions,admin/forms,forms.manage,NOW,validation,fields versioned
+F-22,expo,Public applicant,submit application,form_submissions,/expositores/inscricao,forms.submit,NOW,antispam,"receipt token, PII safe"
+F-23,expo,Reviewer,application review,exhibitor_applications,admin/applications,applications.review,NOW,RBAC,states and audit
+F-24,expo,Visitor,public exhibitor directory,exhibitors,/expositores,public.read,NOW,consent/publish,only opted in
+F-25,content,Editor,FAQ and regulatory pages,faqs,admin/faq,content.write,NOW,editor,published SSR
+F-26,content,Editor,sponsors management,sponsors,admin/sponsors,content.write,NOW,assets,safe external links
+F-27,content,Editor,announcements,announcements,admin/news,content.write,NEXT,CMS,approval flow
+F-28,ops,Org Owner,activity/audit reporting,audit_events,admin/audit,audit.read,NEXT,privacy,scope correct
+F-29,ops,Org Owner,analytics aggregates,analytics,admin/analytics,analytics.read,NEXT,privacy,no cross-tenant
+F-30,ops,Staff,CSV export submissions,form_submissions,admin/export,submissions.export,NEXT,privacy,audit and scrub
+F-31,commercial,Platform Owner,manual plans,tenant_commercial_states,platform/plans,commercial.assign,NEXT,approved pricing,audit plan changes
+F-32,commercial,Tenant admin,visible quota status,usage_counters,admin/plan,commercial.read,NEXT,metering,server enforced
+F-33,commercial,Visitor,synthetic demo,demo,/demo,demo.read,NEXT,isolation,no external effects
+F-34,integration,Org Owner,external ticket link,events,admin/tickets,event.write,NOW,safe urls,clear external CTA
+F-35,integration,Org Owner,ticket gateway native,payment,admin/ticketing,payments.charge,DEFERRED,legal provider,not built now
+F-36,integration,Org Owner,whatsapp/SMS automation,outbox,admin/notifications,messages.send,DEFERRED,cost/consent,explicit approval
+F-37,marketplace,all,cosplay marketplace,marketplace,/marketplace,marketplace.use,DEFERRED,network effects,not built now
+F-38,ops,Platform Owner,staging/domain provider monitor,domains,platform/domains,domain.status.read,NOW,CF API,SSL and host independent

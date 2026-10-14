@@ -1,0 +1,14 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Programacao segura — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_input [label="Hora, palco, convidado"];
+x_valid [label="Validar duracao e timezone"];
+x_conflict [label="Checar sobreposicao"];
+x_draft [label="Salvar rascunho"];
+x_publish [label="Publicar agenda"];
+x_input -> x_valid;
+x_valid -> x_conflict;
+x_conflict -> x_draft;
+x_draft -> x_publish;
+}

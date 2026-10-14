@@ -1,0 +1,16 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Site SSR e SEO — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_req [label="Request publico"];
+x_host [label="Resolve host"];
+x_snap [label="Snapshot publicado"];
+x_assets [label="Assets R2 publicos"];
+x_ssr [label="SSR HTML + SEO"];
+x_cache [label="Cache por host/edicao/revisao"];
+x_req -> x_host;
+x_host -> x_snap;
+x_snap -> x_ssr;
+x_assets -> x_ssr;
+x_ssr -> x_cache;
+}

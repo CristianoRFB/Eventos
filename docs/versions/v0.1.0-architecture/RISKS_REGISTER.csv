@@ -1,0 +1,13 @@
+id,severity,risk,failure_mode,mitigation,phase,gate
+R-01,severe,domain hijack,Hostname pending/released reused by other tenant,unique reservation + ownership + SSL + DNS + teardown,F7,NO_LIVE_DOMAIN
+R-02,severe,cross tenant data access,D1 query missing org scope,central scope guard + A/B adversarial tests,F2,BLOCK_IF_FAILED
+R-03,high,unsafe public asset,R2 private uploads served as public,private/public separation + publication license,F3,BLOCK_IF_FAILED
+R-04,high,stale cache,old content or tenant wrong host,"cache key with host+revision, purge",F4,BLOCK_IF_FAILED
+R-05,high,auth incompatibility,Better Auth Worker/Router adapter mismatch,PoC login logout refresh csrf session revoke,F1,ADR_REQUIRED
+R-06,high,event seasonality,organizer only needs site 1-2 months,test annual vs per-edition pricing,Commercial,MARKET_VALIDATION
+R-07,medium,D1 quota,Free reads/writes exceed daily limit,"usage forecast, reduce SSR lookups/cache",F10,COST_APPROVAL
+R-08,high,double program,two editors overlap stage,transaction + revision + consistency guard,F5,BLOCK_IF_FAILED
+R-09,high,form PII breach,unprotected exhibitor answers,"strict roles, R2 private, retention",F6,BLOCK_IF_FAILED
+R-10,high,production rollout failure,SSL partial status or cutover,staging/manual DNS prevalidation,F11,HUMAN_GATE
+R-11,medium,copied branding without consent,lead treated as customer,"synthetic demo, consent workflow",Lead,LEGAL_REVIEW
+R-12,medium,overscoped SaaS,ticketing marketplace before user,"defer, links only",Roadmap,NO_GO_NOW

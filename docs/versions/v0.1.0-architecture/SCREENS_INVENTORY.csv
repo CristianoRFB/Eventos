@@ -1,0 +1,61 @@
+zone,screen_id,route_template,persona,main_contents,primary_action,priority
+PUBLIC,home-organizadora,/,Visitante,"hero,events,branding",event / edition links,NOW
+PUBLIC,home-evento,/,Visitante,"hero,dates,cta",program; tickets,NOW
+PUBLIC,edicoes,/edicoes,Visitante,timeline editions,edition detail,NOW
+PUBLIC,programacao,/programacao,Visitante,day/stage/category filter,session detail,NOW
+PUBLIC,detalhe-atracao,/programacao/:slug,Visitante,activity metadata,back agenda,NOW
+PUBLIC,convidados,/convidados,Visitante,consented profiles,guest details,NOW
+PUBLIC,convidado-detalhe,/convidados/:slug,Visitante,bio/media/sessions,program,NOW
+PUBLIC,expositores,/expositores,Visitante,approved public profiles,exhibitor detail,NOW
+PUBLIC,expositor-detalhe,/expositores/:slug,Visitante,allowed data,return catalog,NOW
+PUBLIC,inscricao-expositor,/expositores/inscricao,Candidato,form/privacy/attachments,submit,NOW
+PUBLIC,inscricao-confirmacao,/inscricoes/confirmacao,Candidato,receipt private token,status,NOW
+PUBLIC,ingressos-externos,/ingressos,Visitante,external provider CTA,open official link,NOW
+PUBLIC,faq,/faq,Visitante,accordion sections,navigate,NOW
+PUBLIC,como-chegar,/local,Visitante,address accessibility,maps external,NOW
+PUBLIC,patrocinadores,/patrocinadores,Visitante,public sponsors,visit website,NOW
+PUBLIC,regras,/regulamento,Visitante,regulations/privacy,navigate,NOW
+PUBLIC,avisos,/noticias,Visitante,published announcements,detail,NEXT
+PUBLIC,detalhe-aviso,/noticias/:slug,Visitante,published announcement,back,NEXT
+PUBLIC,404,/*,Visitante,unknown host/page,safe home,NOW
+PUBLIC,suspenso,/*,Visitante,suspended organization,no data,NOW
+PUBLIC,preview-protegido,/preview/:token,Editor,unpublished preview,review,NOW
+AUTH,login,/login,Membro,email password/session,choose organization,NOW
+AUTH,aceitar-convite,/invite/:token,Convidado,one-time invite,accept,NOW
+AUTH,selecionar-organizacao,/select-organization,Membro,active memberships,select,NOW
+AUTH,sem-permissao,/forbidden,Membro,permission error,back,NOW
+ADMIN,dashboard,/o/:org/,Owner/admin,metrics/events/issues,open event,NOW
+ADMIN,onboarding,/o/:org/setup,Owner,checklist to publish,save,NOW
+ADMIN,perfil-organizadora,/o/:org/settings,Owner,contacts/branding/privacy,save,NOW
+ADMIN,brand-editor,/o/:org/branding,Owner/admin,tokens/assets/theme preview,apply,NOW
+ADMIN,eventos,/o/:org/events,Owner/admin,event list,new/edit,NOW
+ADMIN,criar-evento,/o/:org/events/new,Owner/admin,"name,slug,brand",create,NOW
+ADMIN,editar-evento,/o/:org/events/:id,Manager,event details,editions,NOW
+ADMIN,edicoes,/o/:org/events/:id/editions,Manager,versions/status,clone/new,NOW
+ADMIN,editar-edicao,/o/:org/editions/:id,Manager,venue/dates/timezone,save,NOW
+ADMIN,cms,/o/:org/editions/:id/cms,Editor,draft blocks/order,preview,NOW
+ADMIN,preview-revisoes,/o/:org/editions/:id/revisions,Publisher,diff/revisions,publish/rollback,NOW
+ADMIN,media,/o/:org/media,Editor,upload/licensing,insert,NOW
+ADMIN,programacao,/o/:org/editions/:id/program,Manager,sessions/filter,edit,NOW
+ADMIN,palcos,/o/:org/editions/:id/stages,Manager,stage/venue settings,save,NOW
+ADMIN,convidados,/o/:org/editions/:id/guests,Manager,guests/profiles,manage,NOW
+ADMIN,expositores,/o/:org/editions/:id/exhibitors,Manager,approved exhibitor list,publish,NOW
+ADMIN,form-builder,/o/:org/editions/:id/forms,Manager,fields/version/consent,publish form,NOW
+ADMIN,submissoes,/o/:org/editions/:id/applications,Reviewer,private application queue,review,NOW
+ADMIN,detalhe-submissao,/o/:org/applications/:id,Reviewer,private answers/files,approve/reject,NOW
+ADMIN,patrocinadores,/o/:org/editions/:id/sponsors,Editor,sponsors/placements,save,NOW
+ADMIN,faq,/o/:org/editions/:id/faq,Editor,reorder faq,save,NOW
+ADMIN,avisos,/o/:org/editions/:id/news,Editor,announcements,publish,NEXT
+ADMIN,dominios,/o/:org/domains,Owner,ownership/DNS/SSL statuses,request/remove,NOW
+ADMIN,equipe,/o/:org/team,Owner,members/invites/roles,invite/revoke,NOW
+ADMIN,plano,/o/:org/plan,Owner,manual plan + limits,view,NEXT
+ADMIN,relatorios,/o/:org/reports,Owner,aggregates,export,NEXT
+ADMIN,auditoria,/o/:org/audit,Owner,recent changes,filter,NEXT
+PLATFORM,dashboard,/platform,Platform owner,tenants/errors,open tenant,NOW
+PLATFORM,organizadoras,/platform/organizations,Platform owner,org list,create/suspend,NOW
+PLATFORM,organizadora-detalhe,/platform/organizations/:id,Platform owner,status/owner/domains,manage,NOW
+PLATFORM,dominios,/platform/domains,Platform owner,provider state and errors,retry,NOW
+PLATFORM,planos,/platform/plans,Platform owner,manual state/overrides,assign,NEXT
+PLATFORM,audit,/platform/audit,Platform owner,privileged mutations,review,NOW
+SAAS,landing,/product,Lead,product description/demo CTA,contact,NEXT
+SAAS,demo,/demo,Lead,synthetic tenant,view,NEXT

@@ -1,0 +1,20 @@
+sequenceDiagram
+  actor Visitor
+  participant CF as Cloudflare SaaS
+  participant API as Eventos77 Worker
+  participant DB as D1
+  participant R2 as Public R2
+  Visitor->>CF: GET www.festival-cliente.example
+  CF->>API: Host request after edge TLS
+  API->>DB: lookup exact active host mapping
+  alt unknown host or status not ready
+    DB-->>API: missing/pending
+    API-->>Visitor: 404 or 421, no tenant default
+  else active verified mapping
+    DB-->>API: organization A / edition 2027
+    API->>DB: check org active and published snapshot
+    DB-->>API: published content only
+    API->>R2: approved asset keys
+    R2-->>API: images / metadata
+    API-->>Visitor: SSR page + canonical + public headers
+  end

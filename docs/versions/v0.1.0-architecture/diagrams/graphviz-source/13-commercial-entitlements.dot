@@ -1,0 +1,16 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#FFFFFF", fontname="DejaVu Sans", label="Entitlements comerciais — ESQUEMA PROPOSTO", labelloc=t, fontsize=20, pad=0.3, nodesep=0.4, ranksep=0.7];
+node [shape=box, style="rounded,filled", fillcolor="#EAF3F6", color="#456C80", fontname="DejaVu Sans",fontsize=12,margin="0.15,0.09"];
+edge [color="#668499", arrowsize=0.7];
+x_plan [label="PlanCatalog local"];
+x_state [label="CommercialState"];
+x_override [label="Overrides auditados"];
+x_resolve [label="EntitlementService"];
+x_backend [label="Backend gate"];
+x_safe [label="RBAC e seguranca obrigatorios"];
+x_plan -> x_resolve;
+x_state -> x_resolve;
+x_override -> x_resolve;
+x_resolve -> x_backend;
+x_safe -> x_backend;
+}

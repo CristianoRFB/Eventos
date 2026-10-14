@@ -1,0 +1,15 @@
+flowchart TB
+  CAT[Local PlanCatalog D1/config] --> RES[EntitlementService]
+  S[CommercialState: plan + status] --> RES
+  O[Overrides with audit] --> RES
+  RES --> CAN[canUse featureKey]
+  RES --> LIM[getLimit limitKey]
+  OPS[OperationalFlag / implemented-state] --> EFFECT[Effective availability]
+  CAN --> EFFECT
+  LIM --> CNT[Transactional usage counter]
+  CNT --> GUARD[Backend create guard]
+  EFFECT --> GUARD
+  GUARD --> OK[Permit or explicit limit error]
+  SEC[Auth/RBAC/Security baseline] --> GUARD
+  classDef safe fill:#e5f5e8,stroke:#2e8b57;
+  class SEC safe

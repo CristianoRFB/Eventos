@@ -1,0 +1,13 @@
+flowchart TB
+  V[Browser publico / painel] -->|HTTPS| EDGE[Cloudflare Edge: zona SaaS]
+  EDGE --> WRK[Workers React Router SSR + API]
+  WRK -->|SQL tenant scoped| DB[(D1: dados + auth sessions)]
+  WRK -->|objetos privados e publicos| R2[(R2 Bucket)]
+  WRK -->|envio desabilitado ate config| OUT[Adapter Email]
+  WRK -->|host verificado| DOM[(Domain Bindings D1)]
+  ADMIN[Host administrativo fixo] --> EDGE
+  CA[API Cloudflare for SaaS] -.->|status DNS/SSL via token restrito| WRK
+  CI[GitHub Actions / PR] --> STAGE[Staging Cloudflare]
+  CI -.->|aprovacao separada| EDGE
+  classDef data fill:#e8e8ff,stroke:#6363a3,color:#24244d;
+  class DB,R2,DOM data
