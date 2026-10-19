@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "preinstall": "node scripts/assert-deployment-disabled.mjs",
+    "prebuild": "node scripts/assert-deployment-disabled.mjs",
     "build": "react-router build",
     "dev": "react-router dev",
     "typecheck": "wrangler types && react-router typegen && tsc -b",
