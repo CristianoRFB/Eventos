@@ -1,0 +1,53 @@
+
+> eventos77@0.2.0-dev prebuild
+> node scripts/assert-deployment-disabled.mjs
+
+
+> eventos77@0.2.0-dev build
+> react-router build
+
+Using Vite Environment API
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 213 modules transformed.
+rendering chunks...
+computing gzip size...
+build/client/.assetsignore                         0.02 kB
+build/client/.vite/manifest.json                   4.17 kB │ gzip:  0.65 kB
+build/client/assets/root-iQNp8fj_.css             18.61 kB │ gzip:  5.24 kB
+build/client/assets/public-Dnu7GqM3.js             0.07 kB │ gzip:  0.09 kB
+build/client/assets/admin-CsCPxajB.js              0.98 kB │ gzip:  0.52 kB
+build/client/assets/platform-Cmllx8_j.js           1.47 kB │ gzip:  0.65 kB
+build/client/assets/login-XungEqP6.js              1.75 kB │ gzip:  0.94 kB
+build/client/assets/organization-C5eKSytG.js       1.88 kB │ gzip:  0.80 kB
+build/client/assets/home-MUdORkBy.js               2.42 kB │ gzip:  0.96 kB
+build/client/assets/event-D9ZY0i58.js              2.47 kB │ gzip:  1.01 kB
+build/client/assets/panel-DbG5VHn7.js              3.93 kB │ gzip:  1.55 kB
+build/client/assets/operations-Cutf1sRI.js         6.27 kB │ gzip:  2.19 kB
+build/client/assets/cms-DstVA-21.js                8.09 kB │ gzip:  2.78 kB
+build/client/assets/public-DZlQklrA.js            10.05 kB │ gzip:  3.09 kB
+build/client/assets/root-DCVNmezx.js              10.88 kB │ gzip:  4.40 kB
+build/client/assets/errorBoundaries-1nSpAG4j.js   33.64 kB │ gzip: 11.83 kB
+build/client/assets/jsx-runtime-CWjxiztN.js       87.18 kB │ gzip: 28.88 kB
+build/client/assets/operations-CQlUoeWu.js        87.81 kB │ gzip: 25.23 kB
+build/client/assets/entry.client-BOmlD082.js     214.70 kB │ gzip: 67.18 kB
+
+✓ built in 2.58s
+vite v8.3.4 building ssr environment for production...
+transforming...
+✓ 583 modules transformed.
+rendering chunks...
+Using secrets defined in .dev.vars
+computing gzip size...
+build/server/.dev.vars                                0.08 kB
+build/server/.vite/manifest.json                      1.45 kB │ gzip:   0.40 kB
+build/server/wrangler.json                            1.70 kB │ gzip:   0.87 kB
+build/server/assets/server-build-iQNp8fj_.css        18.61 kB │ gzip:   5.24 kB
+build/server/assets/rolldown-runtime-Bk_YeHJf.js      1.45 kB │ gzip:   0.67 kB
+build/server/assets/dist-BTa3VvjM.js                 14.84 kB │ gzip:   4.11 kB │ map:    24.94 kB
+build/server/index.js                                43.32 kB │ gzip:  10.58 kB │ map:    83.79 kB
+build/server/assets/factory-DmbtPs-g.js             271.69 kB │ gzip:  60.55 kB │ map:   733.31 kB
+build/server/assets/server-build-CqgGyyAc.js        689.91 kB │ gzip: 138.86 kB │ map: 1,244.62 kB
+build/server/assets/api.server-C8hzVDCs.js        1,131.91 kB │ gzip: 260.85 kB │ map: 2,274.84 kB
+
+✓ built in 2.89s

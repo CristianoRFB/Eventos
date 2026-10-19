@@ -1,0 +1,33 @@
+
+> eventos77@0.2.0-dev test:e2e
+> playwright test --project=desktop --project=mobile
+
+[WebServer] (node:9224) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:21000) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:14776) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:6116) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":34}
+  ok  1 [desktop] › tests\e2e\core.spec.ts:7:1 › edition operations editor saves and public snapshot is navigable without admin cookies (6.7s)
+  ok  2 [desktop] › tests\e2e\core.spec.ts:188:1 › public SSR and sign-in remain readable and keyboard-accessible at this viewport (1.7s)
+  ok  3 [desktop] › tests\e2e\core.spec.ts:224:1 › owner signs in, creates a persisted event, cannot access tenant B and signs out (4.1s)
+  ok  4 [desktop] › tests\e2e\core.spec.ts:273:1 › one shared identity switches between two organizers without seeing unassigned events (2.3s)
+  ok  5 [desktop] › tests\e2e\core.spec.ts:305:1 › CMS editor exposes private preview and revision history at this viewport (13.4s)
+  ok  6 [desktop] › tests\e2e\core.spec.ts:347:1 › platform owner sees global organizations and private tenant access stays denied (1.9s)
+(node:16376) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":35}
+  ok  7 [mobile] › tests\e2e\core.spec.ts:7:1 › edition operations editor saves and public snapshot is navigable without admin cookies (4.7s)
+  ok  8 [mobile] › tests\e2e\core.spec.ts:188:1 › public SSR and sign-in remain readable and keyboard-accessible at this viewport (1.5s)
+  ok  9 [mobile] › tests\e2e\core.spec.ts:224:1 › owner signs in, creates a persisted event, cannot access tenant B and signs out (13.8s)
+  ok 10 [mobile] › tests\e2e\core.spec.ts:273:1 › one shared identity switches between two organizers without seeing unassigned events (2.3s)
+  ok 11 [mobile] › tests\e2e\core.spec.ts:305:1 › CMS editor exposes private preview and revision history at this viewport (3.0s)
+  ok 12 [mobile] › tests\e2e\core.spec.ts:347:1 › platform owner sees global organizations and private tenant access stays denied (12.0s)
+
+  12 passed (1.3m)

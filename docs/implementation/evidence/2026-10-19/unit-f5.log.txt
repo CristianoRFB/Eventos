@@ -1,0 +1,17 @@
+
+> eventos77@0.2.0-dev test
+> vitest run
+
+
+ RUN  v5.0.4 C:/OpenSSL/set/Eventos
+
+(node:7332) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1244) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  8 passed (8)
+      Tests  114 passed (114)
+   Start at  10:36:40
+   Duration  1.62s (tests 59%, import 31%, transform 6%, worker 4%)
+

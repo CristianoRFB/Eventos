@@ -199,6 +199,22 @@ const markdownFiles = [
   'README.md',
   ...requiredFiles.filter((file) => file.endsWith('.md')),
 ];
+const runtimeScreenshots = 'docs/implementation/screenshots/2026-10-19/manifest.json';
+if (existsSync(path.join(root, runtimeScreenshots))) {
+  const manifest = JSON.parse(read(runtimeScreenshots));
+  check(manifest.classification === 'LOCAL_RUNTIME_SYNTHETIC', 'Runtime screenshots must be classified honestly');
+  check(/^[a-f0-9]{40}$/.test(manifest.commit), 'Screenshot manifest missing source commit');
+  for (const screenshot of manifest.screenshots) {
+    const relative = path.posix.join(path.posix.dirname(runtimeScreenshots), screenshot.file);
+    required(relative);
+    if (!existsSync(path.join(root, relative))) continue;
+    const bytes = readFileSync(path.join(root, relative));
+    check(bytes.length > 24 && bytes.subarray(1,4).toString() === 'PNG', `${relative}: invalid PNG`);
+    check(hash(relative) === screenshot.sha256, `${relative}: screenshot hash changed`);
+    check(bytes.readUInt32BE(16) === screenshot.image_width && bytes.readUInt32BE(20) === screenshot.image_height, `${relative}: dimensions mismatch`);
+    check(Boolean(screenshot.captured_at) && Boolean(screenshot.route_template), `${relative}: missing capture provenance`);
+  }
+}
 function collectMarkdown(relative) {
   for (const entry of readdirSync(path.join(root, relative), { withFileTypes: true })) {
     const entryPath = `${relative}/${entry.name}`;

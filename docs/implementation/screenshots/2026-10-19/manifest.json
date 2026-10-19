@@ -1,0 +1,110 @@
+{
+  "classification": "LOCAL_RUNTIME_SYNTHETIC",
+  "commit": "6f5c6aba7c8813315068f1e0cd360f774426e8db",
+  "command": "npm run test:e2e",
+  "browser": "Playwright Chromium",
+  "timezone": "America/Sao_Paulo",
+  "note": "Actual local browser captures. Synthetic fixtures only; no cloud deployment. Receipt/preview tokens are redacted in route templates.",
+  "screenshots": [
+    {
+      "file": "cms-editor-desktop.png",
+      "origin": "http://localhost:5173",
+      "route_template": "/admin/org-a/events/event-a/editions/edition-a/cms",
+      "viewport": "1440x1000",
+      "image_width": 1440,
+      "image_height": 3330,
+      "captured_at": "2026-10-19T13:42:46.568Z",
+      "sha256": "594bd2665b4794f43f8744f16d7b9576e2b184edc3183bea5ca3091fcbd3bec4"
+    },
+    {
+      "file": "cms-editor-mobile.png",
+      "origin": "http://localhost:5173",
+      "route_template": "/admin/org-a/events/event-a/editions/edition-a/cms",
+      "viewport": "390x844",
+      "image_width": 390,
+      "image_height": 7108,
+      "captured_at": "2026-10-19T13:43:14.766Z",
+      "sha256": "2b980200abee5bedf2b2ebda811362891a873523b867047e496155238dc3c7fe"
+    },
+    {
+      "file": "cms-preview-desktop.png",
+      "origin": "http://localhost:5173",
+      "route_template": "/preview/:token",
+      "viewport": "1440x1000",
+      "image_width": 1440,
+      "image_height": 1000,
+      "captured_at": "2026-10-19T13:42:47.165Z",
+      "sha256": "aec64050c8206452a33b3006ddda90ad7fbb59035be67256d9f6e1511aa3a6a0"
+    },
+    {
+      "file": "cms-preview-mobile.png",
+      "origin": "http://localhost:5173",
+      "route_template": "/preview/:token",
+      "viewport": "390x844",
+      "image_width": 390,
+      "image_height": 887,
+      "captured_at": "2026-10-19T13:43:15.382Z",
+      "sha256": "06862f501ce07b8cabca341c1e47091adb0adbd06da05119d943037b0314ea53"
+    },
+    {
+      "file": "operations-editor-desktop.png",
+      "origin": "http://localhost:5173",
+      "route_template": "/admin/org-a/events/event-a/editions/edition-a/operations",
+      "viewport": "1440x1000",
+      "image_width": 1440,
+      "image_height": 1018,
+      "captured_at": "2026-10-19T13:42:22.655Z",
+      "sha256": "7830f7595b154fc9709af1e4e5bbe548b803fe15dad65f0a9cfcfbf02ffde744"
+    },
+    {
+      "file": "operations-editor-mobile.png",
+      "origin": "http://localhost:5173",
+      "route_template": "/admin/org-a/events/event-a/editions/edition-a/operations",
+      "viewport": "390x844",
+      "image_width": 390,
+      "image_height": 1290,
+      "captured_at": "2026-10-19T13:42:52.400Z",
+      "sha256": "2798cb5fcc94da7100f1c75b48c74c0c69b26ea5f7077ee904dd412e1dfc4ac5"
+    },
+    {
+      "file": "published-program-desktop.png",
+      "origin": "http://evento-a.example.test:5173",
+      "route_template": "/programacao",
+      "viewport": "1440x1000",
+      "image_width": 1440,
+      "image_height": 1000,
+      "captured_at": "2026-10-19T13:42:24.885Z",
+      "sha256": "ac6d7d72802a073bdde3bea45577de96da81488b402f139a8ef4d848b060ea30"
+    },
+    {
+      "file": "published-program-mobile.png",
+      "origin": "http://evento-a.example.test:5173",
+      "route_template": "/programacao",
+      "viewport": "390x844",
+      "image_width": 390,
+      "image_height": 1024,
+      "captured_at": "2026-10-19T13:42:53.808Z",
+      "sha256": "cebe1924c3ca481f2504bbdfcd73d53d35e9c39c0bbc407adc8b8f882de861d9"
+    },
+    {
+      "file": "published-guests-desktop.png",
+      "origin": "http://evento-a.example.test:5173",
+      "route_template": "/convidados",
+      "viewport": "1440x1000",
+      "image_width": 1440,
+      "image_height": 1000,
+      "captured_at": "2026-10-19T13:42:25.352Z",
+      "sha256": "3c9d287966bd1172ab45b56f966d86d63472164ebcc6731535212dce9b764339"
+    },
+    {
+      "file": "published-guests-mobile.png",
+      "origin": "http://evento-a.example.test:5173",
+      "route_template": "/convidados",
+      "viewport": "390x844",
+      "image_width": 390,
+      "image_height": 844,
+      "captured_at": "2026-10-19T13:42:54.271Z",
+      "sha256": "4e04c300e16b6b77bbb0734669e449fd2cc1a6b786c999dc507ca3dc0727aace"
+    }
+  ]
+}
