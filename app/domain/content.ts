@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { operationsSchema, emptyOperations } from "./operations";
 
 const shortText = z.string().trim().min(1).max(180);
 const paragraph = z.string().trim().min(1).max(3000);
@@ -84,6 +85,7 @@ export const contentSectionSchema = z.discriminatedUnion("type", [
 export const contentDocumentSchema = z
   .object({
     siteName: shortText,
+    operations: operationsSchema.default(emptyOperations),
     title: shortText,
     description: z.string().trim().max(320).default(""),
     pages: z
@@ -188,6 +190,7 @@ export type ContentDocument = z.infer<typeof contentDocumentSchema>;
 export type ContentSection = z.infer<typeof contentSectionSchema>;
 
 export const starterContent: ContentDocument = {
+  operations: emptyOperations,
   siteName: "Novo evento",
   title: "Novo evento — informações oficiais",
   description: "Informações da próxima edição.",

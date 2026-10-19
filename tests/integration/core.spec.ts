@@ -6,6 +6,7 @@ import {
 } from "@playwright/test";
 import { setTimeout as delay } from "node:timers/promises";
 import { starterContent, type ContentDocument } from "../../app/domain/content";
+import type { OperationKind } from "../../app/domain/operations";
 
 const origin = "http://localhost:5173";
 const password = "TEST_ONLY-Local-2026!";
@@ -1187,4 +1188,212 @@ test("CMS publishes immutable tenant snapshots, previews privately, and rolls ba
       revision: initialPublicationRevision + 3,
     }),
   );
+});
+
+test("edition operations reject resource conflicts, isolate roles, and remain private until snapshot publication", async () => {
+  const owner = client("owner-a");
+  const base = "/api/v1/orgs/org-a/editions/edition-a";
+  const current = (await (await owner.get(`${base}/draft`)).json()) as {
+    revision: number;
+  };
+  const reset = await owner.post(`${base}/draft`, {
+    data: {
+      expectedRevision: current.revision,
+      content: structuredClone(starterContent),
+    },
+  });
+  expect(reset.status(), await reset.text()).toBe(201);
+  let revision = ((await reset.json()) as { revision: number }).revision;
+  const create = async (kind: OperationKind, data: Record<string, unknown>) => {
+    const response = await owner.post(`${base}/${kind}`, {
+      data: { expectedRevision: revision, data },
+    });
+    expect(response.status(), await response.text()).toBe(201);
+    const saved = (await response.json()) as { id: string; revision: number };
+    revision = saved.revision;
+    return saved.id;
+  };
+  const stageA = await create("stages", { name: "Palco Aurora" });
+  const stageB = await create("stages", { name: "Palco Horizonte" });
+  const guest = await create("guests", {
+    name: "Convidada sintética Aurora",
+    description: "Perfil aprovado para o evento fictício.",
+    status: "public",
+  });
+  await create("guests", { name: "NÃO PUBLICAR — perfil em preparação" });
+  await create("exhibitors", {
+    name: "Listagem sintética autorizada",
+    status: "public",
+    publicOptIn: true,
+  });
+  await create("exhibitors", {
+    name: "NÃO PUBLICAR — sem consentimento",
+    status: "public",
+    publicOptIn: false,
+  });
+  await create("sponsors", {
+    name: "Apoio sintético",
+    status: "public",
+    website: "https://example.test/apoio",
+  });
+  expect((await client("owner-b").get(`${base}/guests`)).status()).toBe(403);
+  expect(
+    (await owner.get("/api/v1/orgs/org-a/editions/edition-b/program")).status(),
+  ).toBe(404);
+  expect(
+    (
+      await client("editor-a").post(`${base}/stages`, {
+        data: { expectedRevision: revision, data: { name: "Forjado" } },
+      })
+    ).status(),
+  ).toBe(403);
+  const activity = {
+    title: "Abertura da edição sintética",
+    stageId: stageA,
+    startAt: "2027-06-12T12:00:00Z",
+    endAt: "2027-06-12T13:00:00Z",
+    guestIds: [guest],
+    status: "public",
+  };
+  const itemId = await create("program", activity);
+  const conflict = await owner.post(`${base}/program`, {
+    data: {
+      expectedRevision: revision,
+      data: {
+        ...activity,
+        title: "Sobreposição",
+        startAt: "2027-06-12T12:30:00Z",
+        endAt: "2027-06-12T13:30:00Z",
+      },
+    },
+  });
+  expect(conflict.status()).toBe(400);
+  expect(await conflict.text()).toContain("Conflito de palco");
+  const guestConflict = await owner.post(`${base}/program`, {
+    data: {
+      expectedRevision: revision,
+      data: { ...activity, stageId: stageB },
+    },
+  });
+  expect(guestConflict.status()).toBe(400);
+  expect(await guestConflict.text()).toContain("Conflito de convidado");
+  await create("program", {
+    ...activity,
+    title: "Encontro no segundo palco",
+    stageId: stageB,
+    startAt: "2027-06-12T13:00:00Z",
+    endAt: "2027-06-12T14:00:00Z",
+  });
+  for (const data of [
+    { ...activity, stageId: "foreign-stage" },
+    {
+      ...activity,
+      startAt: "2027-06-13T12:00:00Z",
+      endAt: "2027-06-13T13:00:00Z",
+    },
+  ])
+    expect(
+      (
+        await owner.post(`${base}/program`, {
+          data: { expectedRevision: revision, data },
+        })
+      ).status(),
+    ).toBe(400);
+  expect(
+    (
+      await owner.post(`${base}/sponsors`, {
+        data: {
+          expectedRevision: revision,
+          data: { name: "URL maliciosa", website: "javascript:alert(1)" },
+        },
+      })
+    ).status(),
+  ).toBe(400);
+  const doc = (await (await owner.get(`${base}/draft`)).json()) as {
+    revision: number;
+    content: ContentDocument;
+  };
+  doc.content.operations.stages.push({
+    id: "forged",
+    name: "Escalada",
+    accessibility: "",
+  });
+  expect(
+    (
+      await client("editor-a").post(`${base}/draft`, {
+        data: { expectedRevision: revision, content: doc.content },
+      })
+    ).status(),
+  ).toBe(403);
+  const history = (await (await owner.get(`${base}/revisions`)).json()) as {
+    current: { revision: number } | null;
+  };
+  let pubRevision = history.current?.revision ?? 0;
+  const publish = async () => {
+    const response = await owner.post(`${base}/publish`, {
+      data: {
+        draftRevision: revision,
+        expectedPublicationRevision: pubRevision,
+      },
+    });
+    expect(response.status(), await response.text()).toBe(201);
+    const pub = (await response.json()) as {
+      publicationId: string;
+      revision: number;
+    };
+    pubRevision = pub.revision;
+    return pub.publicationId;
+  };
+  const publicGet = (path: string) =>
+    owner.get(path, { headers: { Host: "evento-a.example.test" } });
+  const first = await publish();
+  const agenda = await publicGet("/programacao");
+  expect(agenda.status()).toBe(200);
+  expect(await agenda.text()).toContain(activity.title);
+  const filtered = await publicGet(`/programacao?stage=${stageA}`);
+  const filteredHtml = await filtered.text();
+  expect(filteredHtml).toContain(activity.title);
+  expect(filteredHtml).not.toContain("<h2>Encontro no segundo palco</h2>");
+  const guestHtml = await (await publicGet("/convidados")).text();
+  expect(guestHtml).toContain("Convidada sintética Aurora");
+  expect(guestHtml).not.toContain("NÃO PUBLICAR");
+  const exhibitorHtml = await (await publicGet("/expositores")).text();
+  expect(exhibitorHtml).toContain("Listagem sintética autorizada");
+  expect(exhibitorHtml).not.toContain("sem consentimento");
+  expect(await (await publicGet("/sitemap.xml")).text()).toContain(
+    "/programacao",
+  );
+  const modified = await owner.patch(`${base}/program/${itemId}`, {
+    data: {
+      expectedRevision: revision,
+      data: { ...activity, title: "Título atualizado no rascunho" },
+    },
+  });
+  expect(modified.status(), await modified.text()).toBe(200);
+  revision = ((await modified.json()) as { revision: number }).revision;
+  expect(await (await publicGet("/programacao")).text()).not.toContain(
+    "Título atualizado no rascunho",
+  );
+  await publish();
+  expect(await (await publicGet("/programacao")).text()).toContain(
+    "Título atualizado no rascunho",
+  );
+  const rollback = await owner.post(`${base}/rollback`, {
+    data: {
+      targetPublicationId: first,
+      expectedPublicationRevision: pubRevision,
+    },
+  });
+  expect(rollback.status()).toBe(201);
+  expect(await (await publicGet("/programacao")).text()).toContain(
+    activity.title,
+  );
+  const concurrent = await Promise.all(
+    ["Palco C", "Palco D"].map((name) =>
+      owner.post(`${base}/stages`, {
+        data: { expectedRevision: revision, data: { name } },
+      }),
+    ),
+  );
+  expect(concurrent.map((r) => r.status()).sort()).toEqual([201, 409]);
 });

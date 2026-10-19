@@ -61,16 +61,15 @@ export default {
         const requestedSegments = url.pathname.split("/").filter(Boolean);
         if (requestedSegments.length > 1)
           throw new Response("Página não encontrada", { status: 404 });
-        let slug = "home";
         if (requestedSegments.length === 1) {
           try {
-            slug = decodeURIComponent(requestedSegments[0]!);
+            decodeURIComponent(requestedSegments[0]!);
           } catch {
             throw new Response("Página não encontrada", { status: 404 });
           }
         }
-        // A custom host reaches the public SSR loader, which requires an active,
-        // ownership-verified binding before reading any tenant publication.
+        // The browser and SSR must match the same public route. Rewriting the
+        // pathname to an internal route breaks hydration and client navigation.
         const publicSite = await resolvePublicSite(request, env);
         publicRevision = publicSite.publicationRevision;
         if (env.APP_ENV !== "local" && url.protocol !== "https:") {
@@ -79,11 +78,7 @@ export default {
             308,
           );
         } else {
-          const publicUrl = new URL(
-            `/_public/${encodeURIComponent(slug)}${url.search}`,
-            url.origin,
-          );
-          response = await requestHandler(new Request(publicUrl, request));
+          response = await requestHandler(request);
         }
       }
     } catch (error) {

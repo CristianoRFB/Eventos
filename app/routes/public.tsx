@@ -1,6 +1,8 @@
 import { env } from "cloudflare:workers";
 import { data as routeData, redirect } from "react-router";
 import type { Route } from "./+types/public";
+import { OperationDirectory } from "../components/operation-directory";
+import { publicOperations } from "../domain/operations";
 import {
   readPreviewToken,
   resolvePublicSite,
@@ -16,7 +18,28 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       throw new Response("Preview não encontrado", { status: 404 });
     const data = await readPreviewToken(env, params.token);
     const content = data.content;
-    const page = content.pages.find((candidate) => candidate.slug === "home");
+    try {
+      content.operations = publicOperations(content.operations);
+    } catch {
+      throw new Response(
+        "A programação pública precisa de perfis de convidados prontos para publicar",
+        { status: 400 },
+      );
+    }
+    const previewSlug = url.searchParams.get("page") ?? "home";
+    const page = content.pages.find(
+      (candidate) => candidate.slug === previewSlug,
+    );
+    const operationKind = [
+      "programacao",
+      "convidados",
+      "expositores",
+      "patrocinadores",
+    ].includes(previewSlug)
+      ? previewSlug
+      : "";
+    if (!page && !operationKind)
+      throw new Response("Página não encontrada", { status: 404 });
     return routeData(
       {
         mode: "preview" as const,
@@ -35,6 +58,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
             ),
           ) ?? [],
         content,
+        previewPath: `/preview/${encodeURIComponent(params.token)}`,
+        operationKind,
+        timeZone: data.timeZone,
+        operationFilter: {
+          day: url.searchParams.get("day") ?? "",
+          stage: url.searchParams.get("stage") ?? "",
+        },
       },
       {
         headers: {
@@ -48,6 +78,19 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const site = await resolvePublicSite(request, env);
   const slug = params.slug ?? "home";
   let page = publicPage(site, slug);
+  const operationTitles: Record<string, string> = {
+    programacao: "Programação",
+    convidados: "Convidados",
+    expositores: "Expositores",
+    patrocinadores: "Patrocinadores",
+  };
+  if (Object.hasOwn(operationTitles, slug))
+    page = {
+      slug,
+      title: operationTitles[slug]!,
+      description: `${operationTitles[slug]} de ${site.eventName}.`,
+      sections: [],
+    };
   if (!page) {
     const storedRedirect = await findPublicRedirect(env, site, slug);
     if (storedRedirect) {
@@ -110,6 +153,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       pageTitle: page.title,
       sections: page.sections.map((section) => renderSection(section)),
       page,
+      operationFilter: {
+        day: url.searchParams.get("day") ?? "",
+        stage: url.searchParams.get("stage") ?? "",
+      },
     },
     { headers: publicHeaders(site.publicationRevision) },
   );
@@ -126,6 +173,11 @@ function publicHeaders(revision: number) {
 }
 
 export function meta({ loaderData }: Route.MetaArgs) {
+  return publicMeta(loaderData);
+}
+export function publicMeta(
+  loaderData: Route.ComponentProps["loaderData"] | undefined,
+) {
   if (!loaderData)
     return [
       { title: "Evento indisponível" },
@@ -247,7 +299,11 @@ function Section({
   }
 }
 
-export default function PublicPage({ loaderData }: Route.ComponentProps) {
+export default function PublicPage({
+  loaderData,
+}: {
+  loaderData: Route.ComponentProps["loaderData"];
+}) {
   const { mode, siteName, organizationName, editionName, pageTitle, sections } =
     loaderData;
   const site = mode === "preview" ? null : loaderData.site;
@@ -263,6 +319,15 @@ export default function PublicPage({ loaderData }: Route.ComponentProps) {
   const edition = site?.editionName ?? editionName;
   const city = site?.city ?? "";
   const startAt = site?.startAt ?? null;
+  const previewPath =
+    loaderData.mode === "preview" ? loaderData.previewPath : "";
+  const pageUrl = (slug: string) =>
+    previewPath
+      ? `${previewPath}${slug === "home" ? "" : `?page=${slug}`}`
+      : slug === "home"
+        ? "/"
+        : `/${slug}`;
+  const operations = site?.content.operations ?? content?.operations;
   return (
     <div
       className="public-site"
@@ -275,13 +340,27 @@ export default function PublicPage({ loaderData }: Route.ComponentProps) {
       }
     >
       <header className="public-header">
-        <a className="brand" href="/">
+        <a className="brand" href={pageUrl("home")}>
           {siteName}
         </a>
         <nav aria-label="Navegação do evento">
-          <a href="/">Início</a>
-          <a href="/edicoes">Edições</a>
-          <a href="/faq">Perguntas</a>
+          <a href={pageUrl("home")}>Início</a>
+          {!previewPath && <a href="/edicoes">Edições</a>}
+          {!!operations?.program.length && (
+            <a href={pageUrl("programacao")}>Programação</a>
+          )}
+          {!!operations?.guests.length && (
+            <a href={pageUrl("convidados")}>Convidados</a>
+          )}
+          {!!operations?.exhibitors.length && (
+            <a href={pageUrl("expositores")}>Expositores</a>
+          )}
+          {!!operations?.sponsors.length && (
+            <a href={pageUrl("patrocinadores")}>Patrocinadores</a>
+          )}
+          {(site || content?.pages.some((p) => p.slug === "faq")) && (
+            <a href={pageUrl("faq")}>Perguntas</a>
+          )}
           {ticketUrl && (
             <a className="button" href={ticketUrl} rel="noopener noreferrer">
               Ingressos ↗
@@ -335,6 +414,16 @@ export default function PublicPage({ loaderData }: Route.ComponentProps) {
             {sections.map((section, index) => (
               <Section section={section} key={`${section.type}-${index}`} />
             ))}
+            {loaderData.mode === "preview" && loaderData.operationKind && (
+              <OperationDirectory
+                ops={loaderData.content.operations}
+                kind={loaderData.operationKind}
+                timeZone={loaderData.timeZone}
+                assetPrefix={`${loaderData.previewPath}/assets`}
+                previewPage={loaderData.operationKind}
+                {...loaderData.operationFilter}
+              />
+            )}
             {ticketUrl && (
               <section className="public-cta">
                 <a
@@ -346,12 +435,36 @@ export default function PublicPage({ loaderData }: Route.ComponentProps) {
                 </a>
               </section>
             )}
-            {!sections.length && (
-              <section className="public-section">
-                <h1>{pageTitle}</h1>
-                <p>As informações desta página serão publicadas em breve.</p>
-              </section>
-            )}
+            {loaderData.mode === "site" &&
+              [
+                "programacao",
+                "convidados",
+                "expositores",
+                "patrocinadores",
+              ].includes(loaderData.page.slug) && (
+                <OperationDirectory
+                  ops={loaderData.site.content.operations}
+                  kind={loaderData.page.slug}
+                  timeZone={loaderData.site.timezone}
+                  {...loaderData.operationFilter}
+                />
+              )}
+            {!sections.length &&
+              !(loaderData.mode === "preview" && loaderData.operationKind) &&
+              !(
+                loaderData.mode === "site" &&
+                [
+                  "programacao",
+                  "convidados",
+                  "expositores",
+                  "patrocinadores",
+                ].includes(loaderData.page.slug)
+              ) && (
+                <section className="public-section">
+                  <h1>{pageTitle}</h1>
+                  <p>As informações desta página serão publicadas em breve.</p>
+                </section>
+              )}
           </>
         )}
       </main>

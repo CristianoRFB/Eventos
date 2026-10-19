@@ -87,6 +87,14 @@ export default function EventPage({ loaderData }: Route.ComponentProps) {
               {canManageContent && (
                 <a
                   className="cms-link"
+                  href={`/admin/${organization.id}/events/${event.id}/editions/${edition.id}/operations`}
+                >
+                  Programação e participantes ↗
+                </a>
+              )}
+              {canManageContent && (
+                <a
+                  className="cms-link"
                   href={`/admin/${organization.id}/events/${event.id}/editions/${edition.id}/cms`}
                 >
                   Conteúdo e publicação ↗

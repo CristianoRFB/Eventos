@@ -15,6 +15,8 @@ import { requireTenant, auditStatement } from "./tenant.server";
 import type { AuthEnvironment } from "../infrastructure/auth.server";
 import { privateHeaders } from "../infrastructure/security.server";
 import { readJsonBody } from "../infrastructure/request.server";
+import { validateOperations, operationStatements } from "./operations.server";
+import { publicOperations, emptyOperations } from "../domain/operations";
 
 const revisionInput = z.number().int().nonnegative();
 const publishInput = z
@@ -78,6 +80,12 @@ function sectionAssetIds(content: ContentDocument): string[] {
       if (section.type === "gallery") ids.push(...section.assetIds);
     }
   }
+  for (const profile of [
+    ...content.operations.guests,
+    ...content.operations.exhibitors,
+    ...content.operations.sponsors,
+  ])
+    if (profile.imageAssetId) ids.push(profile.imageAssetId);
   return [...new Set(ids)];
 }
 
@@ -170,7 +178,7 @@ function pointerCas(
     );
 }
 
-async function saveDraft(
+export async function saveDraft(
   request: Request,
   env: AuthEnvironment,
   orgId: string,
@@ -192,10 +200,10 @@ async function saveDraft(
     .strict()
     .parse(await readJsonBody(request));
   const latest = await env.DB.prepare(
-    "SELECT revision FROM content_drafts WHERE organization_id=? AND edition_id=? ORDER BY revision DESC LIMIT 1",
+    "SELECT revision,content_json FROM content_drafts WHERE organization_id=? AND edition_id=? ORDER BY revision DESC LIMIT 1",
   )
     .bind(orgId, editionId)
-    .first<{ revision: number }>();
+    .first<{ revision: number; content_json: string }>();
   if ((latest?.revision ?? 0) !== body.expectedRevision)
     return privateJson(
       {
@@ -205,6 +213,17 @@ async function saveDraft(
       409,
     );
   const revision = body.expectedRevision + 1;
+  const previous = latest
+    ? contentDocumentSchema.parse(JSON.parse(latest.content_json)).operations
+    : emptyOperations;
+  await validateOperations(
+    request,
+    env,
+    orgId,
+    edition,
+    body.content.operations,
+    previous,
+  );
   const draftId = crypto.randomUUID();
   const statements: D1PreparedStatement[] = [
     env.DB.prepare(
@@ -282,6 +301,15 @@ async function saveDraft(
       }
     }
   }
+  statements.push(
+    ...operationStatements(
+      env.DB,
+      orgId,
+      editionId,
+      draftId,
+      body.content.operations,
+    ),
+  );
   statements.push(
     env.DB.prepare(
       `INSERT INTO audit_events(id,organization_id,actor_id,action,resource_type,resource_id,diff_safe_json)
@@ -420,13 +448,14 @@ export async function readPreviewToken(env: AuthEnvironment, token: string) {
       status: 410,
     });
   const result = await env.DB.prepare(
-    "SELECT d.content_json,d.revision,e.name AS edition_name,e.event_id,e.status AS edition_status,o.name AS organization_name,o.status AS organization_status FROM content_drafts d JOIN editions e ON e.organization_id=d.organization_id AND e.id=d.edition_id JOIN organizations o ON o.id=d.organization_id WHERE d.organization_id=? AND d.edition_id=? AND d.id=?",
+    "SELECT d.content_json,d.revision,e.name AS edition_name,e.time_zone,e.event_id,e.status AS edition_status,o.name AS organization_name,o.status AS organization_status FROM content_drafts d JOIN editions e ON e.organization_id=d.organization_id AND e.id=d.edition_id JOIN organizations o ON o.id=d.organization_id WHERE d.organization_id=? AND d.edition_id=? AND d.id=?",
   )
     .bind(claims.orgId, claims.editionId, claims.draftId)
     .first<{
       content_json: string;
       revision: number;
       edition_name: string;
+      time_zone: string;
       event_id: string;
       edition_status: string;
       organization_name: string;
@@ -442,6 +471,7 @@ export async function readPreviewToken(env: AuthEnvironment, token: string) {
     content: contentDocumentSchema.parse(JSON.parse(result.content_json)),
     revision: result.revision,
     editionName: result.edition_name,
+    timeZone: result.time_zone,
     organizationName: result.organization_name,
     organizationId: claims.orgId,
     editionId: claims.editionId,
@@ -549,6 +579,22 @@ async function publish(
     .first<Draft>();
   if (!draft) throw new Response("Rascunho não encontrado", { status: 404 });
   const snapshot = contentDocumentSchema.parse(JSON.parse(draft.content_json));
+  await validateOperations(
+    request,
+    env,
+    orgId,
+    edition,
+    snapshot.operations,
+    snapshot.operations,
+  );
+  try {
+    snapshot.operations = publicOperations(snapshot.operations);
+  } catch {
+    throw new Response(
+      "Publique os perfis dos convidados antes de publicar suas atividades",
+      { status: 400 },
+    );
+  }
   await assertPublishableAssets(env.DB, orgId, edition, snapshot);
   const publicationId = crypto.randomUUID();
   try {
@@ -1079,6 +1125,14 @@ export async function servePublicMetadata(
       { headers },
     );
   const paths = new Set(["/", "/edicoes"]);
+  const ops = site.content.operations;
+  for (const [path, items] of [
+    ["programacao", ops.program],
+    ["convidados", ops.guests],
+    ["expositores", ops.exhibitors],
+    ["patrocinadores", ops.sponsors],
+  ] as const)
+    if (items.length) paths.add(`/${path}`);
   for (const page of site.content.pages) {
     if (page.slug !== "home") paths.add(`/${encodeURIComponent(page.slug)}`);
   }

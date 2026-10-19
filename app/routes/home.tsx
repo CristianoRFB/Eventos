@@ -1,4 +1,15 @@
-export function meta() {
+import { env } from "cloudflare:workers";
+import type { Route } from "./+types/home";
+import PublicPage, { loader as publicLoader, publicMeta } from "./public";
+
+export async function loader(args: Route.LoaderArgs) {
+  if (new URL(args.request.url).origin === new URL(env.ADMIN_ORIGIN).origin)
+    return { mode: "landing" as const };
+  return publicLoader({ ...args, params: { slug: "home" } });
+}
+export function meta({ loaderData }: Route.MetaArgs) {
+  if (loaderData && loaderData.mode !== "landing")
+    return publicMeta(loaderData);
   return [
     { title: "Eventos 77 — Sua próxima edição começa aqui" },
     {
@@ -10,7 +21,9 @@ export function meta() {
   ];
 }
 
-export default function Home() {
+export default function Home({ loaderData }: Route.ComponentProps) {
+  if (loaderData.mode !== "landing")
+    return <PublicPage loaderData={loaderData} />;
   return (
     <div className="landing">
       <header className="topbar">

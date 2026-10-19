@@ -526,6 +526,11 @@ export const contentDrafts = sqliteTable(
   },
   (table) => [
     unique("content_drafts_org_id_unique").on(table.organizationId, table.id),
+    unique("content_drafts_edition_id_unique").on(
+      table.organizationId,
+      table.editionId,
+      table.id,
+    ),
     unique("content_drafts_edition_revision_unique").on(
       table.organizationId,
       table.editionId,

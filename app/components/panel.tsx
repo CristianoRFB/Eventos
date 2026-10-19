@@ -72,13 +72,23 @@ export function ApiForm({
           transform ? transform(form) : Object.fromEntries(form),
         ),
       });
-      const result = (await response
-        .json()
-        .catch(() => ({ error: "Não foi possível salvar" }))) as {
+      const result = (
+        response.headers.get("Content-Type")?.includes("application/json")
+          ? await response.json()
+          : { error: await response.text() }
+      ) as {
         error?: string;
+        fields?: { message: string }[];
       };
       if (!response.ok) {
-        setMessage(result.error ?? "Confira os dados e tente novamente");
+        setMessage(
+          result.fields
+            ?.slice(0, 6)
+            .map((field) => field.message)
+            .join(" · ") ||
+            result.error ||
+            "Confira os dados e tente novamente",
+        );
         return;
       }
       window.location.reload();

@@ -22,7 +22,9 @@ import {
   uploadImage,
 } from "../infrastructure/media.server";
 import { readJsonBody } from "../infrastructure/request.server";
-import { handleContentApi } from "./content.server";
+import { handleContentApi, saveDraft } from "./content.server";
+import { handleOperationsApi } from "./operations.server";
+import type { OperationKind } from "../domain/operations";
 
 const slug = z
   .string()
@@ -170,6 +172,19 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
   const [, orgId, resource] = match;
   if (resource === "invitations" || resource.startsWith("invitations/"))
     return handleInvitations(request, env, orgId, resource);
+  const operationsRoute = resource.match(
+    /^editions\/([^/]+)\/(stages|program|guests|exhibitors|sponsors)(?:\/([^/]+))?$/,
+  );
+  if (operationsRoute)
+    return handleOperationsApi(
+      request,
+      env,
+      orgId,
+      operationsRoute[1]!,
+      operationsRoute[2] as OperationKind,
+      operationsRoute[3],
+      saveDraft,
+    );
   const contentRoute = resource.match(
     /^editions\/([^/]+)\/(draft|preview|publish|rollback|revisions)$/,
   );

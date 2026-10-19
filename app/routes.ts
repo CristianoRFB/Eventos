@@ -11,6 +11,10 @@ export default [
     "routes/cms.tsx",
   ),
   route("platform", "routes/platform.tsx"),
+  route(
+    "admin/:orgId/events/:eventId/editions/:editionId/operations",
+    "routes/operations.tsx",
+  ),
   route("preview/:token", "routes/public.tsx", { id: "public-preview" }),
-  route("_public/:slug", "routes/public.tsx", { id: "public-site" }),
+  route(":slug", "routes/public.tsx", { id: "public-site" }),
 ] satisfies RouteConfig;

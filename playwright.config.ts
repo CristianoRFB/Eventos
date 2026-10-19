@@ -17,6 +17,9 @@ export default defineConfig({
     baseURL: "http://localhost:5173",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
+    launchOptions: {
+      args: ["--host-resolver-rules=MAP *.example.test 127.0.0.1"],
+    },
   },
   projects: [
     { name: "api", testMatch: "integration/**/*.spec.ts" },

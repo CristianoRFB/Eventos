@@ -1,7 +1,145 @@
 import { expect, test, type Page, type TestInfo } from "@playwright/test";
 import { setTimeout as delay } from "node:timers/promises";
+import type { ContentDocument } from "../../app/domain/content";
 
 const password = "TEST_ONLY-Local-2026!";
+
+test("edition operations editor saves and public snapshot is navigable without admin cookies", async ({
+  page,
+}, testInfo) => {
+  const browserErrors: string[] = [];
+  page.on("pageerror", (error) => browserErrors.push(error.message));
+  await signIn(page, "owner-a");
+  const base = "/api/v1/orgs/org-a/editions/edition-a";
+  await page.goto("/admin/org-a/events/event-a/editions/edition-a/operations");
+  await expect(
+    page.getByRole("heading", {
+      name: "Programação e participantes",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page.getByLabel("Cadastro", { exact: true }).selectOption("stages");
+  await page
+    .getByLabel("Nome", { exact: true })
+    .fill(`Palco da interface ${testInfo.project.name}`);
+  const saved = page.waitForResponse(
+    (r) =>
+      r.url().endsWith(`${base}/stages`) && r.request().method() === "POST",
+  );
+  await page
+    .getByRole("button", { name: "Salvar no rascunho", exact: true })
+    .click();
+  expect((await saved).status()).toBe(201);
+  await expect(page.getByLabel("Cadastro", { exact: true })).toHaveValue(
+    "program",
+  );
+  await page.getByLabel("Cadastro", { exact: true }).selectOption("stages");
+  await expect(
+    page.getByRole("heading", {
+      name: `Palco da interface ${testInfo.project.name}`,
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await screenshot(page, testInfo, "operations-editor");
+
+  const draft = (await (await page.request.get(`${base}/draft`)).json()) as {
+    revision: number;
+    content: ContentDocument;
+  };
+  draft.content.operations = {
+    stages: [
+      {
+        id: "e2e-stage",
+        name: "Palco sintético principal",
+        accessibility: "Acesso sem degraus — demonstração",
+      },
+    ],
+    guests: [
+      {
+        id: "e2e-guest",
+        name: "Convidada de demonstração",
+        description: "Perfil fictício aprovado",
+        website: "",
+        status: "public",
+      },
+    ],
+    program: [
+      {
+        id: "e2e-program",
+        title: "Conversa de demonstração",
+        description: "Atividade fictícia",
+        stageId: "e2e-stage",
+        startAt: "2027-06-12T15:00:00.000Z",
+        endAt: "2027-06-12T16:00:00.000Z",
+        guestIds: ["e2e-guest"],
+        status: "public",
+      },
+    ],
+    exhibitors: [],
+    sponsors: [],
+  };
+  const save = await page.request.post(`${base}/draft`, {
+    headers: { Origin: "http://localhost:5173" },
+    data: { expectedRevision: draft.revision, content: draft.content },
+  });
+  expect(save.status(), await save.text()).toBe(201);
+  const { revision } = (await save.json()) as { revision: number };
+  const history = (await (
+    await page.request.get(`${base}/revisions`)
+  ).json()) as { current: { revision: number } | null };
+  const publish = await page.request.post(`${base}/publish`, {
+    headers: { Origin: "http://localhost:5173" },
+    data: {
+      draftRevision: revision,
+      expectedPublicationRevision: history.current?.revision ?? 0,
+    },
+  });
+  expect(publish.status(), await publish.text()).toBe(201);
+
+  await page.goto("http://evento-a.example.test:5173/programacao");
+  await expect(
+    page.getByRole("heading", {
+      name: "Conversa de demonstração",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Convidada de demonstração", { exact: true }),
+  ).toBeVisible();
+  await page.getByLabel("Palco", { exact: true }).selectOption("e2e-stage");
+  await page.getByRole("button", { name: "Filtrar programação" }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Conversa de demonstração",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  expect(
+    await page.context().cookies("http://evento-a.example.test:5173"),
+  ).toHaveLength(0);
+  await screenshot(page, testInfo, "published-program");
+  await page.getByRole("link", { name: "Convidados", exact: true }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Convidada de demonstração",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await screenshot(page, testInfo, "published-guests");
+  await page.getByRole("link", { name: "Início", exact: true }).click();
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "http://evento-a.example.test:5173/",
+  );
+  expect(browserErrors).toEqual([]);
+  const forbidden = await page.goto(
+    "http://evento-a.example.test:5173/admin/org-a",
+  );
+  expect(forbidden?.status()).toBe(404);
+});
 
 async function screenshot(page: Page, testInfo: TestInfo, name: string) {
   await page.screenshot({
@@ -171,9 +309,7 @@ test("CMS editor exposes private preview and revision history at this viewport",
   await page.getByRole("link", { name: /Organizadora Aurora/ }).click();
   await page.getByRole("link", { name: /Encontro A — fictício/ }).click();
   await page
-    .locator(
-      'a[href="/admin/org-a/events/event-a/editions/edition-a/cms"]',
-    )
+    .locator('a[href="/admin/org-a/events/event-a/editions/edition-a/cms"]')
     .click();
   await expect(
     page.getByRole("heading", {
