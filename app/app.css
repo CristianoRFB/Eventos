@@ -16,7 +16,9 @@ a {
   text-decoration: none;
 }
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 button,
@@ -26,7 +28,9 @@ input {
 }
 a:focus-visible,
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
   outline: 3px solid #ee8c4d;
   outline-offset: 4px;
 }
@@ -186,7 +190,9 @@ label {
   font-size: 13px;
   font-weight: 600;
 }
-input {
+input,
+select,
+textarea {
   width: 100%;
   min-width: 0;
   border: 1px solid #cbd4c9;
@@ -196,6 +202,26 @@ input {
   padding: 10px 12px;
   color: #192b2b;
   margin: 6px 0 12px;
+}
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+input[type="checkbox"] {
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+  margin: 0 8px 0 0;
+  vertical-align: middle;
+}
+.form-grid fieldset {
+  border: 1px solid #cbd4c9;
+  border-radius: 6px;
+  padding: 12px;
+}
+.form-grid fieldset label {
+  display: block;
+  margin: 8px 0;
 }
 .login-card .button {
   margin-top: 12px;
