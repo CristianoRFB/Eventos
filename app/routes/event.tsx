@@ -49,6 +49,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         "content_editor",
         "publisher",
       ].includes(ctx.member.role),
+      canReview: [
+        "organization_owner",
+        "organization_admin",
+        "event_manager",
+        "reviewer_staff",
+      ].includes(ctx.member.role),
     };
   } catch (error) {
     if (error instanceof Response && error.status === 401)
@@ -57,8 +63,14 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   }
 }
 export default function EventPage({ loaderData }: Route.ComponentProps) {
-  const { organization, event, editions, canCreate, canManageContent } =
-    loaderData;
+  const {
+    organization,
+    event,
+    editions,
+    canCreate,
+    canManageContent,
+    canReview,
+  } = loaderData;
   return (
     <Panel name={organization.name}>
       <a href={`/admin/${organization.id}`} className="muted">
@@ -90,6 +102,22 @@ export default function EventPage({ loaderData }: Route.ComponentProps) {
                   href={`/admin/${organization.id}/events/${event.id}/editions/${edition.id}/operations`}
                 >
                   Programação e participantes ↗
+                </a>
+              )}
+              {canCreate && (
+                <a
+                  className="cms-link"
+                  href={`/admin/${organization.id}/events/${event.id}/editions/${edition.id}/forms`}
+                >
+                  Formulários e inscrições ↗
+                </a>
+              )}
+              {canReview && (
+                <a
+                  className="cms-link"
+                  href={`/admin/${organization.id}/events/${event.id}/editions/${edition.id}/applications`}
+                >
+                  Candidaturas ↗
                 </a>
               )}
               {canManageContent && (

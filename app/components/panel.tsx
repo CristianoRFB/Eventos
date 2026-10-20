@@ -50,12 +50,14 @@ export function ApiForm({
   children,
   transform,
   label = "Salvar",
+  onSuccess,
 }: {
   endpoint: string;
   method?: string;
   children: ReactNode;
   transform?: (form: FormData) => unknown;
   label?: string;
+  onSuccess?: (result: Record<string, unknown>) => void;
 }) {
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
@@ -91,7 +93,8 @@ export function ApiForm({
         );
         return;
       }
-      window.location.reload();
+      if (onSuccess) onSuccess(result);
+      else window.location.reload();
     } catch {
       setMessage("Não foi possível conectar. Tente novamente.");
     } finally {

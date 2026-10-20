@@ -17,6 +17,7 @@ import { privateHeaders } from "../infrastructure/security.server";
 import { readJsonBody } from "../infrastructure/request.server";
 import { validateOperations, operationStatements } from "./operations.server";
 import { publicOperations, emptyOperations } from "../domain/operations";
+import { validateContentForms, filterConsentedProfiles } from "./forms.server";
 
 const revisionInput = z.number().int().nonnegative();
 const publishInput = z
@@ -183,6 +184,10 @@ export async function saveDraft(
   env: AuthEnvironment,
   orgId: string,
   editionId: string,
+  extraStatements?: (
+    draftId: string,
+    revision: number,
+  ) => D1PreparedStatement[],
 ) {
   const { edition, actor } = await editionContext(
     request,
@@ -223,6 +228,17 @@ export async function saveDraft(
     edition,
     body.content.operations,
     previous,
+  );
+  const previousForms = latest
+    ? contentDocumentSchema.parse(JSON.parse(latest.content_json)).forms
+    : [];
+  await validateContentForms(
+    request,
+    env,
+    orgId,
+    edition,
+    body.content.forms,
+    previousForms,
   );
   const draftId = crypto.randomUUID();
   const statements: D1PreparedStatement[] = [
@@ -310,6 +326,7 @@ export async function saveDraft(
       body.content.operations,
     ),
   );
+  if (extraStatements) statements.push(...extraStatements(draftId, revision));
   statements.push(
     env.DB.prepare(
       `INSERT INTO audit_events(id,organization_id,actor_id,action,resource_type,resource_id,diff_safe_json)
@@ -579,6 +596,22 @@ async function publish(
     .first<Draft>();
   if (!draft) throw new Response("Rascunho não encontrado", { status: 404 });
   const snapshot = contentDocumentSchema.parse(JSON.parse(draft.content_json));
+  snapshot.operations.exhibitors = (
+    await filterConsentedProfiles(
+      env.DB,
+      orgId,
+      editionId,
+      snapshot.operations.exhibitors,
+    )
+  ).exhibitors;
+  await validateContentForms(
+    request,
+    env,
+    orgId,
+    edition,
+    snapshot.forms,
+    snapshot.forms,
+  );
   await validateOperations(
     request,
     env,
@@ -847,6 +880,8 @@ export type PublicSite = {
   primaryColor: string;
   buttonTextColor: string;
   fontStack: string;
+  publicCacheAllowed: boolean;
+  formStates: Record<string, string>;
 };
 
 export async function resolvePublicSite(
@@ -984,6 +1019,27 @@ export async function resolvePublicSite(
     /* Organization tokens fail closed to the accessible default. */
   }
   const branding = publicBranding(tokens);
+  const consented = await filterConsentedProfiles(
+    env.DB,
+    binding.organization_id,
+    edition.id,
+    content.operations.exhibitors,
+  );
+  content.operations.exhibitors = consented.exhibitors;
+  const formStates: Record<string, string> = {};
+  for (const form of content.forms) {
+    const row = await env.DB.prepare(
+      "SELECT state FROM forms WHERE organization_id=? AND edition_id=? AND id=?",
+    )
+      .bind(binding.organization_id, edition.id, form.id)
+      .first<{ state: string }>();
+    formStates[form.id] =
+      row?.state === "open" &&
+      (!form.definition.deadlineAt ||
+        Date.parse(form.definition.deadlineAt) > Date.now())
+        ? "open"
+        : "closed";
+  }
   return {
     hostname,
     organizationId: binding.organization_id,
@@ -1003,6 +1059,8 @@ export async function resolvePublicSite(
     primaryColor: branding.primaryColor,
     buttonTextColor: branding.buttonTextColor,
     fontStack: branding.fontStack,
+    publicCacheAllowed: content.forms.length === 0 && !consented.hasSources,
+    formStates,
   };
 }
 
@@ -1086,8 +1144,9 @@ export async function servePublicAsset(
   return new Response(object.body, {
     headers: {
       "Content-Type": asset.mime,
-      "Cache-Control":
-        "public, max-age=60, s-maxage=60, stale-while-revalidate=30",
+      "Cache-Control": site.publicCacheAllowed
+        ? "public, max-age=60, s-maxage=60, stale-while-revalidate=30"
+        : "private, no-store",
       "X-Content-Type-Options": "nosniff",
       "Content-Disposition": "inline",
       Vary: "Host",
@@ -1125,6 +1184,7 @@ export async function servePublicMetadata(
       { headers },
     );
   const paths = new Set(["/", "/edicoes"]);
+  if (site.content.forms.length) paths.add("/expositores/inscricao");
   const ops = site.content.operations;
   for (const [path, items] of [
     ["programacao", ops.program],

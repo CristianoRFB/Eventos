@@ -25,6 +25,7 @@ import { readJsonBody } from "../infrastructure/request.server";
 import { handleContentApi, saveDraft } from "./content.server";
 import { handleOperationsApi } from "./operations.server";
 import type { OperationKind } from "../domain/operations";
+import { handleFormsAdmin, handleApplicationsAdmin } from "./forms.server";
 
 const slug = z
   .string()
@@ -175,6 +176,43 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
   const operationsRoute = resource.match(
     /^editions\/([^/]+)\/(stages|program|guests|exhibitors|sponsors)(?:\/([^/]+))?$/,
   );
+  const formsRoute = resource.match(
+    /^editions\/([^/]+)\/forms(?:\/([^/]+)(?:\/(definitions|state|stage))?)?$/,
+  );
+  if (formsRoute)
+    return handleFormsAdmin(
+      request,
+      env,
+      orgId,
+      formsRoute[1]!,
+      formsRoute[2],
+      formsRoute[3],
+      saveDraft,
+    );
+  const applicationList = resource.match(/^editions\/([^/]+)\/applications$/);
+  if (applicationList)
+    return handleApplicationsAdmin(
+      request,
+      env,
+      orgId,
+      applicationList[1],
+      undefined,
+      undefined,
+      saveDraft,
+    );
+  const applicationRoute = resource.match(
+    /^applications\/([^/]+)(?:\/(review|stage-profile))?$/,
+  );
+  if (applicationRoute)
+    return handleApplicationsAdmin(
+      request,
+      env,
+      orgId,
+      undefined,
+      applicationRoute[1],
+      applicationRoute[2],
+      saveDraft,
+    );
   if (operationsRoute)
     return handleOperationsApi(
       request,

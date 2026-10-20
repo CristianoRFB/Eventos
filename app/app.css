@@ -664,6 +664,9 @@ nav a {
   justify-self: start;
   align-self: start;
 }
+.full-span {
+  grid-column: 1 / -1;
+}
 .form-grid [role="status"] {
   grid-column: 1/-1;
   font-size: 13px;

@@ -9,6 +9,7 @@ import {
   servePublicMetadata,
 } from "../app/services/content.server";
 import { ZodError } from "zod";
+import { handlePublicForms } from "../app/services/forms-public.server";
 
 const requestHandler = createRequestHandler(
   () => import("virtual:react-router/server-build"),
@@ -20,6 +21,7 @@ export default {
     const requestId = crypto.randomUUID();
     let response: Response;
     let publicRevision: number | null = null;
+    let publicCacheAllowed = true;
     try {
       const url = new URL(request.url);
       if (url.pathname === "/healthz")
@@ -33,7 +35,9 @@ export default {
           authRequest = new Request(request, { headers: localHeaders });
         }
         response = await createAuth(env).handler(authRequest);
-      } else if (url.pathname.startsWith("/api/"))
+      } else if (url.pathname.startsWith("/api/v1/public/"))
+        response = await handlePublicForms(request, env);
+      else if (url.pathname.startsWith("/api/"))
         response = await handleApi(request, env);
       else if (
         url.origin === new URL(env.ADMIN_ORIGIN).origin &&
@@ -55,11 +59,17 @@ export default {
           env,
           decodeURIComponent(url.pathname.slice("/assets/".length)),
         );
-      else if (/^\/(?:admin|login|platform|api)(?:\/|$)/u.test(url.pathname))
+      else if (/^\/candidatura\/[a-f0-9]{64}$/u.test(url.pathname)) {
+        await resolvePublicSite(request, env);
+        response = await requestHandler(request);
+      } else if (/^\/(?:admin|login|platform|api)(?:\/|$)/u.test(url.pathname))
         response = new Response("Página não encontrada", { status: 404 });
       else {
         const requestedSegments = url.pathname.split("/").filter(Boolean);
-        if (requestedSegments.length > 1)
+        if (
+          requestedSegments.length > 1 &&
+          url.pathname !== "/expositores/inscricao"
+        )
           throw new Response("Página não encontrada", { status: 404 });
         if (requestedSegments.length === 1) {
           try {
@@ -72,6 +82,7 @@ export default {
         // pathname to an internal route breaks hydration and client navigation.
         const publicSite = await resolvePublicSite(request, env);
         publicRevision = publicSite.publicationRevision;
+        publicCacheAllowed = publicSite.publicCacheAllowed;
         if (env.APP_ENV !== "local" && url.protocol !== "https:") {
           response = Response.redirect(
             `https://${publicSite.hostname}${url.pathname}${url.search}`,
@@ -115,13 +126,22 @@ export default {
     }
     const headers = new Headers(response.headers);
     headers.set("X-Content-Type-Options", "nosniff");
-    headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    headers.set(
+      "Referrer-Policy",
+      /^\/(?:candidatura\/|api\/v1\/public\/applications\/)/u.test(
+        new URL(request.url).pathname,
+      )
+        ? "no-referrer"
+        : "strict-origin-when-cross-origin",
+    );
     headers.set("X-Frame-Options", "DENY");
     headers.set("X-Request-Id", requestId);
     if (publicRevision !== null && response.status < 400) {
       headers.set(
         "Cache-Control",
-        "public, max-age=60, s-maxage=60, stale-while-revalidate=30",
+        publicCacheAllowed
+          ? "public, max-age=60, s-maxage=60, stale-while-revalidate=30"
+          : "private, no-store",
       );
       headers.set("X-Robots-Tag", "index, follow");
       headers.set("X-Publication-Revision", String(publicRevision));

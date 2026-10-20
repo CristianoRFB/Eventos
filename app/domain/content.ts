@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { operationsSchema, emptyOperations } from "./operations";
+import { publicFormSchema } from "./forms";
 
 const shortText = z.string().trim().min(1).max(180);
 const paragraph = z.string().trim().min(1).max(3000);
@@ -86,6 +87,7 @@ export const contentDocumentSchema = z
   .object({
     siteName: shortText,
     operations: operationsSchema.default(emptyOperations),
+    forms: z.array(publicFormSchema).max(10).default([]),
     title: shortText,
     description: z.string().trim().max(320).default(""),
     pages: z
@@ -191,6 +193,7 @@ export type ContentSection = z.infer<typeof contentSectionSchema>;
 
 export const starterContent: ContentDocument = {
   operations: emptyOperations,
+  forms: [],
   siteName: "Novo evento",
   title: "Novo evento — informações oficiais",
   description: "Informações da próxima edição.",

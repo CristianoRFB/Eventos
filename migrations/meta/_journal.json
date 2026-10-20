@@ -36,6 +36,13 @@
       "when": 1792416150599,
       "tag": "0004_lying_hammerhead",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1792417624509,
+      "tag": "0005_cuddly_legion",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,7 @@ import type { AuthEnvironment } from "../infrastructure/auth.server";
 import type { Permission } from "../domain/permissions";
 import { privateHeaders } from "../infrastructure/security.server";
 import { readJsonBody } from "../infrastructure/request.server";
+import { filterConsentedProfiles } from "./forms.server";
 
 export const operationPermissions: Record<OperationKind, Permission> = {
   stages: "program.write",
@@ -83,6 +84,20 @@ export async function validateOperations(
     )
       throw new Response("Imagem não pertence à edição", { status: 400 });
   }
+  const consented = await filterConsentedProfiles(
+    env.DB,
+    orgId,
+    edition.id,
+    next.exhibitors,
+  );
+  if (
+    consented.exhibitors.length !== next.exhibitors.length &&
+    JSON.stringify(next.exhibitors) !== JSON.stringify(previous.exhibitors)
+  )
+    throw new Response(
+      "Retire o perfil cuja aprovação ou consentimento deixou de estar ativo",
+      { status: 400 },
+    );
 }
 
 /** Every normalized row belongs to an immutable CMS revision; a failed CAS inserts none. */

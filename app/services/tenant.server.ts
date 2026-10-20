@@ -17,7 +17,7 @@ export interface OrganizationRow {
   timezone: string;
   tokens_json: string;
 }
-interface MembershipRow {
+export interface MembershipRow {
   id: string;
   user_id: string;
   organization_id: string;

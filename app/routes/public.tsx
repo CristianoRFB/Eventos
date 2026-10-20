@@ -3,6 +3,7 @@ import { data as routeData, redirect } from "react-router";
 import type { Route } from "./+types/public";
 import { OperationDirectory } from "../components/operation-directory";
 import { publicOperations } from "../domain/operations";
+import { PublicApplicationForm } from "../components/public-application-form";
 import {
   readPreviewToken,
   resolvePublicSite,
@@ -38,7 +39,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     ].includes(previewSlug)
       ? previewSlug
       : "";
-    if (!page && !operationKind)
+    const formPreview = previewSlug === "inscricao-expositor";
+    if (!page && !operationKind && !formPreview)
       throw new Response("Página não encontrada", { status: 404 });
     return routeData(
       {
@@ -60,6 +62,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         content,
         previewPath: `/preview/${encodeURIComponent(params.token)}`,
         operationKind,
+        formPreview,
         timeZone: data.timeZone,
         operationFilter: {
           day: url.searchParams.get("day") ?? "",
@@ -76,7 +79,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   }
 
   const site = await resolvePublicSite(request, env);
-  const slug = params.slug ?? "home";
+  const slug =
+    params.slug ??
+    (url.pathname === "/expositores/inscricao"
+      ? "inscricao-expositor"
+      : "home");
+  if (params.slug === "inscricao-expositor")
+    throw redirect("/expositores/inscricao");
   let page = publicPage(site, slug);
   const operationTitles: Record<string, string> = {
     programacao: "Programação",
@@ -89,6 +98,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       slug,
       title: operationTitles[slug]!,
       description: `${operationTitles[slug]} de ${site.eventName}.`,
+      sections: [],
+    };
+  if (slug === "inscricao-expositor")
+    page = {
+      slug,
+      title: "Inscrições de expositor",
+      description: "Envie sua candidatura com privacidade.",
       sections: [],
     };
   if (!page) {
@@ -119,7 +135,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         sections: [],
         page: null,
       },
-      { headers: publicHeaders(site.publicationRevision) },
+      {
+        headers: publicHeaders(
+          site.publicationRevision,
+          site.publicCacheAllowed,
+        ),
+      },
     );
   }
   if (slug === "faq") {
@@ -147,7 +168,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
           ? site.content.title
           : `${page.title} — ${site.content.siteName}`,
       description: page.description || site.content.description,
-      canonical: `${url.origin}${page.slug === "home" ? "/" : `/${encodeURIComponent(page.slug)}`}`,
+      canonical: `${url.origin}${page.slug === "home" ? "/" : page.slug === "inscricao-expositor" ? "/expositores/inscricao" : `/${encodeURIComponent(page.slug)}`}`,
       organizationName: site.organizationName,
       editionName: site.editionName,
       pageTitle: page.title,
@@ -158,14 +179,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         stage: url.searchParams.get("stage") ?? "",
       },
     },
-    { headers: publicHeaders(site.publicationRevision) },
+    {
+      headers: publicHeaders(site.publicationRevision, site.publicCacheAllowed),
+    },
   );
 }
 
-function publicHeaders(revision: number) {
+function publicHeaders(revision: number, allowCache = true) {
   return {
-    "Cache-Control":
-      "public, max-age=60, s-maxage=60, stale-while-revalidate=30",
+    "Cache-Control": allowCache
+      ? "public, max-age=60, s-maxage=60, stale-while-revalidate=30"
+      : "private, no-store",
     "X-Robots-Tag": "index, follow",
     "X-Publication-Revision": String(revision),
     Vary: "Host",
@@ -324,9 +348,11 @@ export default function PublicPage({
   const pageUrl = (slug: string) =>
     previewPath
       ? `${previewPath}${slug === "home" ? "" : `?page=${slug}`}`
-      : slug === "home"
-        ? "/"
-        : `/${slug}`;
+      : slug === "inscricao-expositor"
+        ? "/expositores/inscricao"
+        : slug === "home"
+          ? "/"
+          : `/${slug}`;
   const operations = site?.content.operations ?? content?.operations;
   return (
     <div
@@ -357,6 +383,9 @@ export default function PublicPage({
           )}
           {!!operations?.sponsors.length && (
             <a href={pageUrl("patrocinadores")}>Patrocinadores</a>
+          )}
+          {!!(site?.content.forms ?? content?.forms)?.length && (
+            <a href={pageUrl("inscricao-expositor")}>Inscrição de expositor</a>
           )}
           {(site || content?.pages.some((p) => p.slug === "faq")) && (
             <a href={pageUrl("faq")}>Perguntas</a>
@@ -424,6 +453,32 @@ export default function PublicPage({
                 {...loaderData.operationFilter}
               />
             )}
+            {loaderData.mode === "preview" &&
+              loaderData.formPreview &&
+              loaderData.content.forms.map((form) => (
+                <PublicApplicationForm key={form.id} form={form} open preview />
+              ))}
+            {loaderData.mode === "site" &&
+              loaderData.page.slug === "inscricao-expositor" && (
+                <>
+                  <section className="public-section">
+                    <h1>Inscrições de expositor</h1>
+                    {!loaderData.site.content.forms.length && (
+                      <p>
+                        A organização ainda não publicou formulários de
+                        inscrição.
+                      </p>
+                    )}
+                  </section>
+                  {loaderData.site.content.forms.map((form) => (
+                    <PublicApplicationForm
+                      key={form.id}
+                      form={form}
+                      open={loaderData.site.formStates[form.id] === "open"}
+                    />
+                  ))}
+                </>
+              )}
             {ticketUrl && (
               <section className="public-cta">
                 <a
@@ -450,7 +505,14 @@ export default function PublicPage({
                 />
               )}
             {!sections.length &&
-              !(loaderData.mode === "preview" && loaderData.operationKind) &&
+              !(
+                loaderData.mode === "preview" &&
+                (loaderData.operationKind || loaderData.formPreview)
+              ) &&
+              !(
+                loaderData.mode === "site" &&
+                loaderData.page.slug === "inscricao-expositor"
+              ) &&
               !(
                 loaderData.mode === "site" &&
                 [

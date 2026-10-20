@@ -199,8 +199,10 @@ const markdownFiles = [
   'README.md',
   ...requiredFiles.filter((file) => file.endsWith('.md')),
 ];
-const runtimeScreenshots = 'docs/implementation/screenshots/2026-10-19/manifest.json';
-if (existsSync(path.join(root, runtimeScreenshots))) {
+for (const runtimeScreenshots of [
+  'docs/implementation/screenshots/2026-10-19/manifest.json',
+  'docs/implementation/screenshots/2026-10-20/manifest.json',
+]) if (existsSync(path.join(root, runtimeScreenshots))) {
   const manifest = JSON.parse(read(runtimeScreenshots));
   check(manifest.classification === 'LOCAL_RUNTIME_SYNTHETIC', 'Runtime screenshots must be classified honestly');
   check(/^[a-f0-9]{40}$/.test(manifest.commit), 'Screenshot manifest missing source commit');
