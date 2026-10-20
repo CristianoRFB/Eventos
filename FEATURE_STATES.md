@@ -1,8 +1,8 @@
 # Feature states — Eventos 77
 
-Data de checkpoint: 2026-10-19 (`America/Sao_Paulo`). Baseline: `b90ece62e0d3c893dc6e95d6643fa7505dd25602`; branch autorizada: `codex/eventos77-full-system`.
+Data de checkpoint: 2026-10-20 (`America/Sao_Paulo`). Baseline: `b90ece62e0d3c893dc6e95d6643fa7505dd25602`; branch autorizada: `codex/eventos77-full-system`.
 
-Esta tabela preserva o inventário original (38 features: 28 NOW, 7 NEXT, 3 DEFERRED). Neste checkpoint F0–F5, F7, F9–F10 e F12 estão `PARTIAL`; o fluxo de formulários F6 e a mecânica F8 ainda não começaram. Um estado parcial representa só as rotas, dados e ações identificadas abaixo; não dá aceite à feature completa.
+Esta tabela preserva o inventário original (38 features: 28 NOW, 7 NEXT, 3 DEFERRED). Neste checkpoint F0–F7, F9–F10 e F12 estão `PARTIAL`; a mecânica F8 ainda não começou. Um estado parcial representa só as rotas, dados e ações identificadas abaixo; não dá aceite à feature completa.
 
 Fonte: [inventário histórico](docs/versions/v0.1.0-architecture/FEATURE_INVENTORY.csv). A [matriz de features](docs/implementation/FEATURE_TRACEABILITY.csv) conserva persona, dados, rota, permissão, dependência e aceite originais, acrescentando fase, arquivos/testes planejados e evidência real.
 
@@ -30,10 +30,10 @@ NOW integra o escopo solicitado no goal. NEXT continua separado; F8 permite mec�
 | F-18 | agenda by day stage | NOW | F5 | PARTIAL | Cadastros versionados, conflito e diretórios do snapshot; locais e aceite integral pendentes |
 | F-19 | guest profiles | NOW | F5 | PARTIAL | Cadastros versionados, conflito e diretórios do snapshot; locais e aceite integral pendentes |
 | F-20 | guest catalog | NOW | F5 | PARTIAL | Cadastros versionados, conflito e diretórios do snapshot; locais e aceite integral pendentes |
-| F-21 | application form builder | NOW | F6 | NOT_STARTED | Não executada |
-| F-22 | submit application | NOW | F6 | NOT_STARTED | Não executada |
-| F-23 | application review | NOW | F6 | NOT_STARTED | Não executada |
-| F-24 | public exhibitor directory | NOW | F6 | NOT_STARTED | Não executada |
+| F-21 | application form builder | NOW | F6 | PARTIAL | Forms versionados, envio privado, revisão e publicação consentida locais; anexos/retenção/export e aceite integral pendentes |
+| F-22 | submit application | NOW | F6 | PARTIAL | Forms versionados, envio privado, revisão e publicação consentida locais; anexos/retenção/export e aceite integral pendentes |
+| F-23 | application review | NOW | F6 | PARTIAL | Forms versionados, envio privado, revisão e publicação consentida locais; anexos/retenção/export e aceite integral pendentes |
+| F-24 | public exhibitor directory | NOW | F6 | PARTIAL | Forms versionados, envio privado, revisão e publicação consentida locais; anexos/retenção/export e aceite integral pendentes |
 | F-25 | FAQ and regulatory pages | NOW | F4 | PARTIAL | CMS/SSR/preview/publish/rollback local; aceite integral pendente |
 | F-26 | sponsors management | NOW | F5 | PARTIAL | Cadastros versionados, conflito e diretórios do snapshot; locais e aceite integral pendentes |
 | F-27 | announcements | NEXT | F9 | NOT_STARTED | Não executada |

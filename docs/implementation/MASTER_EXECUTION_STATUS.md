@@ -1,10 +1,10 @@
 # MASTER EXECUTION STATUS — Eventos 77
 
-**Checkpoint:** retomada em 2026-10-19 (`America/Sao_Paulo`); evidência histórica de 2026-10-14 preservada.
+**Checkpoint:** fechamento das últimas ações em 2026-10-20 (`America/Sao_Paulo`); evidência histórica de 2026-10-14 preservada.
 **Resultado integral:** `IN_PROGRESS`; não é `CORE_READY`, `READY_FOR_STAGING`, `READY_FOR_PILOT` nem `PRODUCTION_VERIFIED`.  
 **Checkout/origin:** `C:\OpenSSL\set\Eventos` / `https://github.com/CristianoRFB/Eventos.git`.  
 **Branch:** `codex/eventos77-full-system`.  
-**Baseline:** `b90ece62e0d3c893dc6e95d6643fa7505dd25602`; checkpoint funcional atual: `d5765415f094877920f25dd83906ffdd08c05994`, seguido do ajuste visual `6f5c6ab`; ambos enviados ao origin. Base auth/tenant preservada: `21ce08b2a1c4a4389d5273e9bacec53ea027918f`; documentação F0 preservada: `a989a35c8b39c95f20ecf4155553b772f83e3f1e`. Evidências atuais no [checkpoint de retomada](checkpoint-2026-10-19.md), anteriores no [checkpoint local](checkpoint-2026-10-14.md).
+**Baseline:** `b90ece62e0d3c893dc6e95d6643fa7505dd25602`; checkpoint funcional atual: `8ea34d960d487335c721c7bcbf9040897266dafb` (F6), após `a9beeac` (evidências F5). Base auth/tenant preservada: `21ce08b2a1c4a4389d5273e9bacec53ea027918f`; documentação F0 preservada: `a989a35c8b39c95f20ecf4155553b772f83e3f1e`. Evidências atuais no [checkpoint de fechamento](checkpoint-2026-10-20.md), com roteiro para terminar o goal; evidências F5 no [checkpoint de retomada](checkpoint-2026-10-19.md), anteriores no [checkpoint local](checkpoint-2026-10-14.md).
 
 ## Autorização e evidência inicial
 
@@ -22,12 +22,12 @@ O [pre-flight Git executado](preflight-git.txt) comprova raiz, remote, branch, s
 | F3 | PARTIAL | `0000_same_tinkerer.sql`; `api.server.ts`; `media.server.ts`; formulários de eventos/edições; testes locais | Eventos, edições, clone API, CAS e mídia local passaram em parte. Falta editor de marca, clone comprovado sem PII, variantes e reconciliação de R2. R2 real não provisionado. |
 | F4 | PARTIAL | Código preservado em `d5d5f0f`; 20 testes de API repetidos em 2026-10-19; `content.server.ts`; migrations 0002/0003 | CMS com revisão, prévia privada, publish CAS, SSR/SEO e rollback comprovados localmente. Purge indisponível com warning/TTL curto; páginas e aceites adicionais pendentes. |
 | F5 | PARTIAL | Commit `d576541`; `operations.ts`; `operations.server.ts`; `operations-schema.ts`; migration 0004; 114 unitários, 21 API e 12 E2E PASS | Agenda/cadastros em revisões imutáveis; conflitos/escopo/consentimento, filtros e navegação pública. Locais completos e ensaio público de dois dias ainda pendentes. |
-| F6 | NOT_STARTED | Requisitos mapeados, sem aceite funcional | Forms versionados, submissão idempotente, recibo privado, revisão e opt-in publicado. |
+| F6 | PARTIAL | `8ea34d9`; migration 0005; forms/services/routes; 120 unitários, 22 API e jornada F6 desktop/mobile | Formulários imutáveis, submissão cifrada/idempotente, recibo, revisão auditada e opt-in com publicação separada. Faltam anexos, purga de retenção, resposta do candidato, exportação mínima e aceite integral. |
 | F7 | PARTIAL | `app/domain/host.ts`; testes unitários de host; flags custom-domain desligadas | Parser e elegibilidade fail-closed testados sem provedor; binding, ownership, DNS, SSL e host real pendentes. Sem PASS cloud. |
 | F8 | NOT_STARTED | Catálogo produção NOT_APPROVED | Só iniciar após F2; mecânica TEST_ONLY pode ser provada sem inventar catálogo/preço/quotas/trial. Política permanece gate externo. |
-| F9 | PARTIAL | 16 capturas anteriores e [10 atuais](screenshots/2026-10-19/manifest.json); 12 E2E | CMS e operação da edição adicionados às jornadas anteriores; público agenda/convidados navega em desktop/mobile sem erro de hidratação. Demais telas NOW e estados continuam pendentes; NEXT fora da UI. |
-| F10 | PARTIAL | 114 unitários; 21 integração; 12 E2E; lint/typecheck/build; logs no checkpoint atual | Isolamento, CAS, sessão, mídia, agenda e SSR hidratado passaram. Falta cobertura integral, falhas de provedores, backup/restore e medição. Audit de dependências anterior não substitui novo gate de release. |
-| F11 | NOT_STARTED | Consoles disponibilizados; nenhum recurso real é prova de aceite | Preparar templates locais. Staging/recursos/custos exigem escopo autorizado; produção tem autorização e homologação próprias. |
+| F9 | PARTIAL | 26 capturas anteriores e [10 F6](screenshots/2026-10-20/manifest.json); 14 E2E | CMS e operação da edição adicionados às jornadas anteriores; público agenda/convidados navega em desktop/mobile sem erro de hidratação. Demais telas NOW e estados continuam pendentes; NEXT fora da UI. |
+| F10 | PARTIAL | 120 unitários; 22 integração; 14 E2E; lint/typecheck/build; logs no checkpoint 2026-10-20 | Isolamento, CAS, sessão, mídia, agenda e SSR hidratado passaram. Falta cobertura integral, falhas de provedores, backup/restore e medição. Audit de dependências anterior não substitui novo gate de release. |
+| F11 | EXTERNAL_GATE_PENDING | Consoles disponibilizados; nenhum recurso real é prova de aceite | Preparar templates locais. Staging/recursos/custos exigem escopo autorizado; produção tem autorização e homologação próprias. |
 | F12 | PARTIAL | Matrizes; 16 fontes e renders Mermaid; [16 screenshots locais](screenshots/manifest.json); [checkpoint](checkpoint-2026-10-14.md) | Docs e capturas das jornadas existentes foram atualizadas; runbooks, CMS, agenda, domínio e aceite completo ainda faltam. |
 
 Cada linha exige SHA de implementação, comando e código de saída, log/cenário, migrations, screenshot quando aplicável e rollback antes de promover PASS. Estados intermediários não reduzem o escopo original. O status da fase externa não impede desenvolvimento local independente.
@@ -51,11 +51,11 @@ Fonte: [GOAL MASTER](../../codex/CODEX_GOAL_MASTER_EVENTOS_77_FULL_SYSTEM.txt), 
 | Gate | Estado comprovado | Próxima evidência necessária |
 |---|---|---|
 | G0 source/branch | PASS | Checkout/branch autorizados, pre-flight registrado e commits locais documentados. |
-| G1 A/B | PARTIAL | Auth/RBAC/dados/mídia testados; forms, domínios, cache público e superfícies futuras pendentes. |
-| G2 schema/migrations | PARTIAL | SQL versionado, D1 local, FKs compostas e apply sem migrations pendentes; modelo F4–F6 ainda falta. |
+| G1 A/B | PARTIAL | Auth/RBAC/dados/mídia testados; forms A/B e revogação de perfil públicos testados localmente; anexos, domínios e superfícies futuras pendentes. |
+| G2 schema/migrations | PARTIAL | SQL versionado, D1 local, FKs compostas e apply sem migrations pendentes; migrations 0002–0005 acrescentam CMS/operações/forms; aceites completos e restore ainda faltam. |
 | G3 CMS/publish/rollback | PARTIAL | Jornada v1 → draft v2 invisível → v2 → rollback testada; SSR/hosts A/B e preview privado locais. Cloud/purge real não verificados. |
 | G4 domínio fail-closed | PARTIAL | Helpers/eligibilidade puros testados; provider fake completo e host real com ownership+hostname+SSL+DNS faltam. |
-| G5 E2E desktop/mobile | PARTIAL | 6 jornadas por viewport, 12 E2E PASS; 26 capturas em dois checkpoints. Demais telas/resoluções e estados ainda pendentes. |
+| G5 E2E desktop/mobile | PARTIAL | 7 jornadas por viewport, 14 E2E PASS; 36 capturas em três checkpoints. Demais telas/resoluções e estados ainda pendentes. |
 | G6 checks/docs | PASS | `npm ci`, lint, typecheck, Vitest, integração, E2E, build, audit e docs:check registrados no checkpoint local. |
 | G7 cloud autorizado | EXTERNAL_GATE_PENDING | Escopo e autorização das ações concretas; custo/plano validado no momento. |
 | G8 staging/produção | NOT_STARTED | URL/release/logs/smoke/backup/rollback e homologação; produção separada de staging. |
@@ -64,6 +64,6 @@ Cloudflare D1/R2/custom hostnames reais: não provisionados. Firebase: console d
 
 ## Rollback e próximo passo
 
-As migrations `0000`–`0004` foram aplicadas somente ao D1 local fictício; nenhuma migration cloud foi executada. Agenda/cadastros referenciam revisões imutáveis e o rollback editorial mantém o histórico. Retorno seguro: preservar os dados locais e reverter somente commits novos identificados depois do baseline, mantendo compatibilidade com as tabelas adicionais. Nenhum banco ou objeto real foi tocado.
+As migrations `0000`–`0005` foram aplicadas somente ao D1 local fictício; nenhuma migration cloud foi executada. Agenda/cadastros referenciam revisões imutáveis e o rollback editorial mantém o histórico. Retorno seguro: preservar os dados locais e reverter somente commits novos identificados depois do baseline, mantendo compatibilidade com as tabelas adicionais. Nenhum banco ou objeto real foi tocado.
 
-**NEXT_STEP:** F6 — forms versionados, submissão idempotente/rate limit, recibo privado, revisão auditada e inclusão editorial de perfil com opt-in, preservando o modelo de snapshot. Retomar depois os aceites pendentes de F1–F5 e F7–F12 sem tratar gates cloud como conclusão local. [Checkpoint](checkpoint-2026-10-19.md) e [ADR-007](../adr/ADR-007-versioned-edition-operations.md) registram testes e rollback. Resultado integral IN_PROGRESS.
+**NEXT_STEP:** implementar purga por retenção em dados sintéticos A/B (incluindo perfis vinculados e auditoria sem PII), testar expiração e execução repetida; depois anexos privados, resposta do candidato e exportação mínima auditada. O [roteiro de conclusão](checkpoint-2026-10-20.md) lista os demais aceites F0–F12, decisões comerciais e gates externos. Resultado integral IN_PROGRESS, sem declaração de prontidão comercial.

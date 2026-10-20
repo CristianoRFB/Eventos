@@ -1,0 +1,21 @@
+[WebServer] (node:17468) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:21264) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:17860) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:8576) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":46}
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":47}
+  ok 1 [desktop] › tests\e2e\forms.spec.ts:37:1 › organizer builds and publishes a form, applicant submits privately, reviewer stages only consented profile (9.2s)
+(node:16208) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":48}
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":49}
+  ok 2 [mobile] › tests\e2e\forms.spec.ts:37:1 › organizer builds and publishes a form, applicant submits privately, reviewer stages only consented profile (7.9s)
+
+  2 passed (23.4s)

@@ -1,0 +1,110 @@
+{
+  "classification": "LOCAL_RUNTIME_SYNTHETIC",
+  "commit": "8ea34d960d487335c721c7bcbf9040897266dafb",
+  "command": "npm run test:e2e",
+  "browser": "Playwright Chromium",
+  "timezone": "America/Sao_Paulo",
+  "note": "Actual local browser captures with synthetic fixtures. No cloud deployment. Receipt tokens redacted in route templates.",
+  "screenshots": [
+    {
+      "file": "form-builder-desktop.png",
+      "origin": "http://localhost:5173",
+      "route_template": "/admin/:org/events/:event/editions/:edition/forms?form=:id",
+      "viewport": "1440x1000",
+      "image_width": 1440,
+      "image_height": 2565,
+      "captured_at": "2026-10-20T12:09:13.923Z",
+      "sha256": "d3970234372a07181d6f2514bf79148771bdab3ce65140d0edd31e3d79c46c94"
+    },
+    {
+      "file": "form-builder-mobile.png",
+      "origin": "http://localhost:5173",
+      "route_template": "/admin/:org/events/:event/editions/:edition/forms?form=:id",
+      "viewport": "390x844",
+      "image_width": 390,
+      "image_height": 3664,
+      "captured_at": "2026-10-20T12:09:57.442Z",
+      "sha256": "4655cc442a2c9950270f8e3e22982db15ed046907f04cbebe5cd3a30ec674082"
+    },
+    {
+      "file": "public-form-desktop.png",
+      "origin": "http://evento-a.example.test:5173",
+      "route_template": "/expositores/inscricao",
+      "viewport": "1440x1000",
+      "image_width": 1440,
+      "image_height": 1340,
+      "captured_at": "2026-10-20T12:09:16.111Z",
+      "sha256": "7194a540a6cdcd13f98baea6a62b71b260409490668a73b4ebfd1a7ae62c231e"
+    },
+    {
+      "file": "public-form-mobile.png",
+      "origin": "http://evento-a.example.test:5173",
+      "route_template": "/expositores/inscricao",
+      "viewport": "390x844",
+      "image_width": 390,
+      "image_height": 1863,
+      "captured_at": "2026-10-20T12:09:59.486Z",
+      "sha256": "033c43896f083fe87ca98f6955392075b67c5e019f3978095962dfd64117157e"
+    },
+    {
+      "file": "private-receipt-desktop.png",
+      "origin": "http://evento-a.example.test:5173",
+      "route_template": "/candidatura/:receipt",
+      "viewport": "1440x1000",
+      "image_width": 1440,
+      "image_height": 1000,
+      "captured_at": "2026-10-20T12:09:16.544Z",
+      "sha256": "15c23a1307b5e62299667edfafb4e7fa1334b87aac0b4e9f70052304e36e5433"
+    },
+    {
+      "file": "private-receipt-mobile.png",
+      "origin": "http://evento-a.example.test:5173",
+      "route_template": "/candidatura/:receipt",
+      "viewport": "390x844",
+      "image_width": 390,
+      "image_height": 844,
+      "captured_at": "2026-10-20T12:09:59.920Z",
+      "sha256": "a4ab6441b2eecdca5b2e6f9684add89b19630a08866b3244d44b6e4f45d0156c"
+    },
+    {
+      "file": "private-review-desktop.png",
+      "origin": "http://localhost:5173",
+      "route_template": "/admin/:org/events/:event/editions/:edition/applications/:id",
+      "viewport": "1440x1000",
+      "image_width": 1440,
+      "image_height": 1231,
+      "captured_at": "2026-10-20T12:09:17.950Z",
+      "sha256": "ccc64d0f780961c79d9225693835c824fb5e340d53297c5e7631810459d73f77"
+    },
+    {
+      "file": "private-review-mobile.png",
+      "origin": "http://localhost:5173",
+      "route_template": "/admin/:org/events/:event/editions/:edition/applications/:id",
+      "viewport": "390x844",
+      "image_width": 390,
+      "image_height": 1531,
+      "captured_at": "2026-10-20T12:10:01.253Z",
+      "sha256": "bba49e4ff966796a2904b392e8ddd185dc976bdd5966f35b2dfd3c04a57019c3"
+    },
+    {
+      "file": "consented-exhibitor-desktop.png",
+      "origin": "http://evento-a.example.test:5173",
+      "route_template": "/expositores",
+      "viewport": "1440x1000",
+      "image_width": 1440,
+      "image_height": 1000,
+      "captured_at": "2026-10-20T12:09:19.169Z",
+      "sha256": "b2473a62a3a10c5ae788c1c1e04988d4fed42a7f00dbabcfe45bcb5d37e92ceb"
+    },
+    {
+      "file": "consented-exhibitor-mobile.png",
+      "origin": "http://evento-a.example.test:5173",
+      "route_template": "/expositores",
+      "viewport": "390x844",
+      "image_width": 390,
+      "image_height": 844,
+      "captured_at": "2026-10-20T12:10:02.504Z",
+      "sha256": "7ef40b655be84fb0f4cf55c99fa2ca646addc79dbcbe039c39ea4d2ef79c8b04"
+    }
+  ]
+}

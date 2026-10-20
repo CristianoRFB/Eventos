@@ -1,0 +1,85 @@
+
+> eventos77@0.2.0-dev test:integration
+> node scripts/reset-integration-local.mjs && playwright test --project=api
+
+
+ ⛅️ wrangler 4.151.0 (update available 4.151.2)
+───────────────────────────────────────────────
+Resource location: local 
+
+Use --remote if you want to access the remote instance.
+
+🌀 Executing on local database DB (00000000-0000-0000-0000-000000000000) from .wrangler\state\v3\d1:
+🌀 To execute on your remote database, add a --remote flag to your wrangler command.
+🚣 3 commands executed successfully.
+[
+  {
+    "results": [],
+    "success": true,
+    "meta": {
+      "duration": 2
+    }
+  },
+  {
+    "results": [],
+    "success": true,
+    "meta": {
+      "duration": 1
+    }
+  },
+  {
+    "results": [],
+    "success": true,
+    "meta": {
+      "duration": 1
+    }
+  }
+]
+[WebServer] (node:17976) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:13904) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:14972) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 22 tests using 1 worker
+
+(node:17440) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [api] › tests\integration\core.spec.ts:108:1 › health and public SSR expose no private user, membership or infrastructure data (1.2s)
+  ok  2 [api] › tests\integration\core.spec.ts:131:1 › anonymous and forged-session requests never gain administrative access (165ms)
+[WebServer] 2026-10-20T12:07:46.479Z WARN [Better Auth]: Invalid password
+  ok  3 [api] › tests\integration\core.spec.ts:155:1 › signup stays closed and incorrect credentials cannot produce a session (234ms)
+  ok  4 [api] › tests\integration\core.spec.ts:179:1 › session cookie is host-only, HttpOnly and SameSite; session survives subsequent Worker requests (118ms)
+  ok  5 [api] › tests\integration\core.spec.ts:193:1 › tenant A and B API resources remain isolated under direct URL and ID tampering (606ms)
+  ok  6 [api] › tests\integration\core.spec.ts:232:1 › a shared identity selects either membership without merging event scopes (353ms)
+  ok  7 [api] › tests\integration\core.spec.ts:265:1 › tenant invitation token is hashed, email bound, scoped, one-use and audited (426ms)
+  ok  8 [api] › tests\integration\core.spec.ts:357:1 › private media stays behind tenant and event authorization and public media needs a license (361ms)
+  ok  9 [api] › tests\integration\core.spec.ts:434:1 › editors and reviewers cannot escalate roles or create organization-wide events (309ms)
+  ok 10 [api] › tests\integration\core.spec.ts:461:1 › Platform Owner can administer globally but cannot read private tenant data without membership (187ms)
+  ok 11 [api] › tests\integration\core.spec.ts:478:1 › cookie-authenticated writes reject missing Origin, foreign Origin and cross-site fetches (116ms)
+  ok 12 [api] › tests\integration\core.spec.ts:516:1 › strict input validation rejects forged ownership, SQL-shaped slugs and invalid timezones (255ms)
+[WebServer] {"requestId":"83d1fa9b-9683-4a14-9b0d-d67e9ebf216c","kind":"conflict"}
+  ok 13 [api] › tests\integration\core.spec.ts:566:1 › event creation persists, scopes duplicate slugs per tenant and limits staff to assigned events (217ms)
+  ok 14 [api] › tests\integration\core.spec.ts:605:1 › edition creation validates timing, timezone and external HTTPS ticket URLs (255ms)
+  ok 15 [api] › tests\integration\core.spec.ts:664:1 › concurrent settings updates use compare-and-swap instead of losing an update (152ms)
+[WebServer] {"requestId":"06f39664-2c20-41ae-b40a-66da650a84eb","kind":"conflict"}
+  ok 16 [api] › tests\integration\core.spec.ts:688:1 › last-owner guard preserves an active owner and membership revocation takes effect in the existing session (365ms)
+  ok 17 [api] › tests\integration\core.spec.ts:740:1 › platform suspension immediately denies tenant access and reactivation preserves data (270ms)
+  ok 18 [api] › tests\integration\core.spec.ts:779:1 › platform creation persists and critical mutations produce server audit records (110ms)
+  ok 19 [api] › tests\integration\core.spec.ts:823:1 › sign-out revokes the server session so a captured cookie cannot be replayed (325ms)
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":50}
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":51}
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-b","editionId":"edition-b","revision":6}
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":52}
+  ok 20 [api] › tests\integration\core.spec.ts:847:1 › CMS publishes immutable tenant snapshots, previews privately, and rolls back through verified hosts (1.9s)
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":53}
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":54}
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":55}
+  ok 21 [api] › tests\integration\core.spec.ts:1193:1 › edition operations reject resource conflicts, isolate roles, and remain private until snapshot publication (2.9s)
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":56}
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":57}
+[WebServer] {"kind":"publication_cache_invalidation_unavailable","organizationId":"org-a","editionId":"edition-a","revision":58}
+  ok 22 [api] › tests\integration\forms.spec.ts:75:1 › versioned forms keep submissions private, deduplicate races, enforce review and revoke public consent immediately (3.8s)
+
+  22 passed (1.1m)

@@ -1,0 +1,4 @@
+
+> eventos77@0.2.0-dev lint
+> eslint .
+

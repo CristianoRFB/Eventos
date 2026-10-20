@@ -1,0 +1,6 @@
+
+> eventos77@0.2.0-dev docs:check
+> node scripts/docs-check.mjs
+
+PASS docs: 13 phases; 172 phase clauses; 65 global clauses; 38 features; 60 screens; 16 preserved Mermaid sources; 16 verified design renders.
+This validates documented provenance/coverage; it does not certify runtime or cloud acceptance.
