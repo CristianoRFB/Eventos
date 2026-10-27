@@ -10,7 +10,7 @@ import type { Operations } from "../domain/operations";
 import type { AuthEnvironment } from "../infrastructure/auth.server";
 import { privateHeaders } from "../infrastructure/security.server";
 import { readJsonBody } from "../infrastructure/request.server";
-import { decryptSubmission } from "../infrastructure/submission-crypto.server";
+import { decryptSubmission, submissionSecrets } from "../infrastructure/submission-crypto.server";
 import { requireTenant, auditStatement } from "./tenant.server";
 import type { saveDraft } from "./content.server";
 
@@ -404,7 +404,7 @@ export async function handleApplicationsAdmin(
           Date.parse(row.retention_until) > Date.now();
         const scope = `${orgId}:${row.form_id}:${row.submission_id}:${row.definition_id}`;
         const answers = active && row.answers_ciphertext
-          ? await decryptSubmission(env.BETTER_AUTH_SECRET, orgId, scope, row.answers_ciphertext)
+          ? await decryptSubmission(submissionSecrets(env), orgId, scope, row.answers_ciphertext)
           : null;
         lines.push(csvRow([
           row.id, row.form_name, active ? row.status : row.state,
@@ -493,7 +493,7 @@ export async function handleApplicationsAdmin(
     const applicantReplies = [];
     for (const reply of followUps.results) {
       const decrypted = await decryptSubmission(
-        env.BETTER_AUTH_SECRET,
+        submissionSecrets(env),
         orgId,
         `${orgId}:${id}:reply:${reply.requested_revision}`,
         reply.reply_ciphertext,
@@ -525,7 +525,7 @@ export async function handleApplicationsAdmin(
         : [],
       answers: row.answers_ciphertext
         ? await decryptSubmission(
-            env.BETTER_AUTH_SECRET,
+            submissionSecrets(env),
             orgId,
             scope,
             row.answers_ciphertext,
@@ -533,7 +533,7 @@ export async function handleApplicationsAdmin(
         : null,
       publicProfile: row.profile_ciphertext
         ? await decryptSubmission(
-            env.BETTER_AUTH_SECRET,
+            submissionSecrets(env),
             orgId,
             scope,
             row.profile_ciphertext,
@@ -605,7 +605,7 @@ export async function handleApplicationsAdmin(
       });
     const profile = applicantProfileSchema.parse(
       await decryptSubmission(
-        env.BETTER_AUTH_SECRET,
+        submissionSecrets(env),
         orgId,
         scope,
         row.profile_ciphertext,
