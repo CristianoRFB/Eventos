@@ -81,7 +81,9 @@ export async function handleApplicantAttachment(
   }
   const id = crypto.randomUUID();
   const key = `org/${organizationId}/applications/${row.application_id}/${id}`;
-  const sha256 = hex(await crypto.subtle.digest("SHA-256", bytes));
+  const digestBuffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(digestBuffer).set(bytes);
+  const sha256 = hex(await crypto.subtle.digest("SHA-256", digestBuffer));
   try {
     await env.ASSETS_PRIVATE.put(key, bytes, {
       httpMetadata: { contentType: info.mime, cacheControl: "private, no-store" },
