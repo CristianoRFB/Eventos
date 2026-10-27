@@ -38,6 +38,7 @@ function harness() {
     BEGIN SELECT RAISE(ABORT,'reply_redaction_only'); END;
   `);
   sql.exec(readFileSync("migrations/0008_private_cipher_rewraps.sql", "utf8"));
+  sql.exec(readFileSync("migrations/0009_rewrap_audit.sql", "utf8"));
   const bind = (query: string, args: Arg[]) => ({
     first: async () => (sql.prepare(query).get(...args) ?? null),
     run: async () => ({ meta: { changes: Number(sql.prepare(query).run(...args).changes) } }),
@@ -96,6 +97,12 @@ describe("controlled private rewrap without bypassing source immutability", () =
       expect(await rewrapPrivateCipher(h.db,secret,org,"answers",id)).toBe("rewrapped");
       const rotated={...secret,activeKeyId:"jan27"};
       expect(await rewrapPrivateCipher(h.db,rotated,org,"answers",id)).toBe("rewrapped");
+      expect(h.sql.prepare("SELECT action,from_key,to_key FROM private_cipher_rewrap_events ORDER BY id").all())
+        .toEqual([
+          { action: "created", from_key: "legacy", to_key: "oct26" },
+          { action: "rotated", from_key: "oct26", to_key: "jan27" },
+        ]);
+      expect(() => h.run("DELETE FROM private_cipher_rewrap_events")).toThrow(/immutable/i);
       const cipher=await resolveRewrappedCipher(h.db,org,"answers",id,original);
       expect(cipher?.startsWith("v2.jan27.")).toBe(true);
       expect(await decryptSubmission(rotated,org,scope(org,id),cipher!))
