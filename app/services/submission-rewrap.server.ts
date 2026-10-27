@@ -37,6 +37,19 @@ export async function effectiveSubmissionCipher(
   sourceId: string,
   original: string,
 ): Promise<string> {
+  // Explicit live-source recheck is required even if there is no overlay:
+  // otherwise a stale application row could fall back to a withdrawn cipher.
+  const liveQuery = source.kind === "submission"
+    ? `SELECT 1 AS valid FROM form_submissions WHERE organization_id=? AND id=?
+       AND state='active' AND retention_until>strftime('%Y-%m-%dT%H:%M:%fZ','now')
+       AND ${source.field==="answers"?"answers_ciphertext":"profile_ciphertext"}=?`
+    : `SELECT 1 AS valid FROM application_replies r
+       JOIN exhibitor_applications a ON a.organization_id=r.organization_id AND a.id=r.application_id
+       JOIN form_submissions s ON s.organization_id=a.organization_id AND s.id=a.submission_id
+       WHERE r.organization_id=? AND r.id=? AND r.reply_ciphertext=?
+         AND s.state='active' AND s.retention_until>strftime('%Y-%m-%dT%H:%M:%fZ','now')`;
+  const live = await db.prepare(liveQuery).bind(organizationId,sourceId,original).first<{valid:number}>();
+  if (!live) throw new Response("Conteúdo privado indisponível", { status: 404 });
   const fingerprintValue = await fingerprint(original);
   const row = await db.prepare(
     `SELECT v.rewrapped_ciphertext AS cipher FROM private_cipher_rewraps v
