@@ -144,6 +144,17 @@ describe("F6: private submission retention cleanup", () => {
       "exhibitor-expired",
       "application-a-expired",
     );
+    for (const [tenant, suffix] of [["a", "expired"], ["b", "live"]] as const) {
+      exec(
+        "INSERT INTO application_replies(id,organization_id,edition_id,application_id,requested_revision,reply_ciphertext) VALUES(?,?,?,?,?,?)",
+        `reply-${tenant}-${suffix}`,
+        `org-${tenant}`,
+        `edition-${tenant}`,
+        `application-${tenant}-${suffix}`,
+        2,
+        "encrypted applicant follow-up",
+      );
+    }
     const beforeB = sql
       .prepare("SELECT * FROM form_submissions WHERE id=?")
       .get(liveB);
@@ -174,6 +185,12 @@ describe("F6: private submission retention cleanup", () => {
         .prepare("SELECT action,actor_id FROM application_events WHERE application_id=?")
         .all("application-a-expired"),
     ).toEqual([{ action: "retention.purged", actor_id: null }]);
+    expect(
+      sql.prepare("SELECT reply_ciphertext FROM application_replies WHERE id=?").get("reply-a-expired"),
+    ).toMatchObject({ reply_ciphertext: null });
+    expect(
+      sql.prepare("SELECT reply_ciphertext FROM application_replies WHERE id=?").get("reply-b-live"),
+    ).toMatchObject({ reply_ciphertext: "encrypted applicant follow-up" });
     // Keep the immutable link so already published snapshots can be suppressed.
     expect(
       sql
