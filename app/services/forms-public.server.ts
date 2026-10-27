@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { AuthEnvironment } from "../infrastructure/auth.server";
+import { handleApplicantAttachment, cleanupPendingApplicantAttachments } from "./application-attachments.server";
 import {
   privateHeaders,
   requireSameOrigin,
@@ -33,6 +34,13 @@ export async function handlePublicForms(
   const url = new URL(request.url);
   const site = await resolvePublicSite(request, env);
   if (request.method !== "GET") requireSameOrigin(request, url.origin);
+  const receiptAttachment = url.pathname.match(
+    /^\/api\/v1\/public\/applications\/([a-f0-9]{64})\/attachments$/,
+  );
+  if (receiptAttachment)
+    return handleApplicantAttachment(
+      request, env, site.organizationId, site.editionId, receiptAttachment[1]!,
+    );
   const submit = url.pathname.match(
     /^\/api\/v1\/public\/forms\/([^/]+)\/submit$/,
   );
@@ -316,7 +324,14 @@ export async function handlePublicForms(
           env.DB.prepare(
             "UPDATE application_replies SET reply_ciphertext=NULL WHERE organization_id=? AND application_id=? AND reply_ciphertext IS NOT NULL",
           ).bind(site.organizationId, row.application_id),
+          env.DB.prepare(
+            "UPDATE application_attachments SET state='delete_pending',original_name='' WHERE organization_id=? AND application_id=? AND state='ready'",
+          ).bind(site.organizationId, row.application_id),
         ]);
+      // Withdrawal never waits on R2 availability: metadata is already
+      // durably hidden and the retryable cleanup queue preserves the work.
+      try { await cleanupPendingApplicantAttachments(env, 50, site.organizationId); }
+      catch { console.error(JSON.stringify({ kind: "attachment_withdrawal_cleanup_pending" })); }
       return json({ status: "withdrawn" });
     }
     return new Response(null, { status: 405, headers: privateHeaders() });
