@@ -20,3 +20,12 @@ A rotina `purgeExpiredSubmissions(db, now, batchSize)` foi adicionada ao código
 O Worker expõe um handler `scheduled`, **mas nenhum cron foi habilitado** no `wrangler.jsonc` ou em Cloudflare. Logo, purga automática hospedada NÃO está ativa. O novo teste SQLite usa as migrations reais para provar A/B, datas, execução repetida, mensagens redigidas e seleção em lotes; até a conclusão do CI, os testes desta branch permanecem NÃO VERIFICADOS. O hash do recibo, hashes de idempotência/payload e metadados de auditoria permanecem para integridade do histórico; a política de minimização/anonimização desses pseudônimos e o scheduler de produção exigem revisão antes de aceitar dados reais.
 
 A limpeza não equivale a `F6 PASS`: ainda faltam anexos privados, resposta a pedidos de informação, exportação mínima auditada e plano de rotação/recuperação de chave.
+
+
+## Complemento F6 — exportação privada e resposta a pedido de informações (27/10/2026)
+
+Nesta branch foi implementada exportação CSV da fila de candidaturas por edição, sob `applications.review`, com limite de 100 registros/página, serialização contra formula injection, auditoria `application.private.export`, `Cache-Control: private, no-store` e sem incluir respostas retiradas ou com retenção vencida. O arquivo é baixado somente do host administrativo por membros autorizados, sem URL pública. A versão atual exporta JSON de respostas privadas dentro de coluna CSV e, portanto, requer tratamento como DADO PESSOAL; não compartilhar por canal não autorizado. Paginação superior a 100 requer solicitação de páginas explícitas.
+
+Também foi introduzido pedido de esclarecimento via status `needs_info` e resposta do candidato no mesmo recibo privado opaco, apenas até a expiração. Cada resposta é AES-GCM escopada por organização, candidatura e revisão do pedido, com no máximo uma resposta por revisão, proteção same-origin e estado de retorno `submitted`. A equipe vê o conteúdo somente após checagem `applications.review` e auditoria de consulta. A resposta é apagada por nulificação do ciphertext em retirada ou purga; ligação de auditoria e metadados sem resposta permanecem. `migrations/0006_applicant_replies.sql` é ADITIVA e só pode ser aplicada após teste de migrations, sem provisionar D1 real.
+
+Não foram habilitados SMTP/SMS/WhatsApp, cron, domínios reais ou e-mails de notificação. Nenhum valor de pricing foi criado. Rotação de chave AES-GCM, anexos privados e demais requisitos F6 continuam abertos; documentação representa mudança em BRANCH, não produção até CI final.
