@@ -202,11 +202,11 @@ export async function handleReviewerAttachment(
  * Can run safely multiple times. If the bucket is unavailable, leave work
  * queued instead of falsely declaring physical deletion.
  */
-export async function cleanupPendingApplicantAttachments(env: AuthEnvironment, max = 50) {
+export async function cleanupPendingApplicantAttachments(env: AuthEnvironment, max = 50, organizationId?: string) {
   if (!env.ASSETS_PRIVATE) return { deleted: 0, pending: true };
   const pending = await env.DB.prepare(
-    "SELECT id,organization_id,object_key FROM application_attachments WHERE state='delete_pending' ORDER BY created_at,id LIMIT ?",
-  ).bind(max).all<{ id: string; organization_id: string; object_key: string }>();
+    "SELECT id,organization_id,object_key FROM application_attachments WHERE state='delete_pending' AND (? IS NULL OR organization_id=?) ORDER BY created_at,id LIMIT ?",
+  ).bind(organizationId ?? null, organizationId ?? null, max).all<{ id: string; organization_id: string; object_key: string }>();
   let deleted = 0;
   for (const row of pending.results) {
     if (!row.object_key.startsWith(`org/${row.organization_id}/applications/`))
