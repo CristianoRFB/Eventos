@@ -139,6 +139,18 @@ export default function ApplicationsPage({ loaderData }: Route.ComponentProps) {
       </p>
       {list && (
         <section className="section-card">
+          <p>
+            <a
+              className="button light"
+              href={`/api/v1/orgs/${organization.id}/editions/${editionId}/applications/export?page=0`}
+            >
+              Exportar primeira página de candidaturas (CSV privado)
+            </a>
+          </p>
+          <p className="notice">
+            Até 100 candidaturas por página. Somente equipe autorizada;
+            dados retirados ou vencidos não são exportados.
+          </p>
           {list.map((item) => (
             <article className="event-row" key={item.id}>
               <div>
