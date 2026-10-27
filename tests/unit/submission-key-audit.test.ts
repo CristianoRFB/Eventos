@@ -26,10 +26,10 @@ describe("F6: retirement safety inventory", () => {
       } as unknown as D1Database;
       const usage = await auditSubmissionKeyUsage(db);
       expect(usage).toEqual([
-        { keyId: "invalid", references: 1 },
-        { keyId: "v1", references: 1 },
-        { keyId: "v2:jan27", references: 1 },
-        { keyId: "v2:oct26", references: 3 },
+        { keyId: "invalid", count: 1 },
+        { keyId: "v1", count: 1 },
+        { keyId: "v2:jan27", count: 1 },
+        { keyId: "v2:oct26", count: 3 },
       ]);
       expect(JSON.stringify(usage)).not.toContain("cipher");
       expect(() => assertKeyCanRetire(usage, "oct26")).toThrow("Unrecognized");
