@@ -241,10 +241,13 @@ export async function handlePublicForms(
         canReply: row.state === "active" && row.status === "needs_info",
       });
     if (request.method === "POST" && receiptRoute[2] === "reply") {
-      const input = z.object({
+      const parsed = z.object({
         expectedRevision: z.number().int().positive(),
         message: z.string().trim().min(1).max(2000),
-      }).strict().parse(await readJsonBody(request, 4096));
+      }).strict().safeParse(await readJsonBody(request, 4096));
+      if (!parsed.success)
+        return json({ error: "Resposta inválida. Informe uma mensagem de até 2000 caracteres." }, 400);
+      const input = parsed.data;
       if (
         row.state !== "active" ||
         row.status !== "needs_info" ||
