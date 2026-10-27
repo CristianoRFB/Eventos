@@ -50,6 +50,9 @@ export async function purgeExpiredSubmissions(
       db.prepare(
         "UPDATE application_replies SET reply_ciphertext=NULL WHERE organization_id=? AND application_id IN (SELECT id FROM exhibitor_applications WHERE organization_id=? AND submission_id=?) AND reply_ciphertext IS NOT NULL",
       ).bind(organizationId, organizationId, id),
+      db.prepare(
+        "UPDATE application_attachments SET state='delete_pending',original_name='' WHERE organization_id=? AND application_id IN (SELECT id FROM exhibitor_applications WHERE organization_id=? AND submission_id=?) AND state='ready'",
+      ).bind(organizationId, organizationId, id),
       // Deterministic primary key prevents duplicate audit records when the
       // purge is retried or two jobs overlap. No PII enters the audit event.
       db.prepare(
