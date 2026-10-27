@@ -4,7 +4,10 @@
  * prefixes cannot be interpreted as commands by spreadsheet applications.
  */
 export function csvCell(input: unknown): string {
-  const raw = String(input ?? "").replace(/[\r\n\u0000-\u001f\u007f]/g, " ");
+  const raw = Array.from(String(input ?? ""), (character) => {
+    const code = character.codePointAt(0) ?? 0;
+    return code < 32 || code === 127 ? " " : character;
+  }).join("");
   const safe = /^[\s]*[=+\-@]/.test(raw) ? "'" + raw : raw;
   return '"' + safe.replaceAll('"', '""') + '"';
 }
