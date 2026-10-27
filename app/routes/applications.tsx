@@ -18,6 +18,11 @@ type Detail = {
   answers: Record<string, unknown> | null;
   publicProfile: Record<string, string> | null;
   fields?: { key: string; label: string }[];
+  applicantReplies?: {
+    requestedRevision: number;
+    message: string;
+    createdAt: string;
+  }[];
 };
 export async function loader({ request, params }: Route.LoaderArgs) {
   try {
@@ -202,6 +207,18 @@ export default function ApplicationsPage({ loaderData }: Route.ComponentProps) {
               </p>
             )}
           </section>
+          {detail.applicantReplies && detail.applicantReplies.length > 0 && (
+            <section className="section-card">
+              <h2>Informações complementares recebidas</h2>
+              {detail.applicantReplies.map((reply) => (
+                <article key={reply.requestedRevision}>
+                  <p>Resposta à solicitação #{reply.requestedRevision}</p>
+                  <p>{reply.message}</p>
+                  <small>{reply.createdAt}</small>
+                </article>
+              ))}
+            </section>
+          )}
           {detail.answers && (
             <section className="section-card">
               <h2>Decisão de análise</h2>
