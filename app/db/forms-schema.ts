@@ -296,7 +296,7 @@ export const applicationAttachments = sqliteTable(
     check("attachment_mime", sql`${t.mime} IN ('image/png','image/jpeg','image/webp')`),
     check("attachment_size", sql`${t.byteSize}>0 AND ${t.byteSize}<=2097152`),
     check("attachment_hash", sql`length(${t.sha256})=64 AND ${t.sha256} NOT GLOB '*[^0-9a-f]*'`),
-    check("attachment_key", sql`${t.objectKey} LIKE ('org/'||${t.organizationId}||'/applications/'||${t.applicationId}||'/%')`),
+    check("attachment_key", sql`${t.objectKey}=('org/'||${t.organizationId}||'/applications/'||${t.applicationId}||'/'||${t.id})`),
     check("attachment_state", sql`${t.state} IN ('ready','delete_pending','deleted')`),
     check("attachment_deleted_time", sql`(${t.state}='ready' AND ${t.removedAt} IS NULL) OR ${t.state}='delete_pending' OR (${t.state}='deleted' AND ${t.removedAt} IS NOT NULL)`),
   ],
