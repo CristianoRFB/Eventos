@@ -1,6 +1,6 @@
 # MASTER EXECUTION STATUS — Eventos 77
 
-**Checkpoint:** fechamento das últimas ações em 2026-10-20 (`America/Sao_Paulo`); evidência histórica de 2026-10-14 preservada.
+**Checkpoint:** 27/10/2026 na branch de chat — [evidências e código F6](checkpoint-2026-10-27-chat.md). Histórico de 20/10 e 14/10 preservado; não há merge/deploy.
 **Resultado integral:** `IN_PROGRESS`; não é `CORE_READY`, `READY_FOR_STAGING`, `READY_FOR_PILOT` nem `PRODUCTION_VERIFIED`.  
 **Checkout/origin:** `C:\OpenSSL\set\Eventos` / `https://github.com/CristianoRFB/Eventos.git`.  
 **Branch:** `codex/eventos77-full-system`.  
@@ -66,4 +66,4 @@ Cloudflare D1/R2/custom hostnames reais: não provisionados. Firebase: console d
 
 As migrations `0000`–`0005` foram aplicadas somente ao D1 local fictício; nenhuma migration cloud foi executada. Agenda/cadastros referenciam revisões imutáveis e o rollback editorial mantém o histórico. Retorno seguro: preservar os dados locais e reverter somente commits novos identificados depois do baseline, mantendo compatibilidade com as tabelas adicionais. Nenhum banco ou objeto real foi tocado.
 
-**NEXT_STEP:** implementar purga por retenção em dados sintéticos A/B (incluindo perfis vinculados e auditoria sem PII), testar expiração e execução repetida; depois anexos privados, resposta do candidato e exportação mínima auditada. O [roteiro de conclusão](checkpoint-2026-10-20.md) lista os demais aceites F0–F12, decisões comerciais e gates externos. Resultado integral IN_PROGRESS, sem declaração de prontidão comercial.
+**NEXT_STEP (27/10):** o código de purga, export CSV e resposta de candidato foi implementado e passou CI na revisão `3a0eadf2`. Continuar pelo **F6 anexos privados** e rotação/recovery de chave, com testes de privacidade; em seguida fechar aceites pendentes e F7 provider fake. Veja [checkpoint atual](checkpoint-2026-10-27-chat.md), inclusive limites e autorização externa. Resultado integral IN_PROGRESS, sem declaração de prontidão comercial.
