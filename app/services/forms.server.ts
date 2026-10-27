@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { csvRow } from "../domain/export-csv";
 import {
   formDefinitionSchema,
   applicantProfileSchema,
@@ -373,7 +374,7 @@ export async function handleApplicationsAdmin(
 ) {
   if (!id && editionId) {
     if (request.method !== "GET") return new Response(null, { status: 405 });
-    await editionFormContext(
+    const { actor } = await editionFormContext(
       request,
       env,
       orgId,
@@ -386,6 +387,47 @@ export async function handleApplicationsAdmin(
       .min(0)
       .max(10000)
       .parse(new URL(request.url).searchParams.get("page") ?? 0);
+    if (action === "export") {
+      // Staff-only, scoped, bounded and audited. CSV is never public or cached.
+      // Retention-expired and withdrawn responses are never decrypted/exported.
+      const rows = await env.DB.prepare(
+        "SELECT a.id,a.status,a.created_at,f.name AS form_name,s.state,s.retention_until,s.form_id,s.definition_id,s.id AS submission_id,s.answers_ciphertext FROM exhibitor_applications a JOIN form_submissions s ON s.organization_id=a.organization_id AND s.id=a.submission_id JOIN forms f ON f.organization_id=s.organization_id AND f.id=s.form_id WHERE a.organization_id=? AND a.edition_id=? ORDER BY a.created_at DESC,a.id LIMIT 100 OFFSET ?",
+      ).bind(orgId, editionId, page * 100).all<{
+        id: string; status: string; created_at: string; form_name: string;
+        state: string; retention_until: string; form_id: string;
+        definition_id: string; submission_id: string;
+        answers_ciphertext: string | null;
+      }>();
+      const lines = [csvRow(["id", "formulario", "status", "enviada_em", "respostas_json"])];
+      for (const row of rows.results) {
+        const active = row.state === "active" &&
+          Date.parse(row.retention_until) > Date.now();
+        const scope = `${orgId}:${row.form_id}:${row.submission_id}:${row.definition_id}`;
+        const answers = active && row.answers_ciphertext
+          ? await decryptSubmission(env.BETTER_AUTH_SECRET, orgId, scope, row.answers_ciphertext)
+          : null;
+        lines.push(csvRow([
+          row.id, row.form_name, active ? row.status : row.state,
+          row.created_at, answers ? JSON.stringify(answers) : "",
+        ]));
+      }
+      await env.DB.batch([
+        auditStatement(
+          env.DB, orgId, actor.identity.user.id,
+          "application.private.export", "edition", editionId,
+        ),
+      ]);
+      return new Response("\uFEFF" + lines.join("\r\n") + "\r\n", {
+        status: 200,
+        headers: {
+          ...privateHeaders(),
+          "Content-Type": "text/csv; charset=utf-8",
+          "Content-Disposition": 'attachment; filename="eventos77-candidaturas.csv"',
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "no-referrer",
+        },
+      });
+    }
     return json(
       (
         await env.DB.prepare(
