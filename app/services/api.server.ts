@@ -26,6 +26,7 @@ import { handleContentApi, saveDraft } from "./content.server";
 import { handleOperationsApi } from "./operations.server";
 import type { OperationKind } from "../domain/operations";
 import { handleFormsAdmin, handleApplicationsAdmin } from "./forms.server";
+import { handleReviewerAttachment } from "./application-attachments.server";
 
 const slug = z
   .string()
@@ -201,6 +202,13 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
       undefined,
       "export",
       saveDraft,
+    );
+  const applicantAttachment = resource.match(
+    /^applications\/([^/]+)\/attachments(?:\/([^/]+))?$/,
+  );
+  if (applicantAttachment)
+    return handleReviewerAttachment(
+      request, env, orgId, applicantAttachment[1]!, applicantAttachment[2],
     );
   const applicationList = resource.match(/^editions\/([^/]+)\/applications$/);
   if (applicationList)
