@@ -276,11 +276,67 @@ test("versioned forms keep submissions private, deduplicate races, enforce revie
     ).status(),
   ).toBe(404);
   expect((await editor.get(appPath)).status()).toBe(403);
+  const needsInfo = await reviewer.post(`${appPath}/review`, {
+    data: {
+      expectedRevision: 1,
+      status: "needs_info",
+      applicantMessage: "Informe uma descrição complementar.",
+    },
+  });
+  expect(needsInfo.status(), await needsInfo.text()).toBe(200);
+  const needsInfoReceipt = await (await visitor.get(receiptApi)).json() as {
+    status: string;
+    revision: number;
+    canReply: boolean;
+  };
+  expect(needsInfoReceipt).toMatchObject({
+    status: "needs_info",
+    revision: 2,
+    canReply: true,
+  });
+  const replyPath = `${receiptApi}/reply`;
+  expect((await visitorB.post(replyPath, { data: {
+    expectedRevision: 2, message: "Tentativa de outra organizadora",
+  } })).status()).toBe(404);
+  expect((await visitor.post(replyPath, {
+    headers: { Origin: "https://evil.example.test" },
+    data: { expectedRevision: 2, message: "Origem forjada" },
+  })).status()).toBe(403);
+  expect((await visitor.post(replyPath, {
+    data: { expectedRevision: 2, message: "" },
+  })).status()).toBe(400);
+  const followUp = await visitor.post(replyPath, {
+    data: {
+      expectedRevision: 2,
+      message: "Descrição complementar privada para análise.",
+    },
+  });
+  expect(followUp.status(), await followUp.text()).toBe(200);
+  expect(await followUp.json()).toMatchObject({
+    status: "submitted",
+    revision: 3,
+  });
+  expect((await visitor.post(replyPath, {
+    data: { expectedRevision: 2, message: "Duplicação" },
+  })).status()).toBe(409);
+  const followUpRead = await reviewer.get(appPath);
+  expect(followUpRead.status(), await followUpRead.text()).toBe(200);
+  const followUpData = await followUpRead.json() as {
+    applicantReplies: { message: string }[];
+  };
+  expect(followUpData.applicantReplies).toEqual([
+    expect.objectContaining({
+      message: "Descrição complementar privada para análise.",
+    }),
+  ]);
+  expect((await visitor.get(receiptApi)).then((r) => r.text())).resolves.not.toContain(
+    "Descrição complementar privada para análise.",
+  );
   expect(
     (
       await reviewer.post(`${appPath}/review`, {
         data: {
-          expectedRevision: 1,
+          expectedRevision: 3,
           status: "approved",
           applicantMessage: "Aprovação fictícia para o ensaio.",
         },
