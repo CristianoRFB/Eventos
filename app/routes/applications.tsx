@@ -23,6 +23,14 @@ type Detail = {
     message: string;
     createdAt: string;
   }[];
+  attachments?: {
+    id: string;
+    original_name: string;
+    mime: string;
+    byte_size: number;
+    sha256: string;
+    created_at: string;
+  }[];
 };
 export async function loader({ request, params }: Route.LoaderArgs) {
   try {
@@ -207,6 +215,21 @@ export default function ApplicationsPage({ loaderData }: Route.ComponentProps) {
               </p>
             )}
           </section>
+          {detail.attachments && detail.attachments.length > 0 && (
+            <section className="section-card">
+              <h2>Anexos privados</h2>
+              <p>Downloads autorizados são auditados, sem links públicos do R2.</p>
+              <ul>
+                {detail.attachments.map((item) => (
+                  <li key={item.id}>
+                    <a href={`/api/v1/orgs/${organization.id}/applications/${detail.id}/attachments/${item.id}`}>
+                      Baixar {item.original_name} ({Math.ceil(item.byte_size / 1024)} KB)
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           {detail.applicantReplies && detail.applicantReplies.length > 0 && (
             <section className="section-card">
               <h2>Informações complementares recebidas</h2>
