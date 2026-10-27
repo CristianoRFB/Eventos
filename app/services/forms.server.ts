@@ -11,6 +11,7 @@ import type { AuthEnvironment } from "../infrastructure/auth.server";
 import { privateHeaders } from "../infrastructure/security.server";
 import { readJsonBody } from "../infrastructure/request.server";
 import { decryptSubmission, submissionSecrets } from "../infrastructure/submission-crypto.server";
+import { effectiveSubmissionCipher } from "./submission-rewrap.server";
 import { requireTenant, auditStatement } from "./tenant.server";
 import type { saveDraft } from "./content.server";
 
@@ -404,7 +405,7 @@ export async function handleApplicationsAdmin(
           Date.parse(row.retention_until) > Date.now();
         const scope = `${orgId}:${row.form_id}:${row.submission_id}:${row.definition_id}`;
         const answers = active && row.answers_ciphertext
-          ? await decryptSubmission(submissionSecrets(env), orgId, scope, row.answers_ciphertext)
+          ? await decryptSubmission(submissionSecrets(env), orgId, scope, await effectiveSubmissionCipher(env.DB, orgId, {kind:"submission",field:"answers"}, row.submission_id, row.answers_ciphertext))
           : null;
         lines.push(csvRow([
           row.id, row.form_name, active ? row.status : row.state,
@@ -484,8 +485,9 @@ export async function handleApplicationsAdmin(
       .bind(orgId, row.form_id, row.definition_id)
       .first<{ definition_json: string }>();
     const followUps = await env.DB.prepare(
-      "SELECT requested_revision,reply_ciphertext,created_at FROM application_replies WHERE organization_id=? AND edition_id=? AND application_id=? AND reply_ciphertext IS NOT NULL ORDER BY requested_revision",
+      "SELECT id,requested_revision,reply_ciphertext,created_at FROM application_replies WHERE organization_id=? AND edition_id=? AND application_id=? AND reply_ciphertext IS NOT NULL ORDER BY requested_revision",
     ).bind(orgId, context.edition_id, id).all<{
+      id: string;
       requested_revision: number;
       reply_ciphertext: string;
       created_at: string;
@@ -496,7 +498,7 @@ export async function handleApplicationsAdmin(
         submissionSecrets(env),
         orgId,
         `${orgId}:${id}:reply:${reply.requested_revision}`,
-        reply.reply_ciphertext,
+        await effectiveSubmissionCipher(env.DB,orgId,{kind:"reply",field:"reply"},reply.id,reply.reply_ciphertext),
       ) as { message: string };
       applicantReplies.push({
         requestedRevision: reply.requested_revision,
@@ -528,7 +530,7 @@ export async function handleApplicationsAdmin(
             submissionSecrets(env),
             orgId,
             scope,
-            row.answers_ciphertext,
+            await effectiveSubmissionCipher(env.DB,orgId,{kind:"submission",field:"answers"},row.submission_id,row.answers_ciphertext),
           )
         : null,
       publicProfile: row.profile_ciphertext
@@ -536,7 +538,7 @@ export async function handleApplicationsAdmin(
             submissionSecrets(env),
             orgId,
             scope,
-            row.profile_ciphertext,
+            await effectiveSubmissionCipher(env.DB,orgId,{kind:"submission",field:"profile"},row.submission_id,row.profile_ciphertext),
           )
         : null,
     });
@@ -608,7 +610,7 @@ export async function handleApplicationsAdmin(
         submissionSecrets(env),
         orgId,
         scope,
-        row.profile_ciphertext,
+        await effectiveSubmissionCipher(env.DB,orgId,{kind:"submission",field:"profile"},row.submission_id,row.profile_ciphertext),
       ),
     );
     const mapped = await env.DB.prepare(
