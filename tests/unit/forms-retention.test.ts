@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { beforeEach, afterEach, describe, expect, it } from "vitest";
 import { purgeExpiredSubmissions } from "../../app/services/forms-retention.server";
+import { cleanupPendingApplicantAttachments } from "../../app/services/application-attachments.server";
 
 type Input = string | number | null;
 describe("F6: private submission retention cleanup", () => {
@@ -137,6 +138,32 @@ describe("F6: private submission retention cleanup", () => {
     const expired = submission("a", "expired", "2027-12-31T23:59:59.000Z");
     const liveA = submission("a", "live", "2031-01-01T00:00:00.000Z");
     const liveB = submission("b", "live", "2031-01-01T00:00:00.000Z");
+    for (const [tenant, suffix] of [["a","expired"],["b","live"]] as const) {
+      exec(
+        "INSERT INTO application_attachments(id,organization_id,edition_id,application_id,object_key,original_name,mime,byte_size,sha256) VALUES(?,?,?,?,?,?,?,?,?)",
+        `attachment-${tenant}-${suffix}`,
+        `org-${tenant}`,
+        `edition-${tenant}`,
+        `application-${tenant}-${suffix}`,
+        `org/org-${tenant}/applications/application-${tenant}-${suffix}/attachment-${tenant}-${suffix}`,
+        "private-evidence.png",
+        "image/png",
+        57,
+        "a".repeat(64),
+      );
+    }
+    expect(() => exec(
+      "INSERT INTO application_attachments(id,organization_id,edition_id,application_id,object_key,original_name,mime,byte_size,sha256) VALUES(?,?,?,?,?,?,?,?,?)",
+      "forged-a",
+      "org-a",
+      "edition-a",
+      "application-b-live",
+      "org/org-a/applications/application-b-live/forged-a",
+      "malicious.png",
+      "image/png",
+      57,
+      "a".repeat(64),
+    )).toThrow(/FOREIGN KEY|constraint/i);
     exec(
       "INSERT INTO public_profile_sources(organization_id,edition_id,exhibitor_id,application_id) VALUES(?,?,?,?)",
       "org-a",
@@ -191,6 +218,33 @@ describe("F6: private submission retention cleanup", () => {
     expect(
       sql.prepare("SELECT reply_ciphertext FROM application_replies WHERE id=?").get("reply-b-live"),
     ).toMatchObject({ reply_ciphertext: "encrypted applicant follow-up" });
+    expect(
+      sql.prepare("SELECT state,original_name FROM application_attachments WHERE id=?").get("attachment-a-expired"),
+    ).toMatchObject({ state: "delete_pending", original_name: "" });
+    expect(
+      sql.prepare("SELECT state,original_name FROM application_attachments WHERE id=?").get("attachment-b-live"),
+    ).toMatchObject({ state: "ready", original_name: "private-evidence.png" });
+    const deletedKeys: string[] = [];
+    const cleanup = await cleanupPendingApplicantAttachments({
+      DB: db(),
+      ASSETS_PRIVATE: {
+        delete: async (key: string) => { deletedKeys.push(key); },
+      } as unknown as R2Bucket,
+    } as Parameters<typeof cleanupPendingApplicantAttachments>[0], 50, "org-a");
+    expect(cleanup.deleted).toBe(1);
+    expect(deletedKeys).toEqual([
+      "org/org-a/applications/application-a-expired/attachment-a-expired",
+    ]);
+    expect(
+      sql.prepare("SELECT state FROM application_attachments WHERE id=?").get("attachment-a-expired"),
+    ).toMatchObject({ state: "deleted" });
+    expect((await cleanupPendingApplicantAttachments({
+      DB: db(),
+      ASSETS_PRIVATE: {
+        delete: async () => { throw new Error("Must not retry completed object"); },
+      } as unknown as R2Bucket,
+    } as Parameters<typeof cleanupPendingApplicantAttachments>[0])).deleted).toBe(0);
+
     // Keep the immutable link so already published snapshots can be suppressed.
     expect(
       sql
