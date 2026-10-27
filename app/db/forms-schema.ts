@@ -231,3 +231,36 @@ export const publicFormRateLimits = sqliteTable(
     check("form_rate_count", sql`${t.count}>=1 AND ${t.count}<=10`),
   ],
 );
+
+/** At most one encrypted applicant reply for each needs_info revision.
+ * Reply content may only be redacted (never changed or re-exposed).
+ */
+export const applicationReplies = sqliteTable(
+  "application_replies",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").notNull(),
+    editionId: text("edition_id").notNull(),
+    applicationId: text("application_id").notNull(),
+    requestedRevision: integer("requested_revision").notNull(),
+    replyCiphertext: text("reply_ciphertext"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    unique("application_replies_once_per_request").on(
+      t.organizationId, t.applicationId, t.requestedRevision,
+    ),
+    index("application_replies_by_application").on(
+      t.organizationId, t.applicationId, t.createdAt,
+    ),
+    foreignKey({
+      columns: [t.organizationId, t.editionId, t.applicationId],
+      foreignColumns: [
+        exhibitorApplications.organizationId,
+        exhibitorApplications.editionId,
+        exhibitorApplications.id,
+      ],
+    }),
+    check("application_reply_revision", sql`${t.requestedRevision}>=1`),
+  ],
+);
