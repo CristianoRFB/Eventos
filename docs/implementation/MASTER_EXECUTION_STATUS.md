@@ -66,4 +66,9 @@ Cloudflare D1/R2/custom hostnames reais: não provisionados. Firebase: console d
 
 As migrations `0000`–`0007` foram testadas somente no D1 local fictício; nenhuma migration cloud foi executada. Agenda/cadastros referenciam revisões imutáveis e o rollback editorial mantém o histórico. Retorno seguro: preservar os dados locais e reverter somente commits novos identificados depois do baseline, mantendo compatibilidade com as tabelas adicionais. Nenhum banco ou objeto real foi tocado.
 
-**NEXT_STEP (27/10):** o código de purga, export CSV e resposta de candidato foi implementado e passou CI na revisão `3a0eadf2`. Continuar por **F6 rotação/recovery de chave**, reconciliação/aviso de retenção e aceites de privacidade; em seguida fechar aceites pendentes e F7 provider fake. Veja [checkpoint atual](checkpoint-2026-10-27-chat.md), inclusive limites e autorização externa. Resultado integral IN_PROGRESS, sem declaração de prontidão comercial.
+**CHECKPOINT F6 AES-GCM (27/10):** [crypto e inventário](checkpoint-2026-10-27-crypto.md) entregues em `18216308`, CI completo PASS (31+ códigos: ver arquivo). F6 permanece PARTIAL até rewrap seguro e política de dados/retention, sem secret/cloud ou produção.
+
+**NEXT_STEP HISTÓRICO (27/10):** o código de purga, export CSV e resposta de candidato foi implementado e passou CI na revisão `3a0eadf2`. Continuar por **F6 rotação/recovery de chave**, reconciliação/aviso de retenção e aceites de privacidade; em seguida fechar aceites pendentes e F7 provider fake. Veja [checkpoint atual](checkpoint-2026-10-27-chat.md), inclusive limites e autorização externa. Resultado integral IN_PROGRESS, sem declaração de prontidão comercial.
+
+
+**NEXT_STEP ATUAL (27/10, após crypto):** implementar rewrap versionado e auditável em fixtures, sem contornar triggers redaction-only, revisar lifecycle de mídia e avançar F7 provider fake. Evidência [checkpoint crypto](checkpoint-2026-10-27-crypto.md); não repetir o início do F6.
