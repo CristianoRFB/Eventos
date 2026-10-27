@@ -189,6 +189,19 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
       formsRoute[3],
       saveDraft,
     );
+  const applicationExport = resource.match(
+    /^editions\/([^/]+)\/applications\/export$/,
+  );
+  if (applicationExport)
+    return handleApplicationsAdmin(
+      request,
+      env,
+      orgId,
+      applicationExport[1],
+      undefined,
+      "export",
+      saveDraft,
+    );
   const applicationList = resource.match(/^editions\/([^/]+)\/applications$/);
   if (applicationList)
     return handleApplicationsAdmin(
