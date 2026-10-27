@@ -483,10 +483,32 @@ export async function handleApplicationsAdmin(
     )
       .bind(orgId, row.form_id, row.definition_id)
       .first<{ definition_json: string }>();
+    const followUps = await env.DB.prepare(
+      "SELECT requested_revision,reply_ciphertext,created_at FROM application_replies WHERE organization_id=? AND edition_id=? AND application_id=? AND reply_ciphertext IS NOT NULL ORDER BY requested_revision",
+    ).bind(orgId, context.edition_id, id).all<{
+      requested_revision: number;
+      reply_ciphertext: string;
+      created_at: string;
+    }>();
+    const applicantReplies = [];
+    for (const reply of followUps.results) {
+      const decrypted = await decryptSubmission(
+        env.BETTER_AUTH_SECRET,
+        orgId,
+        `${orgId}:${id}:reply:${reply.requested_revision}`,
+        reply.reply_ciphertext,
+      ) as { message: string };
+      applicantReplies.push({
+        requestedRevision: reply.requested_revision,
+        message: decrypted.message,
+        createdAt: reply.created_at,
+      });
+    }
     return json({
       id,
       status: row.status,
       revision: row.revision,
+      applicantReplies,
       applicantMessage: row.applicant_message,
       listingOptIn: row.listing_opt_in === 1,
       fields: definition
