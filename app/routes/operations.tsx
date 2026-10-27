@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { redirect } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Route } from "./+types/operations";
 import { requireTenant } from "../services/tenant.server";
 import { operationPermissions } from "../services/operations.server";
@@ -76,6 +76,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 export default function OperationsPage({ loaderData }: Route.ComponentProps) {
   const { organization, edition, revision, operations, editable } = loaderData;
+  // SSR sends controlled form controls before React can attach event handlers.
+  // A user (or fast browser test) changing the select during that gap would
+  // lose the selection on hydration and submit the wrong operation kind.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   const [kind, setKind] = useState<OperationKind>("program");
   const [selected, setSelected] = useState("");
   const item = operations[kind].find((i) => i.id === selected);
@@ -107,6 +112,7 @@ export default function OperationsPage({ loaderData }: Route.ComponentProps) {
           Cadastro
           <select
             aria-label="Cadastro"
+            disabled={!hydrated}
             value={kind}
             onChange={(e) => {
               setKind(e.target.value as OperationKind);
@@ -124,6 +130,7 @@ export default function OperationsPage({ loaderData }: Route.ComponentProps) {
           Registro
           <select
             aria-label="Registro"
+            disabled={!hydrated}
             value={selected}
             onChange={(e) => setSelected(e.target.value)}
           >
