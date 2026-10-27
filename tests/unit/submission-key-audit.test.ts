@@ -10,7 +10,8 @@ describe("F6: retirement safety inventory", () => {
     const sql = new DatabaseSync(":memory:");
     try {
       sql.exec(`CREATE TABLE form_submissions(answers_ciphertext text,profile_ciphertext text);
-                CREATE TABLE application_replies(reply_ciphertext text);`);
+                CREATE TABLE application_replies(reply_ciphertext text);
+                CREATE TABLE private_cipher_rewraps(rewrapped_ciphertext text);`);
       const submission = sql.prepare(
         "INSERT INTO form_submissions(answers_ciphertext,profile_ciphertext) VALUES(?,?)",
       );
@@ -19,6 +20,8 @@ describe("F6: retirement safety inventory", () => {
       submission.run("broken", "v2.jan27.iv4.cipher4");
       sql.prepare("INSERT INTO application_replies(reply_ciphertext) VALUES(?)")
         .run("v2.oct26.iv5.cipher5");
+      sql.prepare("INSERT INTO private_cipher_rewraps(rewrapped_ciphertext) VALUES(?)")
+        .run("v2.jan27.iv6.cipher6");
       const db = {
         prepare: (statement: string) => ({
           all: async () => ({ results: sql.prepare(statement).all() }),
@@ -28,7 +31,7 @@ describe("F6: retirement safety inventory", () => {
       expect(usage).toEqual([
         { keyId: "invalid", count: 1 },
         { keyId: "v1", count: 1 },
-        { keyId: "v2:jan27", count: 1 },
+        { keyId: "v2:jan27", count: 2 },
         { keyId: "v2:oct26", count: 3 },
       ]);
       expect(JSON.stringify(usage)).not.toContain("cipher");
