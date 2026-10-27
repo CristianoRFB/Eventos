@@ -18,7 +18,7 @@ CREATE TABLE application_attachments (
   CONSTRAINT attachment_mime CHECK(mime IN ('image/png','image/jpeg','image/webp')),
   CONSTRAINT attachment_size CHECK(byte_size>0 AND byte_size<=2097152),
   CONSTRAINT attachment_hash CHECK(length(sha256)=64 AND sha256 NOT GLOB '*[^0-9a-f]*'),
-  CONSTRAINT attachment_key CHECK(object_key LIKE ('org/'||organization_id||'/applications/'||application_id||'/%')),
+  CONSTRAINT attachment_key CHECK(object_key=('org/'||organization_id||'/applications/'||application_id||'/'||id)),
   CONSTRAINT attachment_state CHECK(state IN ('ready','delete_pending','deleted')),
   CONSTRAINT attachment_deleted_time CHECK((state='ready' AND removed_at IS NULL) OR (state='delete_pending') OR (state='deleted' AND removed_at IS NOT NULL))
 );
