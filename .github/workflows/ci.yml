@@ -2,6 +2,9 @@ name: Local quality gates
 on:
   pull_request:
   workflow_dispatch:
+concurrency:
+  group: eventos77-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
