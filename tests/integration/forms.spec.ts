@@ -276,6 +276,56 @@ test("versioned forms keep submissions private, deduplicate races, enforce revie
     ).status(),
   ).toBe(404);
   expect((await editor.get(appPath)).status()).toBe(403);
+  // End-to-end private R2 upload: real local Worker and synthetic D1/R2 fixture.
+  const png = new Uint8Array(57);
+  png.set([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
+  const pngView = new DataView(png.buffer);
+  pngView.setUint32(8, 13);
+  png.set([0x49,0x48,0x44,0x52],12);
+  pngView.setUint32(16, 2);
+  pngView.setUint32(20, 2);
+  png[24]=8; png[25]=6;
+  png.set([0x49,0x44,0x41,0x54],37);
+  png.set([0x49,0x45,0x4e,0x44],49);
+  const uploadPath = `${receiptApi}/attachments`;
+  const uploadHeaders = { "Content-Type": "image/png", "X-File-Name": "prova.png" };
+  expect((await visitor.post(uploadPath, {
+    headers: { ...uploadHeaders, "Content-Type": "text/html" },
+    data: Buffer.from(png),
+  })).status()).toBe(400);
+  expect((await visitorB.post(uploadPath, {
+    headers: uploadHeaders,
+    data: Buffer.from(png),
+  })).status()).not.toBe(201);
+  const uploaded = await visitor.post(uploadPath, {
+    headers: uploadHeaders,
+    data: Buffer.from(png),
+  });
+  expect(uploaded.status(), await uploaded.text()).toBe(201);
+  const imageId = (await uploaded.json() as { id: string }).id;
+  expect(imageId).toMatch(/^[a-f0-9-]{36}$/);
+  const attachmentAdmin = `${appPath}/attachments`;
+  expect((await editor.get(attachmentAdmin)).status()).toBe(403);
+  expect((await foreign.get(`/api/v1/orgs/org-b/applications/${applicationId}/attachments`)).status()).toBe(404);
+  const attachmentsList = await reviewer.get(attachmentAdmin);
+  expect(attachmentsList.status()).toBe(200);
+  expect(await attachmentsList.json()).toContainEqual(
+    expect.objectContaining({ id: imageId, original_name: "prova.png", mime: "image/png" }),
+  );
+  const downloaded = await reviewer.get(`${attachmentAdmin}/${imageId}`);
+  expect(downloaded.status(), await downloaded.text()).toBe(200);
+  expect(downloaded.headers()["cache-control"]).toContain("no-store");
+  expect(downloaded.headers()["content-disposition"]).toContain("attachment;");
+  expect(Buffer.from(await downloaded.body())).toEqual(Buffer.from(png));
+  for (let i = 0; i < 2; i++) {
+    const extra = await visitor.post(uploadPath, {
+      headers: uploadHeaders, data: Buffer.from(png),
+    });
+    expect(extra.status(), await extra.text()).toBe(201);
+  }
+  expect((await visitor.post(uploadPath, {
+    headers: uploadHeaders, data: Buffer.from(png),
+  })).status()).toBe(409);
   const needsInfo = await reviewer.post(`${appPath}/review`, {
     data: {
       expectedRevision: 1,
@@ -407,6 +457,10 @@ test("versioned forms keep submissions private, deduplicate races, enforce revie
         })
       ).status(),
     ).toBe(200);
+  expect((await reviewer.get(`${attachmentAdmin}/${imageId}`)).status()).toBe(404);
+  expect((await visitor.post(uploadPath, {
+    headers: uploadHeaders, data: Buffer.from(png),
+  })).status()).toBe(410);
   const revoked = await publicGet("/expositores");
   expect(await revoked.text()).not.toContain(payload.publicProfile.name);
   expect(revoked.headers()["x-publication-revision"]).toBe(String(publication));
