@@ -57,6 +57,12 @@ Verificar em **320, 375, 390, 768 e 1440px**:
    `needs_info`, responde uma vez, e revisor visualiza só no seu tenant.
 5. Exportação privada requer `applications.review`, responde como CSV
    sem cache e não inclui dados de outro tenant/retirados/vencidos.
+5a. Testar anexos de candidatura com R2 LOCAL: duas organizações A/B,
+   PNG/JPEG/WebP assinados corretamente, rejeição de arquivo inválido, 4º
+   upload bloqueado, download só com applications.review, retirada no recibo,
+   objeto físico removido após confirmação e sem URL pública. Com binding
+   ausente, mostrar indisponibilidade sem confirmar upload falso. Nunca
+   habilitar cron real apenas para concluir este teste.
 6. Retirada revoga perfil público imediatamente (inclusive snapshots
    anteriores) e remove ciphertext do candidato.
 7. Simular avanço controlado do relógio apenas no banco fictício e
