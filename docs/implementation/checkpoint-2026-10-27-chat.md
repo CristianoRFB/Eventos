@@ -47,3 +47,25 @@ retirada/retention purgando objetos derivados permitidos, testes A/B e URLs
 sem exposição pública. Depois implementar a estratégia versionada de
 rotação/recuperação AES (somente fixtures), fechar F6 e avançar F7 provider fake.
 Não criar recurso cloud/cron nem ligar billing sem autorização.
+
+## Continuação F6 — anexo privado e aceite local
+
+Implementados `migrations/0007_application_attachments.sql`, tabela Drizzle,
+serviço `application-attachments.server.ts`, rota pública de upload por recibo,
+rota administrativa de download com RBAC por evento, UI de candidato e revisor,
+redaction em retirada/expiração e limpeza física idempotente via R2
+(apenas local). Limites técnicos: 3 imagens de até 2 MiB (PNG/JPEG/WebP),
+metadados SHA-256 e validação de MIME/conteúdo. Corrigido o CHECK de chave
+R2 no SQLite: igualdade exata em vez de LIKE dinâmico.
+
+**CI de código:** SHA `84629bd61342901024c328aa21c94c203f99bd74`,
+https://github.com/CristianoRFB/Eventos/actions/runs/40553072100 — `success`
+(migração local, lint, tipos, unitários, integração, E2E, docs).
+**Estado:** F6 continua PARTIAL. Nenhum cron, bucket hospedado, domínio ou
+cliente real foi configurado. A política global de mídia exige verificação de
+avisos, tolerância, reconciliação de órfãos e teste de backup/restauração de
+bytes antes de cron de expiração. Ver `docs/adr/ADR-009-private-applicant-attachments.md`.
+
+**NEXT_CODE_STEP:** rotação/recuperação de segredo AES-GCM com fixtures e
+compatibilidade `v1`, seguida de lifecycle/domínios F7 fake e fechamento dos
+aceites NOW existentes. Não reiniciar o trabalho de anexos.
