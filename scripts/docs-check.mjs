@@ -21,8 +21,8 @@ const hash = (relative) =>
  */
 const textHashMatches = (relative, expected) => {
   if (hash(relative) === expected) return true;
-  if (!/\\.(csv|txt|md|mmd)$/i.test(relative)) return false;
-  const normalized = read(relative).replace(/\\r\\n/g, '\\n').replace(/\\n/g, '\\r\\n');
+  if (!/\.(csv|txt|md|mmd)$/i.test(relative)) return false;
+  const normalized = read(relative).replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
   return createHash('sha256').update(normalized).digest('hex') === expected;
 };
 
