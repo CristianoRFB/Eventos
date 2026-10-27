@@ -504,8 +504,15 @@ export async function handleApplicationsAdmin(
         createdAt: reply.created_at,
       });
     }
+    const attachments = await env.DB.prepare(
+      "SELECT id,original_name,mime,byte_size,sha256,created_at FROM application_attachments WHERE organization_id=? AND application_id=? AND state='ready' ORDER BY created_at,id LIMIT 3",
+    ).bind(orgId, id).all<{
+      id: string; original_name: string; mime: string;
+      byte_size: number; sha256: string; created_at: string;
+    }>();
     return json({
       id,
+      attachments: attachments.results,
       status: row.status,
       revision: row.revision,
       applicantReplies,
