@@ -13,6 +13,18 @@ const hash = (relative) =>
   createHash('sha256')
     .update(readFileSync(path.join(root, relative)))
     .digest('hex');
+/**
+ * Historical design CSVs were authored with CRLF and some Git checkouts
+ * normalize them to LF. Require byte-for-byte equality after normalizing
+ * ONLY line endings on text sources, never on PNG/SVG evidence. The historical
+ * SHA-256 remains unchanged; semantic edits still fail this provenance gate.
+ */
+const textHashMatches = (relative, expected) => {
+  if (hash(relative) === expected) return true;
+  if (!/\.(csv|txt|md|mmd)$/i.test(relative)) return false;
+  const normalized = read(relative).replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
+  return createHash('sha256').update(normalized).digest('hex') === expected;
+};
 
 // Quoted CSV fields may contain commas, quotes and original multiline clauses.
 function csv(relative) {
@@ -94,7 +106,7 @@ for (const row of [...requirements, ...globals]) {
   requirementIds.add(row.requirement_id);
   required(row.source);
   if (!existsSync(path.join(root, row.source))) continue;
-  check(hash(row.source) === row.source_sha256, `${row.requirement_id}: source hash changed`);
+  check(textHashMatches(row.source, row.source_sha256), `${row.requirement_id}: source hash changed`);
   const sourceText = read(row.source)
     .split(/\r?\n/)
     .slice(Number(row.source_start_line) - 1, Number(row.source_end_line))
@@ -135,7 +147,7 @@ function checkInventory(originalPath, tracedPath, keyFields, expectedCount) {
       check(tracedRow[field] === value, `${tracedPath}: ${id}.${field} changed source semantics`);
     }
     check(tracedRow.source === originalPath, `${tracedPath}: ${id} source path mismatch`);
-    check(tracedRow.source_sha256 === hash(originalPath), `${tracedPath}: ${id} source hash mismatch`);
+    check(textHashMatches(originalPath, tracedRow.source_sha256), `${tracedPath}: ${id} source hash mismatch`);
     if (tracedRow.status === 'PASS') {
       check(Boolean(tracedRow.implementation_sha), `${tracedPath}: ${id} PASS without SHA`);
       check(
@@ -169,7 +181,7 @@ check(
 for (const row of diagramRows) {
   required(row.source_path);
   required(row.historical_svg_path);
-  check(hash(row.source_path) === row.source_sha256, `${row.diagram_id}: historical source changed`);
+  check(textHashMatches(row.source_path, row.source_sha256), `${row.diagram_id}: historical source changed`);
   check(
     row.historical_renderer === 'GRAPHVIZ_DOT_AUXILIARY',
     `${row.diagram_id}: historical SVG must retain truthful renderer provenance`,
@@ -184,7 +196,7 @@ if (existsSync(path.join(root, renderManifest))) {
   check(manifest.diagrams.length === 16, 'Mermaid manifest must include all 16 sources');
   for (const row of manifest.diagrams) {
     required(row.source);
-    check(row.sourceSha256 === hash(row.source), `${row.id}: rendered source hash mismatch`);
+    check(textHashMatches(row.source, row.sourceSha256), `${row.id}: rendered source hash mismatch`);
     check(row.status === 'PASS', `${row.id}: Mermaid render is ${row.status}`);
     if (row.status !== 'PASS') continue;
     required(row.svg);

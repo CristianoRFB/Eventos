@@ -18,6 +18,19 @@ type Detail = {
   answers: Record<string, unknown> | null;
   publicProfile: Record<string, string> | null;
   fields?: { key: string; label: string }[];
+  applicantReplies?: {
+    requestedRevision: number;
+    message: string;
+    createdAt: string;
+  }[];
+  attachments?: {
+    id: string;
+    original_name: string;
+    mime: string;
+    byte_size: number;
+    sha256: string;
+    created_at: string;
+  }[];
 };
 export async function loader({ request, params }: Route.LoaderArgs) {
   try {
@@ -139,6 +152,18 @@ export default function ApplicationsPage({ loaderData }: Route.ComponentProps) {
       </p>
       {list && (
         <section className="section-card">
+          <p>
+            <a
+              className="button light"
+              href={`/api/v1/orgs/${organization.id}/editions/${editionId}/applications/export?page=0`}
+            >
+              Exportar primeira página de candidaturas (CSV privado)
+            </a>
+          </p>
+          <p className="notice">
+            Até 100 candidaturas por página. Somente equipe autorizada;
+            dados retirados ou vencidos não são exportados.
+          </p>
           {list.map((item) => (
             <article className="event-row" key={item.id}>
               <div>
@@ -190,6 +215,33 @@ export default function ApplicationsPage({ loaderData }: Route.ComponentProps) {
               </p>
             )}
           </section>
+          {detail.attachments && detail.attachments.length > 0 && (
+            <section className="section-card">
+              <h2>Anexos privados</h2>
+              <p>Downloads autorizados são auditados, sem links públicos do R2.</p>
+              <ul>
+                {detail.attachments.map((item) => (
+                  <li key={item.id}>
+                    <a href={`/api/v1/orgs/${organization.id}/applications/${detail.id}/attachments/${item.id}`}>
+                      Baixar {item.original_name} ({Math.ceil(item.byte_size / 1024)} KB)
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {detail.applicantReplies && detail.applicantReplies.length > 0 && (
+            <section className="section-card">
+              <h2>Informações complementares recebidas</h2>
+              {detail.applicantReplies.map((reply) => (
+                <article key={reply.requestedRevision}>
+                  <p>Resposta à solicitação #{reply.requestedRevision}</p>
+                  <p>{reply.message}</p>
+                  <small>{reply.createdAt}</small>
+                </article>
+              ))}
+            </section>
+          )}
           {detail.answers && (
             <section className="section-card">
               <h2>Decisão de análise</h2>

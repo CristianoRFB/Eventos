@@ -238,6 +238,26 @@ test("versioned forms keep submissions private, deduplicate races, enforce revie
       await visitor.get("/api/v1/public/applications/" + "a".repeat(64))
     ).status(),
   ).toBe(404);
+  // The only export surface is reviewer-authorized, org-scoped and no-store.
+  const exported = await owner.get(`${base}/applications/export?page=0`);
+  expect(exported.status(), await exported.text()).toBe(200);
+  expect(exported.headers()["content-type"]).toContain("text/csv");
+  expect(exported.headers()["cache-control"]).toContain("no-store");
+  expect(exported.headers()["content-disposition"]).toContain("attachment");
+  const csv = await exported.text();
+  expect(csv).toContain("private-f6@example.test");
+  expect(csv).toContain("respostas_json");
+  expect(
+    (await editor.get(`${base}/applications/export?page=0`)).status(),
+  ).toBe(403);
+  const otherOrgExport = await foreign.get(
+    "/api/v1/orgs/org-b/editions/edition-b/applications/export?page=0",
+  );
+  expect(otherOrgExport.status()).toBe(200);
+  expect(await otherOrgExport.text()).not.toContain("private-f6@example.test");
+  expect(
+    (await owner.post(`${base}/applications/export`, { data: {} })).status(),
+  ).toBe(405);
   const list = (await (await owner.get(`${base}/applications`)).json()) as {
     id: string;
     form_name: string;
@@ -256,11 +276,118 @@ test("versioned forms keep submissions private, deduplicate races, enforce revie
     ).status(),
   ).toBe(404);
   expect((await editor.get(appPath)).status()).toBe(403);
+  // End-to-end private R2 upload: real local Worker and synthetic D1/R2 fixture.
+  const png = new Uint8Array(57);
+  png.set([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
+  const pngView = new DataView(png.buffer);
+  pngView.setUint32(8, 13);
+  png.set([0x49,0x48,0x44,0x52],12);
+  pngView.setUint32(16, 2);
+  pngView.setUint32(20, 2);
+  png[24]=8; png[25]=6;
+  png.set([0x49,0x44,0x41,0x54],37);
+  png.set([0x49,0x45,0x4e,0x44],49);
+  const uploadPath = `${receiptApi}/attachments`;
+  const uploadHeaders = { "Content-Type": "image/png", "X-File-Name": "prova.png" };
+  expect((await visitor.post(uploadPath, {
+    headers: { ...uploadHeaders, "Content-Type": "text/html" },
+    data: Buffer.from(png),
+  })).status()).toBe(400);
+  expect((await visitorB.post(uploadPath, {
+    headers: uploadHeaders,
+    data: Buffer.from(png),
+  })).status()).not.toBe(201);
+  const uploaded = await visitor.post(uploadPath, {
+    headers: uploadHeaders,
+    data: Buffer.from(png),
+  });
+  expect(uploaded.status(), await uploaded.text()).toBe(201);
+  const imageId = (await uploaded.json() as { id: string }).id;
+  expect(imageId).toMatch(/^[a-f0-9-]{36}$/);
+  const attachmentAdmin = `${appPath}/attachments`;
+  expect((await editor.get(attachmentAdmin)).status()).toBe(403);
+  expect((await foreign.get(`/api/v1/orgs/org-b/applications/${applicationId}/attachments`)).status()).toBe(404);
+  const attachmentsList = await reviewer.get(attachmentAdmin);
+  expect(attachmentsList.status()).toBe(200);
+  expect(await attachmentsList.json()).toContainEqual(
+    expect.objectContaining({ id: imageId, original_name: "prova.png", mime: "image/png" }),
+  );
+  const downloaded = await reviewer.get(`${attachmentAdmin}/${imageId}`);
+  expect(downloaded.status(), await downloaded.text()).toBe(200);
+  expect(downloaded.headers()["cache-control"]).toContain("no-store");
+  expect(downloaded.headers()["content-disposition"]).toContain("attachment;");
+  expect(Buffer.from(await downloaded.body())).toEqual(Buffer.from(png));
+  for (let i = 0; i < 2; i++) {
+    const extra = await visitor.post(uploadPath, {
+      headers: uploadHeaders, data: Buffer.from(png),
+    });
+    expect(extra.status(), await extra.text()).toBe(201);
+  }
+  expect((await visitor.post(uploadPath, {
+    headers: uploadHeaders, data: Buffer.from(png),
+  })).status()).toBe(409);
+  const needsInfo = await reviewer.post(`${appPath}/review`, {
+    data: {
+      expectedRevision: 1,
+      status: "needs_info",
+      applicantMessage: "Informe uma descrição complementar.",
+    },
+  });
+  expect(needsInfo.status(), await needsInfo.text()).toBe(200);
+  const needsInfoReceipt = await (await visitor.get(receiptApi)).json() as {
+    status: string;
+    revision: number;
+    canReply: boolean;
+  };
+  expect(needsInfoReceipt).toMatchObject({
+    status: "needs_info",
+    revision: 2,
+    canReply: true,
+  });
+  const replyPath = `${receiptApi}/reply`;
+  expect((await visitorB.post(replyPath, { data: {
+    expectedRevision: 2, message: "Tentativa de outra organizadora",
+  } })).status()).toBe(404);
+  expect((await visitor.post(replyPath, {
+    headers: { Origin: "https://evil.example.test" },
+    data: { expectedRevision: 2, message: "Origem forjada" },
+  })).status()).toBe(403);
+  expect((await visitor.post(replyPath, {
+    data: { expectedRevision: 2, message: "" },
+  })).status()).toBe(400);
+  const followUp = await visitor.post(replyPath, {
+    data: {
+      expectedRevision: 2,
+      message: "Descrição complementar privada para análise.",
+    },
+  });
+  expect(followUp.status(), await followUp.text()).toBe(200);
+  expect(await followUp.json()).toMatchObject({
+    status: "submitted",
+    revision: 3,
+  });
+  expect((await visitor.post(replyPath, {
+    data: { expectedRevision: 2, message: "Duplicação" },
+  })).status()).toBe(409);
+  const followUpRead = await reviewer.get(appPath);
+  expect(followUpRead.status(), await followUpRead.text()).toBe(200);
+  const followUpData = await followUpRead.json() as {
+    applicantReplies: { message: string }[];
+  };
+  expect(followUpData.applicantReplies).toEqual([
+    expect.objectContaining({
+      message: "Descrição complementar privada para análise.",
+    }),
+  ]);
+  const publicReceiptBody = await (await visitor.get(receiptApi)).text();
+  expect(publicReceiptBody).not.toContain(
+    "Descrição complementar privada para análise.",
+  );
   expect(
     (
       await reviewer.post(`${appPath}/review`, {
         data: {
-          expectedRevision: 1,
+          expectedRevision: 3,
           status: "approved",
           applicantMessage: "Aprovação fictícia para o ensaio.",
         },
@@ -330,6 +457,10 @@ test("versioned forms keep submissions private, deduplicate races, enforce revie
         })
       ).status(),
     ).toBe(200);
+  expect((await reviewer.get(`${attachmentAdmin}/${imageId}`)).status()).toBe(404);
+  expect((await visitor.post(uploadPath, {
+    headers: uploadHeaders, data: Buffer.from(png),
+  })).status()).toBe(410);
   const revoked = await publicGet("/expositores");
   expect(await revoked.text()).not.toContain(payload.publicProfile.name);
   expect(revoked.headers()["x-publication-revision"]).toBe(String(publication));

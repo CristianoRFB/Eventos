@@ -20,6 +20,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     applicantMessage: string;
     formName: string;
     expiresAt: string;
+    revision: number;
+    canReply: boolean;
   };
   return routeData(
     { ...result, receiptApi: url.pathname },
@@ -46,7 +48,12 @@ export default function ApplicationReceipt({
 }: Route.ComponentProps) {
   const [status, setStatus] = useState(loaderData.status),
     [message, setMessage] = useState(""),
-    [pending, setPending] = useState(false);
+    [pending, setPending] = useState(false),
+    [reply, setReply] = useState(""),
+    [canReply, setCanReply] = useState(loaderData.canReply),
+    [attachment, setAttachment] = useState<File | null>(null),
+    [attachmentPending, setAttachmentPending] = useState(false),
+    [attachmentMessage, setAttachmentMessage] = useState("");
   return (
     <main className="public-main">
       <section className="public-section">
@@ -68,6 +75,118 @@ export default function ApplicationReceipt({
         <p>
           A aprovação não publica seus contatos nem seu perfil automaticamente.
         </p>
+        {canReply && status === "needs_info" && (
+          <form
+            onSubmit={async (event) => {
+              event.preventDefault();
+              if (pending || !reply.trim()) return;
+              setPending(true);
+              try {
+                const response = await fetch(
+                  `${loaderData.receiptApi}/reply`,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      expectedRevision: loaderData.revision,
+                      message: reply.trim(),
+                    }),
+                  },
+                );
+                if (response.ok) {
+                  setStatus("submitted");
+                  setCanReply(false);
+                  setReply("");
+                  setMessage("Resposta privada enviada. A organizadora poderá analisá-la.");
+                } else if (response.status === 409)
+                  setMessage("A solicitação foi alterada. Atualize este recibo.");
+                else
+                  setMessage("Não foi possível enviar. Verifique a resposta e tente novamente.");
+              } catch {
+                setMessage("Falha de conexão. Sua mensagem não foi confirmada.");
+              } finally {
+                setPending(false);
+              }
+            }}
+          >
+            <label>
+              Sua resposta à solicitação de informações
+              <textarea
+                required
+                maxLength={2000}
+                value={reply}
+                onChange={(event) => setReply(event.target.value)}
+              />
+            </label>
+            <button className="button light" disabled={pending || !reply.trim()}>
+              Enviar resposta privada
+            </button>
+          </form>
+        )}
+
+        {status !== "withdrawn" && status !== "purged" && (
+          <section className="section-card">
+            <h2>Anexos privados da candidatura</h2>
+            <p>
+              Até 3 imagens PNG, JPEG ou WebP, com no máximo 2 MB cada.
+              O material não aparece no site público e só pode ser consultado
+              pela equipe autorizada da organizadora. Não envie RG, documentos
+              médicos, comprovantes sensíveis ou arquivos de terceiros sem
+              autorização. O recurso está sujeito ao prazo de privacidade
+              informado no formulário.
+            </p>
+            <form onSubmit={async (event) => {
+              event.preventDefault();
+              if (!attachment || attachmentPending) return;
+              if (attachment.size > 2 * 1024 * 1024) {
+                setAttachmentMessage("O arquivo ultrapassa 2 MB.");
+                return;
+              }
+              setAttachmentPending(true);
+              setAttachmentMessage("");
+              try {
+                const response = await fetch(
+                  `${loaderData.receiptApi}/attachments`,
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": attachment.type,
+                      "X-File-Name": encodeURIComponent(attachment.name),
+                    },
+                    body: attachment,
+                  },
+                );
+                const result = await response.json() as {
+                  error?: string; name?: string;
+                };
+                if (response.status === 201) {
+                  setAttachmentMessage(`Anexo privado recebido: ${result.name ?? "imagem"}.`);
+                  setAttachment(null);
+                } else {
+                  setAttachmentMessage(result.error ?? "Envio indisponível. Tente novamente.");
+                }
+              } catch {
+                setAttachmentMessage("Sem conexão. O envio não foi confirmado.");
+              } finally {
+                setAttachmentPending(false);
+              }
+            }}>
+              <label>
+                Imagem da candidatura (PNG/JPEG/WebP)
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(event) => setAttachment(event.target.files?.[0] ?? null)}
+                />
+              </label>
+              <button type="submit" className="button light"
+                disabled={attachmentPending || !attachment}>
+                Enviar anexo privado
+              </button>
+            </form>
+            <p role="status">{attachmentMessage}</p>
+          </section>
+        )}
         {status !== "withdrawn" && (
           <button
             disabled={pending}

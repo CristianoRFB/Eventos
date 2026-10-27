@@ -231,3 +231,96 @@ export const publicFormRateLimits = sqliteTable(
     check("form_rate_count", sql`${t.count}>=1 AND ${t.count}<=10`),
   ],
 );
+
+/** At most one encrypted applicant reply for each needs_info revision.
+ * Reply content may only be redacted (never changed or re-exposed).
+ */
+export const applicationReplies = sqliteTable(
+  "application_replies",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").notNull(),
+    editionId: text("edition_id").notNull(),
+    applicationId: text("application_id").notNull(),
+    requestedRevision: integer("requested_revision").notNull(),
+    replyCiphertext: text("reply_ciphertext"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    unique("application_replies_once_per_request").on(
+      t.organizationId, t.applicationId, t.requestedRevision,
+    ),
+    index("application_replies_by_application").on(
+      t.organizationId, t.applicationId, t.createdAt,
+    ),
+    foreignKey({
+      columns: [t.organizationId, t.editionId, t.applicationId],
+      foreignColumns: [
+        exhibitorApplications.organizationId,
+        exhibitorApplications.editionId,
+        exhibitorApplications.id,
+      ],
+    }),
+    check("application_reply_revision", sql`${t.requestedRevision}>=1`),
+  ],
+);
+
+/** Private applicant attachment references. R2 objects are never public assets. */
+export const applicationAttachments = sqliteTable(
+  "application_attachments",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").notNull(),
+    editionId: text("edition_id").notNull(),
+    applicationId: text("application_id").notNull(),
+    objectKey: text("object_key").notNull().unique(),
+    originalName: text("original_name").notNull(),
+    mime: text("mime", { enum: ["image/png", "image/jpeg", "image/webp"] }).notNull(),
+    byteSize: integer("byte_size").notNull(),
+    sha256: text("sha256").notNull(),
+    state: text("state", { enum: ["ready", "delete_pending", "deleted"] }).notNull().default("ready"),
+    createdAt: createdAt(),
+    removedAt: text("removed_at"),
+  },
+  (t) => [
+    index("application_attachments_by_app").on(t.organizationId, t.applicationId, t.state),
+    index("application_attachments_cleanup").on(t.state, t.createdAt),
+    foreignKey({
+      columns: [t.organizationId, t.editionId, t.applicationId],
+      foreignColumns: [
+        exhibitorApplications.organizationId,
+        exhibitorApplications.editionId,
+        exhibitorApplications.id,
+      ],
+    }),
+    check("attachment_mime", sql`${t.mime} IN ('image/png','image/jpeg','image/webp')`),
+    check("attachment_size", sql`${t.byteSize}>0 AND ${t.byteSize}<=2097152`),
+    check("attachment_hash", sql`length(${t.sha256})=64 AND ${t.sha256} NOT GLOB '*[^0-9a-f]*'`),
+    check("attachment_key", sql`${t.objectKey}=('org/'||${t.organizationId}||'/applications/'||${t.applicationId}||'/'||${t.id})`),
+    check("attachment_state", sql`${t.state} IN ('ready','delete_pending','deleted')`),
+    check("attachment_deleted_time", sql`(${t.state}='ready' AND ${t.removedAt} IS NULL) OR ${t.state}='delete_pending' OR (${t.state}='deleted' AND ${t.removedAt} IS NOT NULL)`),
+  ],
+);
+
+/** Encrypted key-rotation shadow; does not mutate immutable source fields. */
+export const privateCipherRewraps = sqliteTable(
+  "private_cipher_rewraps",
+  {
+    organizationId: text("organization_id").notNull(),
+    sourceKind: text("source_kind", { enum: ["submission", "reply"] }).notNull(),
+    sourceId: text("source_id").notNull(),
+    fieldName: text("field_name", { enum: ["answers", "profile", "reply"] }).notNull(),
+    sourceHash: text("source_hash").notNull(),
+    rewrappedCiphertext: text("rewrapped_ciphertext").notNull(),
+    createdAt: createdAt(),
+    updatedAt: text("updated_at").notNull().default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ','now'))`),
+  },
+  (t) => [
+    primaryKey({ columns: [t.organizationId, t.sourceKind, t.sourceId, t.fieldName] }),
+    index("rewrap_by_tenant").on(t.organizationId,t.sourceKind,t.sourceId),
+    check("rewrap_source_kind",sql`${t.sourceKind} IN ('submission','reply')`),
+    check("rewrap_field",sql`(${t.sourceKind}='submission' AND ${t.fieldName} IN ('answers','profile')) OR (${t.sourceKind}='reply' AND ${t.fieldName}='reply')`),
+    check("rewrap_source_hash",sql`length(${t.sourceHash})=64 AND ${t.sourceHash} NOT GLOB '*[^0-9a-f]*'`),
+    check("rewrap_envelope",sql`${t.rewrappedCiphertext} LIKE 'v2.%'`),
+  ],
+);

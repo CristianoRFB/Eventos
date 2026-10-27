@@ -11,3 +11,21 @@ Aceite de análise privada e opt-in de listagem são escolhas separadas. Aprova�
 Retenção é um valor informado pela organizadora, sem padrão comercial inventado. O exemplo de 30 dias é exclusivamente sintético. Expiração bloqueia acesso/listagem, mas a rotina de purga por retenção ainda não existe: não utilizar dados reais antes de implementá-la. Anexos privados, resposta do candidato a pedido de informações, exportação mínima auditada, testes completos de expiração e recuperação de chaves continuam pendentes. Mensagens externas permanecem desabilitadas.
 
 Migration `0005_cuddly_legion.sql` aplicada apenas no D1 local, acrescentando oito tabelas e constraints de escopo/imutabilidade. Rollback seguro preserva banco e histórico, reverte código por commit e fecha recebimento; não executar down destrutivo nem remover registros privados obrigatórios. Não foi feito deploy ou alteração de dados cloud.
+
+
+## Adendo de implementação — 27/10/2026 (branch de chat, aguardando CI)
+
+A rotina `purgeExpiredSubmissions(db, now, batchSize)` foi adicionada ao código na branch de chat. Ela seleciona apenas submissões com `retention_until <= now` e estado ativo/retirado, limita a operação a 100 itens por invocação, e executa cada limpeza em lote transacional do D1. A rotina anula `answers_ciphertext`, `profile_ciphertext` e `listing_opt_in`, marca `state='purged'`, remove `applicant_message` da candidatura vinculada, e emite evento `retention.purged` sem PII com ID determinístico. Preserva históricos de evento e `public_profile_sources` imutáveis para que perfis já publicados continuem bloqueados pela validação de consentimento. Não exclui arquivos R2 (anexos ainda não foram implementados).
+
+O Worker expõe um handler `scheduled`, **mas nenhum cron foi habilitado** no `wrangler.jsonc` ou em Cloudflare. Logo, purga automática hospedada NÃO está ativa. O novo teste SQLite usa as migrations reais para provar A/B, datas, execução repetida, mensagens redigidas e seleção em lotes; até a conclusão do CI, os testes desta branch permanecem NÃO VERIFICADOS. O hash do recibo, hashes de idempotência/payload e metadados de auditoria permanecem para integridade do histórico; a política de minimização/anonimização desses pseudônimos e o scheduler de produção exigem revisão antes de aceitar dados reais.
+
+A limpeza não equivale a `F6 PASS`: ainda faltam anexos privados, resposta a pedidos de informação, exportação mínima auditada e plano de rotação/recuperação de chave.
+
+
+## Complemento F6 — exportação privada e resposta a pedido de informações (27/10/2026)
+
+Nesta branch foi implementada exportação CSV da fila de candidaturas por edição, sob `applications.review`, com limite de 100 registros/página, serialização contra formula injection, auditoria `application.private.export`, `Cache-Control: private, no-store` e sem incluir respostas retiradas ou com retenção vencida. O arquivo é baixado somente do host administrativo por membros autorizados, sem URL pública. A versão atual exporta JSON de respostas privadas dentro de coluna CSV e, portanto, requer tratamento como DADO PESSOAL; não compartilhar por canal não autorizado. Paginação superior a 100 requer solicitação de páginas explícitas.
+
+Também foi introduzido pedido de esclarecimento via status `needs_info` e resposta do candidato no mesmo recibo privado opaco, apenas até a expiração. Cada resposta é AES-GCM escopada por organização, candidatura e revisão do pedido, com no máximo uma resposta por revisão, proteção same-origin e estado de retorno `submitted`. A equipe vê o conteúdo somente após checagem `applications.review` e auditoria de consulta. A resposta é apagada por nulificação do ciphertext em retirada ou purga; ligação de auditoria e metadados sem resposta permanecem. `migrations/0006_applicant_replies.sql` é ADITIVA e só pode ser aplicada após teste de migrations, sem provisionar D1 real.
+
+Não foram habilitados SMTP/SMS/WhatsApp, cron, domínios reais ou e-mails de notificação. Nenhum valor de pricing foi criado. Rotação de chave AES-GCM, anexos privados e demais requisitos F6 continuam abertos; documentação representa mudança em BRANCH, não produção até CI final.

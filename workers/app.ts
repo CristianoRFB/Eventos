@@ -10,6 +10,8 @@ import {
 } from "../app/services/content.server";
 import { ZodError } from "zod";
 import { handlePublicForms } from "../app/services/forms-public.server";
+import { purgeExpiredSubmissions } from "../app/services/forms-retention.server";
+import { cleanupPendingApplicantAttachments } from "../app/services/application-attachments.server";
 
 const requestHandler = createRequestHandler(
   () => import("virtual:react-router/server-build"),
@@ -158,5 +160,20 @@ export default {
       statusText: response.statusText,
       headers,
     });
+  },
+  // Only runs after the target environment explicitly enables a cron trigger.
+  // No scheduled trigger is configured by this change.
+  async scheduled(_controller, env) {
+    const result = await purgeExpiredSubmissions(env.DB);
+    const attachments = await cleanupPendingApplicantAttachments(env);
+    console.info(
+      JSON.stringify({
+        kind: "forms_retention",
+        examined: result.examined,
+        purged: result.purged,
+        attachmentObjectsDeleted: attachments.deleted,
+        storageCleanupPending: attachments.pending,
+      }),
+    );
   },
 } satisfies ExportedHandler<Env>;

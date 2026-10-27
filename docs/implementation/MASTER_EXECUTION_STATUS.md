@@ -1,6 +1,6 @@
 # MASTER EXECUTION STATUS — Eventos 77
 
-**Checkpoint:** fechamento das últimas ações em 2026-10-20 (`America/Sao_Paulo`); evidência histórica de 2026-10-14 preservada.
+**Checkpoint:** 27/10/2026 na branch de chat — [evidências e código F6](checkpoint-2026-10-27-chat.md). Histórico de 20/10 e 14/10 preservado; não há merge/deploy.
 **Resultado integral:** `IN_PROGRESS`; não é `CORE_READY`, `READY_FOR_STAGING`, `READY_FOR_PILOT` nem `PRODUCTION_VERIFIED`.  
 **Checkout/origin:** `C:\OpenSSL\set\Eventos` / `https://github.com/CristianoRFB/Eventos.git`.  
 **Branch:** `codex/eventos77-full-system`.  
@@ -22,7 +22,7 @@ O [pre-flight Git executado](preflight-git.txt) comprova raiz, remote, branch, s
 | F3 | PARTIAL | `0000_same_tinkerer.sql`; `api.server.ts`; `media.server.ts`; formulários de eventos/edições; testes locais | Eventos, edições, clone API, CAS e mídia local passaram em parte. Falta editor de marca, clone comprovado sem PII, variantes e reconciliação de R2. R2 real não provisionado. |
 | F4 | PARTIAL | Código preservado em `d5d5f0f`; 20 testes de API repetidos em 2026-10-19; `content.server.ts`; migrations 0002/0003 | CMS com revisão, prévia privada, publish CAS, SSR/SEO e rollback comprovados localmente. Purge indisponível com warning/TTL curto; páginas e aceites adicionais pendentes. |
 | F5 | PARTIAL | Commit `d576541`; `operations.ts`; `operations.server.ts`; `operations-schema.ts`; migration 0004; 114 unitários, 21 API e 12 E2E PASS | Agenda/cadastros em revisões imutáveis; conflitos/escopo/consentimento, filtros e navegação pública. Locais completos e ensaio público de dois dias ainda pendentes. |
-| F6 | PARTIAL | `8ea34d9`; migration 0005; forms/services/routes; 120 unitários, 22 API e jornada F6 desktop/mobile | Formulários imutáveis, submissão cifrada/idempotente, recibo, revisão auditada e opt-in com publicação separada. Faltam anexos, purga de retenção, resposta do candidato, exportação mínima e aceite integral. |
+| F6 | PARTIAL | Histórico `8ea34d9`; migrations 0005–0007; serviço de anexos R2 privado; [ADR-009](../adr/ADR-009-private-applicant-attachments.md); [CI local PASS em `84629bd6`](https://github.com/CristianoRFB/Eventos/actions/runs/40553072100) | Formulários, candidatura cifrada, upload privado 3×2MiB, read por RBAC, reply, exportação auditada e retirada/retention implementados. Faltam rotação/recovery AES, reconciliação de mídia/avisos/tolerância e aceites hospedados. |
 | F7 | PARTIAL | `app/domain/host.ts`; testes unitários de host; flags custom-domain desligadas | Parser e elegibilidade fail-closed testados sem provedor; binding, ownership, DNS, SSL e host real pendentes. Sem PASS cloud. |
 | F8 | NOT_STARTED | Catálogo produção NOT_APPROVED | Só iniciar após F2; mecânica TEST_ONLY pode ser provada sem inventar catálogo/preço/quotas/trial. Política permanece gate externo. |
 | F9 | PARTIAL | 26 capturas anteriores e [10 F6](screenshots/2026-10-20/manifest.json); 14 E2E | CMS e operação da edição adicionados às jornadas anteriores; público agenda/convidados navega em desktop/mobile sem erro de hidratação. Demais telas NOW e estados continuam pendentes; NEXT fora da UI. |
@@ -52,7 +52,7 @@ Fonte: [GOAL MASTER](../../codex/CODEX_GOAL_MASTER_EVENTOS_77_FULL_SYSTEM.txt), 
 |---|---|---|
 | G0 source/branch | PASS | Checkout/branch autorizados, pre-flight registrado e commits locais documentados. |
 | G1 A/B | PARTIAL | Auth/RBAC/dados/mídia testados; forms A/B e revogação de perfil públicos testados localmente; anexos, domínios e superfícies futuras pendentes. |
-| G2 schema/migrations | PARTIAL | SQL versionado, D1 local, FKs compostas e apply sem migrations pendentes; migrations 0002–0005 acrescentam CMS/operações/forms; aceites completos e restore ainda faltam. |
+| G2 schema/migrations | PARTIAL | SQL versionado, D1 local, FKs compostas e apply sem migrations pendentes; migrations 0002–0007 acrescentam CMS/operações/forms/replies/anexos; aceites completos e restore ainda faltam. |
 | G3 CMS/publish/rollback | PARTIAL | Jornada v1 → draft v2 invisível → v2 → rollback testada; SSR/hosts A/B e preview privado locais. Cloud/purge real não verificados. |
 | G4 domínio fail-closed | PARTIAL | Helpers/eligibilidade puros testados; provider fake completo e host real com ownership+hostname+SSL+DNS faltam. |
 | G5 E2E desktop/mobile | PARTIAL | 7 jornadas por viewport, 14 E2E PASS; 36 capturas em três checkpoints. Demais telas/resoluções e estados ainda pendentes. |
@@ -64,6 +64,14 @@ Cloudflare D1/R2/custom hostnames reais: não provisionados. Firebase: console d
 
 ## Rollback e próximo passo
 
-As migrations `0000`–`0005` foram aplicadas somente ao D1 local fictício; nenhuma migration cloud foi executada. Agenda/cadastros referenciam revisões imutáveis e o rollback editorial mantém o histórico. Retorno seguro: preservar os dados locais e reverter somente commits novos identificados depois do baseline, mantendo compatibilidade com as tabelas adicionais. Nenhum banco ou objeto real foi tocado.
+As migrations `0000`–`0007` foram testadas somente no D1 local fictício; nenhuma migration cloud foi executada. Agenda/cadastros referenciam revisões imutáveis e o rollback editorial mantém o histórico. Retorno seguro: preservar os dados locais e reverter somente commits novos identificados depois do baseline, mantendo compatibilidade com as tabelas adicionais. Nenhum banco ou objeto real foi tocado.
 
-**NEXT_STEP:** implementar purga por retenção em dados sintéticos A/B (incluindo perfis vinculados e auditoria sem PII), testar expiração e execução repetida; depois anexos privados, resposta do candidato e exportação mínima auditada. O [roteiro de conclusão](checkpoint-2026-10-20.md) lista os demais aceites F0–F12, decisões comerciais e gates externos. Resultado integral IN_PROGRESS, sem declaração de prontidão comercial.
+**CHECKPOINT F6 AES-GCM (27/10):** [crypto e inventário](checkpoint-2026-10-27-crypto.md) entregues em `18216308`, CI completo PASS (31+ códigos: ver arquivo). F6 permanece PARTIAL até rewrap seguro e política de dados/retention, sem secret/cloud ou produção.
+
+**NEXT_STEP HISTÓRICO (27/10):** o código de purga, export CSV e resposta de candidato foi implementado e passou CI na revisão `3a0eadf2`. Continuar por **F6 rotação/recovery de chave**, reconciliação/aviso de retenção e aceites de privacidade; em seguida fechar aceites pendentes e F7 provider fake. Veja [checkpoint atual](checkpoint-2026-10-27-chat.md), inclusive limites e autorização externa. Resultado integral IN_PROGRESS, sem declaração de prontidão comercial.
+
+
+**NEXT_STEP ATUAL (27/10, após crypto):** implementar rewrap versionado e auditável em fixtures, sem contornar triggers redaction-only, revisar lifecycle de mídia e avançar F7 provider fake. Evidência [checkpoint crypto](checkpoint-2026-10-27-crypto.md); não repetir o início do F6.
+
+
+**F6 rewrap CHECKPOINT 27/10:** ver [checkpoint de rewrap](checkpoint-2026-10-27-rewrap.md). Implementação protegida em shadow table pela migration `0008`; `08ae62a1` [CI completo PASS](https://github.com/CristianoRFB/Eventos/actions/runs/40577852115). Código re-encripta v1/v2 por tenant com modo DRY_RUN, CAS, execução retomável, triggers de revogação e leitura pelo painel. Não remove v1 físico; a chave legada NÃO é aposentável enquanto os dados originais existirem. Ainda F6 PARTIAL, external secret vault pendente. **NEXT_CODE_STEP:** F7 lifecycle de Custom Hostnames com provider fake e testes A×B; não reiniciar F6 nem alterar infraestrutura real.
