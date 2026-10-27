@@ -264,3 +264,40 @@ export const applicationReplies = sqliteTable(
     check("application_reply_revision", sql`${t.requestedRevision}>=1`),
   ],
 );
+
+/** Private applicant attachment references. R2 objects are never public assets. */
+export const applicationAttachments = sqliteTable(
+  "application_attachments",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").notNull(),
+    editionId: text("edition_id").notNull(),
+    applicationId: text("application_id").notNull(),
+    objectKey: text("object_key").notNull().unique(),
+    originalName: text("original_name").notNull(),
+    mime: text("mime", { enum: ["image/png", "image/jpeg", "image/webp"] }).notNull(),
+    byteSize: integer("byte_size").notNull(),
+    sha256: text("sha256").notNull(),
+    state: text("state", { enum: ["ready", "delete_pending", "deleted"] }).notNull().default("ready"),
+    createdAt: createdAt(),
+    removedAt: text("removed_at"),
+  },
+  (t) => [
+    index("application_attachments_by_app").on(t.organizationId, t.applicationId, t.state),
+    index("application_attachments_cleanup").on(t.state, t.createdAt),
+    foreignKey({
+      columns: [t.organizationId, t.editionId, t.applicationId],
+      foreignColumns: [
+        exhibitorApplications.organizationId,
+        exhibitorApplications.editionId,
+        exhibitorApplications.id,
+      ],
+    }),
+    check("attachment_mime", sql`${t.mime} IN ('image/png','image/jpeg','image/webp')`),
+    check("attachment_size", sql`${t.byteSize}>0 AND ${t.byteSize}<=2097152`),
+    check("attachment_hash", sql`length(${t.sha256})=64 AND ${t.sha256} NOT GLOB '*[^0-9a-f]*'`),
+    check("attachment_key", sql`${t.objectKey} LIKE ('org/'||${t.organizationId}||'/applications/'||${t.applicationId}||'/%')`),
+    check("attachment_state", sql`${t.state} IN ('ready','delete_pending','deleted')`),
+    check("attachment_deleted_time", sql`(${t.state}='ready' AND ${t.removedAt} IS NULL) OR ${t.state}='delete_pending' OR (${t.state}='deleted' AND ${t.removedAt} IS NOT NULL)`),
+  ],
+);
