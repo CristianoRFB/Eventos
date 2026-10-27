@@ -11,6 +11,7 @@ import type { AuthEnvironment } from "../infrastructure/auth.server";
 import { privateHeaders } from "../infrastructure/security.server";
 import { readJsonBody } from "../infrastructure/request.server";
 import { decryptSubmission, submissionSecrets } from "../infrastructure/submission-crypto.server";
+import { resolveRewrappedCipher } from "./forms-rewrap.server";
 import { requireTenant, auditStatement } from "./tenant.server";
 import type { saveDraft } from "./content.server";
 
@@ -403,8 +404,11 @@ export async function handleApplicationsAdmin(
         const active = row.state === "active" &&
           Date.parse(row.retention_until) > Date.now();
         const scope = `${orgId}:${row.form_id}:${row.submission_id}:${row.definition_id}`;
-        const answers = active && row.answers_ciphertext
-          ? await decryptSubmission(submissionSecrets(env), orgId, scope, row.answers_ciphertext)
+        const effective = active
+          ? await resolveRewrappedCipher(env.DB, orgId, "answers", row.submission_id, row.answers_ciphertext)
+          : null;
+        const answers = effective
+          ? await decryptSubmission(submissionSecrets(env), orgId, scope, effective)
           : null;
         lines.push(csvRow([
           row.id, row.form_name, active ? row.status : row.state,
@@ -459,6 +463,14 @@ export async function handleApplicationsAdmin(
     }>();
   if (!row) throw new Response("Candidatura não encontrada", { status: 404 });
   const scope = `${orgId}:${row.form_id}:${row.submission_id}:${row.definition_id}`;
+  // Resolve tenant/record-bound replacements without mutating originals.
+  // The caller still must enforce state, permissions and retention separately.
+  const effectiveAnswers = await resolveRewrappedCipher(
+    env.DB, orgId, "answers", row.submission_id, row.answers_ciphertext,
+  );
+  const effectiveProfile = await resolveRewrappedCipher(
+    env.DB, orgId, "profile", row.submission_id, row.profile_ciphertext,
+  );
   if (request.method === "GET") {
     if (row.state !== "active" || Date.parse(row.retention_until) <= Date.now())
       return json({
@@ -484,19 +496,24 @@ export async function handleApplicationsAdmin(
       .bind(orgId, row.form_id, row.definition_id)
       .first<{ definition_json: string }>();
     const followUps = await env.DB.prepare(
-      "SELECT requested_revision,reply_ciphertext,created_at FROM application_replies WHERE organization_id=? AND edition_id=? AND application_id=? AND reply_ciphertext IS NOT NULL ORDER BY requested_revision",
+      "SELECT id,requested_revision,reply_ciphertext,created_at FROM application_replies WHERE organization_id=? AND edition_id=? AND application_id=? AND reply_ciphertext IS NOT NULL ORDER BY requested_revision",
     ).bind(orgId, context.edition_id, id).all<{
+      id: string;
       requested_revision: number;
       reply_ciphertext: string;
       created_at: string;
     }>();
     const applicantReplies = [];
     for (const reply of followUps.results) {
+      const effectiveReply = await resolveRewrappedCipher(
+        env.DB, orgId, "reply", reply.id, reply.reply_ciphertext,
+      );
+      if (!effectiveReply) continue;
       const decrypted = await decryptSubmission(
         submissionSecrets(env),
         orgId,
         `${orgId}:${id}:reply:${reply.requested_revision}`,
-        reply.reply_ciphertext,
+        effectiveReply,
       ) as { message: string };
       applicantReplies.push({
         requestedRevision: reply.requested_revision,
@@ -523,21 +540,11 @@ export async function handleApplicationsAdmin(
             .parse(JSON.parse(definition.definition_json))
             .fields.map((f) => ({ key: f.key, label: f.label }))
         : [],
-      answers: row.answers_ciphertext
-        ? await decryptSubmission(
-            submissionSecrets(env),
-            orgId,
-            scope,
-            row.answers_ciphertext,
-          )
+      answers: effectiveAnswers
+        ? await decryptSubmission(submissionSecrets(env), orgId, scope, effectiveAnswers)
         : null,
-      publicProfile: row.profile_ciphertext
-        ? await decryptSubmission(
-            submissionSecrets(env),
-            orgId,
-            scope,
-            row.profile_ciphertext,
-          )
+      publicProfile: effectiveProfile
+        ? await decryptSubmission(submissionSecrets(env), orgId, scope, effectiveProfile)
         : null,
     });
   }
@@ -598,7 +605,7 @@ export async function handleApplicationsAdmin(
       row.listing_opt_in !== 1 ||
       row.state !== "active" ||
       Date.parse(row.retention_until) <= Date.now() ||
-      !row.profile_ciphertext
+      !effectiveProfile
     )
       throw new Response("A listagem exige aprovação e consentimento ativo", {
         status: 400,
@@ -608,7 +615,7 @@ export async function handleApplicationsAdmin(
         submissionSecrets(env),
         orgId,
         scope,
-        row.profile_ciphertext,
+        effectiveProfile!,
       ),
     );
     const mapped = await env.DB.prepare(
