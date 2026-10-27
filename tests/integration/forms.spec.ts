@@ -329,7 +329,8 @@ test("versioned forms keep submissions private, deduplicate races, enforce revie
       message: "Descrição complementar privada para análise.",
     }),
   ]);
-  expect((await visitor.get(receiptApi)).then((r) => r.text())).resolves.not.toContain(
+  const publicReceiptBody = await (await visitor.get(receiptApi)).text();
+  expect(publicReceiptBody).not.toContain(
     "Descrição complementar privada para análise.",
   );
   expect(
