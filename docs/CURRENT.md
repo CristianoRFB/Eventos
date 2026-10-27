@@ -12,3 +12,6 @@ Os checkpoints [de F5](implementation/checkpoint-2026-10-19.md) e [inicial](impl
 
 
 **Checkpoint F6 crypto (27/10/2026):** [rotação v1/v2 e inventário de chaves](implementation/checkpoint-2026-10-27-crypto.md), código `18216308` com [CI completo aprovado](https://github.com/CristianoRFB/Eventos/actions/runs/40564327280). Próximo desenvolvimento: re-encriptação controlada sem violar gatilhos de imutabilidade; depois governança de retenção/mídia e provider fake F7. Não há configuração de segredos ou deploy hospedado. F6 permanece PARTIAL.
+
+
+**Checkpoint F6 rewrap (27/10/2026):** código `08ae62a1` aprovado integralmente pelo CI [40577852115](https://github.com/CristianoRFB/Eventos/actions/runs/40577852115). Recriptografia controlada e retomável em overlay cifrado, sem modificar triggers antigos; [checkpoint](implementation/checkpoint-2026-10-27-rewrap.md), [ADR-011](adr/ADR-011-private-cipher-rewrap.md). **Próxima implementação F7 provider fake de domínio personalizado**, sem ativar Cloudflare for SaaS, DNS, cron ou serviços pagos. F6 e sistema geral continuam PARTIAL.
