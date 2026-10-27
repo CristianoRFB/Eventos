@@ -10,6 +10,11 @@ export interface AuthEnvironment {
   APP_ENV: string;
   ADMIN_ORIGIN: string;
   BETTER_AUTH_SECRET?: string;
+  /** Secret JSON object {keyId:material}, not a tracked var. */
+  SUBMISSION_ENCRYPTION_KEYRING?: string;
+  SUBMISSION_ENCRYPTION_ACTIVE_KEY_ID?: string;
+  /** Original v1 root when Better Auth secret changes. */
+  SUBMISSION_ENCRYPTION_V1_SECRET?: string;
 }
 export function createAuth(env: AuthEnvironment): Auth {
   if (
