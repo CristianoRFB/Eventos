@@ -308,11 +308,11 @@ export async function handlePublicForms(
             "UPDATE form_submissions SET state='withdrawn',answers_ciphertext=NULL,profile_ciphertext=NULL,listing_opt_in=0 WHERE organization_id=? AND edition_id=? AND id=? AND state='active'",
           ).bind(site.organizationId, site.editionId, row.id),
           env.DB.prepare(
-            "UPDATE application_replies SET reply_ciphertext=NULL WHERE organization_id=? AND application_id=? AND reply_ciphertext IS NOT NULL",
-          ).bind(site.organizationId, row.application_id),
-          env.DB.prepare(
             "INSERT INTO application_events(id,organization_id,application_id,action) SELECT ?,?,?,'withdrawn' WHERE changes()=1",
           ).bind(crypto.randomUUID(), site.organizationId, row.application_id),
+          env.DB.prepare(
+            "UPDATE application_replies SET reply_ciphertext=NULL WHERE organization_id=? AND application_id=? AND reply_ciphertext IS NOT NULL",
+          ).bind(site.organizationId, row.application_id),
         ]);
       return json({ status: "withdrawn" });
     }
