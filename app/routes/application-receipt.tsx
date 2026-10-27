@@ -50,7 +50,10 @@ export default function ApplicationReceipt({
     [message, setMessage] = useState(""),
     [pending, setPending] = useState(false),
     [reply, setReply] = useState(""),
-    [canReply, setCanReply] = useState(loaderData.canReply);
+    [canReply, setCanReply] = useState(loaderData.canReply),
+    [attachment, setAttachment] = useState<File | null>(null),
+    [attachmentPending, setAttachmentPending] = useState(false),
+    [attachmentMessage, setAttachmentMessage] = useState("");
   return (
     <main className="public-main">
       <section className="public-section">
@@ -121,6 +124,66 @@ export default function ApplicationReceipt({
           </form>
         )}
 
+        {status !== "withdrawn" && status !== "purged" && (
+          <section className="section-card">
+            <h2>Anexos privados da candidatura</h2>
+            <p>
+              Até 3 imagens PNG, JPEG ou WebP, com no máximo 2 MB cada.
+              O material não aparece no site público e só pode ser consultado
+              pela equipe autorizada da organizadora.
+            </p>
+            <form onSubmit={async (event) => {
+              event.preventDefault();
+              if (!attachment || attachmentPending) return;
+              if (attachment.size > 2 * 1024 * 1024) {
+                setAttachmentMessage("O arquivo ultrapassa 2 MB.");
+                return;
+              }
+              setAttachmentPending(true);
+              setAttachmentMessage("");
+              try {
+                const response = await fetch(
+                  `${loaderData.receiptApi}/attachments`,
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": attachment.type,
+                      "X-File-Name": encodeURIComponent(attachment.name),
+                    },
+                    body: attachment,
+                  },
+                );
+                const result = await response.json() as {
+                  error?: string; name?: string;
+                };
+                if (response.status === 201) {
+                  setAttachmentMessage(`Anexo privado recebido: ${result.name ?? "imagem"}.`);
+                  setAttachment(null);
+                } else {
+                  setAttachmentMessage(result.error ?? "Envio indisponível. Tente novamente.");
+                }
+              } catch {
+                setAttachmentMessage("Sem conexão. O envio não foi confirmado.");
+              } finally {
+                setAttachmentPending(false);
+              }
+            }}>
+              <label>
+                Imagem da candidatura (PNG/JPEG/WebP)
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(event) => setAttachment(event.target.files?.[0] ?? null)}
+                />
+              </label>
+              <button type="submit" className="button light"
+                disabled={attachmentPending || !attachment}>
+                Enviar anexo privado
+              </button>
+            </form>
+            <p role="status">{attachmentMessage}</p>
+          </section>
+        )}
         {status !== "withdrawn" && (
           <button
             disabled={pending}
