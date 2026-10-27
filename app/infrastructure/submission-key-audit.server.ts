@@ -4,7 +4,7 @@
  * NO private answers, message text, ciphertext, tokens or tenant names.
  * This is intentionally NOT exposed as a tenant API endpoint.
  */
-export type KeyUsage = { keyId: string; references: number };
+export type KeyUsage = { keyId: string; count: number };
 
 export async function auditSubmissionKeyUsage(db: D1Database): Promise<KeyUsage[]> {
   const rows = await db.prepare(
@@ -22,19 +22,19 @@ export async function auditSubmissionKeyUsage(db: D1Database): Promise<KeyUsage[
          ELSE 'invalid'
        END AS key_id FROM ciphertexts
      )
-     SELECT key_id AS keyId,count(*) AS references
+     SELECT key_id AS keyId,count(*) AS count
      FROM classified GROUP BY key_id ORDER BY key_id`,
   ).all<KeyUsage>();
   return rows.results;
 }
 
-/** Fail closed if there are corrupt/unknown envelopes, or any references. */
+/** Fail closed if there are corrupt/unknown envelopes, or any count. */
 export function assertKeyCanRetire(usage: KeyUsage[], keyId: string) {
   if (keyId !== "v1" && !/^[a-z][a-z0-9_-]{0,31}$/.test(keyId))
     throw new Error("Invalid retirement key ID");
-  if (usage.some((row) => row.keyId === "invalid" && row.references > 0))
+  if (usage.some((row) => row.keyId === "invalid" && row.count > 0))
     throw new Error("Unrecognized encrypted payloads block key retirement");
   const envelope = keyId === "v1" ? "v1" : `v2:${keyId}`;
-  if (usage.some((row) => row.keyId === envelope && row.references > 0))
+  if (usage.some((row) => row.keyId === envelope && row.count > 0))
     throw new Error("Encrypted data still requires this key");
 }
