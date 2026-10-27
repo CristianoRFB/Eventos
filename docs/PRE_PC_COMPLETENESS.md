@@ -26,12 +26,13 @@ arquivo, teste, SHA e documentação de aceite.
 | Purga de retenção tenant-scoped e redaction | `app/services/forms-retention.server.ts`, `workers/app.ts` | Testes unitários A/B; cron real desligado |
 | Exportação CSV privada em páginas de 100 | `app/domain/export-csv.ts`, `forms.server.ts`, `api.server.ts`, `applications.tsx` | Inclui permissão `applications.review`, auditoria e proteção contra formula injection |
 | Resposta de candidato a solicitação | `migrations/0006_applicant_replies.sql`, `forms-public.server.ts`, `forms.server.ts`, `application-receipt.tsx`, `applications.tsx` | Criptografia, revisão única, same-origin, redaction e testes A/B; **ainda F6 PARTIAL** |
+| Anexos privados de candidaturas | `migrations/0007_application_attachments.sql`, `application-attachments.server.ts`, painel e recibo | Upload/download local R2, guard A×B, 3×2MiB, hash, MIME, fila de exclusão; CI `84629bd6` PASS, CLOUD pendente |
 | Correção de SSR/hydration e CI cross-platform | `operations.tsx`, `scripts/docs-check.mjs` | CI de `19f8c224` aprovado; alterações posteriores exigem CI no próprio SHA |
 
 ## Pendências não encerradas
 
 - F0–F5: concluir cada item ainda aberto do `MASTER_EXECUTION_STATUS.md`.
-- F6: anexos privados, chave/rotação/recuperação, retenção hospedada
+- F6: chave/rotação/recuperação, política de anexos com aviso/tolerância e retenção hospedada
   condicionada a aprovação e confirmação do fluxo completo nos testes mais recentes.
 - F7: provider fake lifecycle completo, DNS/SSL/ownership reais somente com autorização.
 - F8: mecanismo TEST_ONLY; preços, quotas e trial continuam SEM APROVAÇÃO.
