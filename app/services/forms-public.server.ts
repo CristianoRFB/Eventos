@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { AuthEnvironment } from "../infrastructure/auth.server";
 import {
   privateHeaders,
@@ -205,11 +206,11 @@ export async function handlePublicForms(
     }
   }
   const receiptRoute = url.pathname.match(
-    /^\/api\/v1\/public\/applications\/([a-f0-9]{64})(?:\/(withdraw))?$/,
+    /^\/api\/v1\/public\/applications\/([a-f0-9]{64})(?:\/(withdraw|reply))?$/,
   );
   if (receiptRoute) {
     const row = await env.DB.prepare(
-      "SELECT s.id,s.state,s.receipt_expires_at,s.retention_until,a.id AS application_id,a.status,a.applicant_message,f.name AS form_name FROM form_submissions s JOIN exhibitor_applications a ON a.organization_id=s.organization_id AND a.submission_id=s.id JOIN forms f ON f.organization_id=s.organization_id AND f.id=s.form_id WHERE s.organization_id=? AND s.edition_id=? AND s.receipt_hash=?",
+      "SELECT s.id,s.state,s.receipt_expires_at,s.retention_until,a.id AS application_id,a.status,a.revision,a.applicant_message,f.name AS form_name FROM form_submissions s JOIN exhibitor_applications a ON a.organization_id=s.organization_id AND a.submission_id=s.id JOIN forms f ON f.organization_id=s.organization_id AND f.id=s.form_id WHERE s.organization_id=? AND s.edition_id=? AND s.receipt_hash=?",
     )
       .bind(
         site.organizationId,
@@ -223,6 +224,7 @@ export async function handlePublicForms(
         retention_until: string;
         application_id: string;
         status: string;
+        revision: number;
         applicant_message: string;
         form_name: string;
       }>();
@@ -235,13 +237,79 @@ export async function handlePublicForms(
         applicantMessage: row.state === "active" ? row.applicant_message : "",
         formName: row.form_name,
         expiresAt: row.receipt_expires_at,
+        revision: row.revision,
+        canReply: row.state === "active" && row.status === "needs_info",
       });
+    if (request.method === "POST" && receiptRoute[2] === "reply") {
+      const input = z.object({
+        expectedRevision: z.number().int().positive(),
+        message: z.string().trim().min(1).max(2000),
+      }).strict().parse(await readJsonBody(request, 4096));
+      if (
+        row.state !== "active" ||
+        row.status !== "needs_info" ||
+        row.revision !== input.expectedRevision
+      ) return json({ error: "Esta solicitação já foi respondida ou alterada." }, 409);
+      const replyId = crypto.randomUUID();
+      const scope = `${site.organizationId}:${row.application_id}:reply:${row.revision}`;
+      const encrypted = await encryptSubmission(
+        env.BETTER_AUTH_SECRET,
+        site.organizationId,
+        scope,
+        { message: input.message },
+      );
+      try {
+        const results = await env.DB.batch([
+          env.DB.prepare(
+            `INSERT INTO application_replies(id,organization_id,edition_id,application_id,requested_revision,reply_ciphertext)
+             SELECT ?,?,?,?,?,? WHERE EXISTS(
+               SELECT 1 FROM exhibitor_applications a
+               JOIN form_submissions s ON s.organization_id=a.organization_id AND s.id=a.submission_id
+               WHERE a.organization_id=? AND a.edition_id=? AND a.id=?
+                 AND a.status='needs_info' AND a.revision=?
+                 AND s.state='active' AND s.retention_until>? AND s.receipt_expires_at>?
+             )`,
+          ).bind(
+            replyId, site.organizationId, site.editionId, row.application_id,
+            input.expectedRevision, encrypted,
+            site.organizationId, site.editionId, row.application_id,
+            input.expectedRevision, new Date().toISOString(), new Date().toISOString(),
+          ),
+          env.DB.prepare(
+            `UPDATE exhibitor_applications SET status='submitted',revision=revision+1
+             WHERE organization_id=? AND edition_id=? AND id=? AND status='needs_info'
+             AND revision=? AND EXISTS(
+               SELECT 1 FROM application_replies WHERE organization_id=?
+                 AND application_id=? AND requested_revision=?
+             )`,
+          ).bind(
+            site.organizationId, site.editionId, row.application_id,
+            input.expectedRevision, site.organizationId, row.application_id,
+            input.expectedRevision,
+          ),
+          env.DB.prepare(
+            `INSERT INTO application_events(id,organization_id,application_id,action)
+             SELECT ?,?,?,'applicant.replied' WHERE changes()=1`,
+          ).bind(crypto.randomUUID(), site.organizationId, row.application_id),
+        ]);
+        return results[0].meta.changes === 1 && results[1].meta.changes === 1
+          ? json({ status: "submitted", revision: input.expectedRevision + 1 })
+          : json({ error: "Esta solicitação já foi respondida ou alterada." }, 409);
+      } catch (error) {
+        if (/UNIQUE constraint/i.test(error instanceof Error ? error.message : ""))
+          return json({ error: "Resposta já registrada para esta solicitação." }, 409);
+        throw error;
+      }
+    }
     if (request.method === "POST" && receiptRoute[2] === "withdraw") {
       if (row.state === "active")
         await env.DB.batch([
           env.DB.prepare(
             "UPDATE form_submissions SET state='withdrawn',answers_ciphertext=NULL,profile_ciphertext=NULL,listing_opt_in=0 WHERE organization_id=? AND edition_id=? AND id=? AND state='active'",
           ).bind(site.organizationId, site.editionId, row.id),
+          env.DB.prepare(
+            "UPDATE application_replies SET reply_ciphertext=NULL WHERE organization_id=? AND application_id=? AND reply_ciphertext IS NOT NULL",
+          ).bind(site.organizationId, row.application_id),
           env.DB.prepare(
             "INSERT INTO application_events(id,organization_id,application_id,action) SELECT ?,?,?,'withdrawn' WHERE changes()=1",
           ).bind(crypto.randomUUID(), site.organizationId, row.application_id),
