@@ -301,3 +301,26 @@ export const applicationAttachments = sqliteTable(
     check("attachment_deleted_time", sql`(${t.state}='ready' AND ${t.removedAt} IS NULL) OR ${t.state}='delete_pending' OR (${t.state}='deleted' AND ${t.removedAt} IS NOT NULL)`),
   ],
 );
+
+/** Encrypted key-rotation shadow; does not mutate immutable source fields. */
+export const privateCipherRewraps = sqliteTable(
+  "private_cipher_rewraps",
+  {
+    organizationId: text("organization_id").notNull(),
+    sourceKind: text("source_kind", { enum: ["submission", "reply"] }).notNull(),
+    sourceId: text("source_id").notNull(),
+    fieldName: text("field_name", { enum: ["answers", "profile", "reply"] }).notNull(),
+    sourceHash: text("source_hash").notNull(),
+    rewrappedCiphertext: text("rewrapped_ciphertext").notNull(),
+    createdAt: createdAt(),
+    updatedAt: text("updated_at").notNull().default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ','now'))`),
+  },
+  (t) => [
+    primaryKey({ columns: [t.organizationId, t.sourceKind, t.sourceId, t.fieldName] }),
+    index("rewrap_by_tenant").on(t.organizationId,t.sourceKind,t.sourceId),
+    check("rewrap_source_kind",sql`${t.sourceKind} IN ('submission','reply')`),
+    check("rewrap_field",sql`(${t.sourceKind}='submission' AND ${t.fieldName} IN ('answers','profile')) OR (${t.sourceKind}='reply' AND ${t.fieldName}='reply')`),
+    check("rewrap_source_hash",sql`length(${t.sourceHash})=64 AND ${t.sourceHash} NOT GLOB '*[^0-9a-f]*'`),
+    check("rewrap_envelope",sql`${t.rewrappedCiphertext} LIKE 'v2.%'`),
+  ],
+);
