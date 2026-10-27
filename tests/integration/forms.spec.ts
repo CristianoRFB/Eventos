@@ -238,6 +238,26 @@ test("versioned forms keep submissions private, deduplicate races, enforce revie
       await visitor.get("/api/v1/public/applications/" + "a".repeat(64))
     ).status(),
   ).toBe(404);
+  // The only export surface is reviewer-authorized, org-scoped and no-store.
+  const exported = await owner.get(`${base}/applications/export?page=0`);
+  expect(exported.status(), await exported.text()).toBe(200);
+  expect(exported.headers()["content-type"]).toContain("text/csv");
+  expect(exported.headers()["cache-control"]).toContain("no-store");
+  expect(exported.headers()["content-disposition"]).toContain("attachment");
+  const csv = await exported.text();
+  expect(csv).toContain("private-f6@example.test");
+  expect(csv).toContain("respostas_json");
+  expect(
+    (await editor.get(`${base}/applications/export?page=0`)).status(),
+  ).toBe(403);
+  const otherOrgExport = await foreign.get(
+    "/api/v1/orgs/org-b/editions/edition-b/applications/export?page=0",
+  );
+  expect(otherOrgExport.status()).toBe(200);
+  expect(await otherOrgExport.text()).not.toContain("private-f6@example.test");
+  expect(
+    (await owner.post(`${base}/applications/export`, { data: {} })).status(),
+  ).toBe(405);
   const list = (await (await owner.get(`${base}/applications`)).json()) as {
     id: string;
     form_name: string;
