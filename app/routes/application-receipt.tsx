@@ -20,6 +20,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     applicantMessage: string;
     formName: string;
     expiresAt: string;
+    revision: number;
+    canReply: boolean;
   };
   return routeData(
     { ...result, receiptApi: url.pathname },
@@ -46,7 +48,9 @@ export default function ApplicationReceipt({
 }: Route.ComponentProps) {
   const [status, setStatus] = useState(loaderData.status),
     [message, setMessage] = useState(""),
-    [pending, setPending] = useState(false);
+    [pending, setPending] = useState(false),
+    [reply, setReply] = useState(""),
+    [canReply, setCanReply] = useState(loaderData.canReply);
   return (
     <main className="public-main">
       <section className="public-section">
@@ -68,6 +72,55 @@ export default function ApplicationReceipt({
         <p>
           A aprovação não publica seus contatos nem seu perfil automaticamente.
         </p>
+        {canReply && status === "needs_info" && (
+          <form
+            onSubmit={async (event) => {
+              event.preventDefault();
+              if (pending || !reply.trim()) return;
+              setPending(true);
+              try {
+                const response = await fetch(
+                  `${loaderData.receiptApi}/reply`,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      expectedRevision: loaderData.revision,
+                      message: reply.trim(),
+                    }),
+                  },
+                );
+                if (response.ok) {
+                  setStatus("submitted");
+                  setCanReply(false);
+                  setReply("");
+                  setMessage("Resposta privada enviada. A organizadora poderá analisá-la.");
+                } else if (response.status === 409)
+                  setMessage("A solicitação foi alterada. Atualize este recibo.");
+                else
+                  setMessage("Não foi possível enviar. Verifique a resposta e tente novamente.");
+              } catch {
+                setMessage("Falha de conexão. Sua mensagem não foi confirmada.");
+              } finally {
+                setPending(false);
+              }
+            }}
+          >
+            <label>
+              Sua resposta à solicitação de informações
+              <textarea
+                required
+                maxLength={2000}
+                value={reply}
+                onChange={(event) => setReply(event.target.value)}
+              />
+            </label>
+            <button className="button light" disabled={pending || !reply.trim()}>
+              Enviar resposta privada
+            </button>
+          </form>
+        )}
+
         {status !== "withdrawn" && (
           <button
             disabled={pending}
