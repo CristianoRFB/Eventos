@@ -72,3 +72,6 @@ As migrations `0000`–`0007` foram testadas somente no D1 local fictício; nenh
 
 
 **NEXT_STEP ATUAL (27/10, após crypto):** implementar rewrap versionado e auditável em fixtures, sem contornar triggers redaction-only, revisar lifecycle de mídia e avançar F7 provider fake. Evidência [checkpoint crypto](checkpoint-2026-10-27-crypto.md); não repetir o início do F6.
+
+
+**F6 rewrap CHECKPOINT 27/10:** ver [checkpoint de rewrap](checkpoint-2026-10-27-rewrap.md). Implementação protegida em shadow table pela migration `0008`; `08ae62a1` [CI completo PASS](https://github.com/CristianoRFB/Eventos/actions/runs/40577852115). Código re-encripta v1/v2 por tenant com modo DRY_RUN, CAS, execução retomável, triggers de revogação e leitura pelo painel. Não remove v1 físico; a chave legada NÃO é aposentável enquanto os dados originais existirem. Ainda F6 PARTIAL, external secret vault pendente. **NEXT_CODE_STEP:** F7 lifecycle de Custom Hostnames com provider fake e testes A×B; não reiniciar F6 nem alterar infraestrutura real.
