@@ -127,6 +127,13 @@ export async function handleApplicantAttachment(
       size: bytes.byteLength, sha256,
     }, 201);
   } catch (error) {
+    if (env.APP_ENV === "local") {
+      const detail = error instanceof Error ? error.message : "unknown";
+      console.error(JSON.stringify({
+        kind: "attachment_local_persistence_error",
+        reason: detail.split("\n")[0]?.slice(0, 220).replace(/[a-f0-9]{8}-[a-f0-9-]{27}/gi, "[id]"),
+      }));
+    }
     // A failed D1 insert must not leave an untracked object in the private bucket.
     try { await env.ASSETS_PRIVATE.delete(key); }
     catch { console.error(JSON.stringify({ kind: "attachment_compensation_failed" })); }
