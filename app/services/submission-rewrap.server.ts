@@ -35,9 +35,8 @@ export async function effectiveSubmissionCipher(
   organizationId: string,
   source: Source,
   sourceId: string,
-  original: string | null,
-): Promise<string | null> {
-  if (original === null) return null;
+  original: string,
+): Promise<string> {
   const fingerprintValue = await fingerprint(original);
   const row = await db.prepare(
     `SELECT v.rewrapped_ciphertext AS cipher FROM private_cipher_rewraps v
