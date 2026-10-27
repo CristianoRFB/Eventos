@@ -130,7 +130,10 @@ export default function ApplicationReceipt({
             <p>
               Até 3 imagens PNG, JPEG ou WebP, com no máximo 2 MB cada.
               O material não aparece no site público e só pode ser consultado
-              pela equipe autorizada da organizadora.
+              pela equipe autorizada da organizadora. Não envie RG, documentos
+              médicos, comprovantes sensíveis ou arquivos de terceiros sem
+              autorização. O recurso está sujeito ao prazo de privacidade
+              informado no formulário.
             </p>
             <form onSubmit={async (event) => {
               event.preventDefault();
