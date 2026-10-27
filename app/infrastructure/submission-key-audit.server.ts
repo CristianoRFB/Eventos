@@ -14,6 +14,10 @@ export async function auditSubmissionKeyUsage(db: D1Database): Promise<KeyUsage[
        SELECT profile_ciphertext AS cipher FROM form_submissions WHERE profile_ciphertext IS NOT NULL
        UNION ALL
        SELECT reply_ciphertext AS cipher FROM application_replies WHERE reply_ciphertext IS NOT NULL
+       UNION ALL
+       -- The base encryption remains for rollback, and shadow versions require
+       -- their own keys. BOTH must be counted before any key retirement.
+       SELECT rewrapped_ciphertext AS cipher FROM private_cipher_rewraps
      ), classified AS (
        SELECT CASE
          WHEN substr(cipher,1,3)='v1.' THEN 'v1'
