@@ -11,6 +11,7 @@ import {
   receiptDigest,
   encryptSubmission,
   equalPrivateDigests,
+  submissionSecrets,
 } from "../infrastructure/submission-crypto.server";
 import {
   submitFormSchema,
@@ -123,14 +124,14 @@ export async function handlePublicForms(
       Date.now() + form.definition.retentionDays * 86400000,
     ).toISOString();
     const encryptedAnswers = await encryptSubmission(
-      env.BETTER_AUTH_SECRET,
+      submissionSecrets(env),
       site.organizationId,
       scope,
       answers,
     );
     const encryptedProfile = input.publicProfile
       ? await encryptSubmission(
-          env.BETTER_AUTH_SECRET,
+          submissionSecrets(env),
           site.organizationId,
           scope,
           input.publicProfile,
@@ -264,7 +265,7 @@ export async function handlePublicForms(
       const replyId = crypto.randomUUID();
       const scope = `${site.organizationId}:${row.application_id}:reply:${row.revision}`;
       const encrypted = await encryptSubmission(
-        env.BETTER_AUTH_SECRET,
+        submissionSecrets(env),
         site.organizationId,
         scope,
         { message: input.message },
