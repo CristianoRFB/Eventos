@@ -5,6 +5,7 @@ export default [
   route("login", "routes/login.tsx"),
   route("admin", "routes/admin.tsx"),
   route("admin/:orgId", "routes/organization.tsx"),
+  route("admin/:orgId/domains", "routes/domains.tsx"),
   route("admin/:orgId/events/:eventId", "routes/event.tsx"),
   route(
     "admin/:orgId/events/:eventId/editions/:editionId/cms",
