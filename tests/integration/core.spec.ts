@@ -1397,3 +1397,62 @@ test("edition operations reject resource conflicts, isolate roles, and remain pr
   );
   expect(concurrent.map((r) => r.status()).sort()).toEqual([201, 409]);
 });
+
+
+test("F7: domain requests are owner-only, tenant-bound and versioned in D1", async () => {
+  const owner = client("owner-a");
+  const other = client("owner-b");
+  const editor = client("editor-a");
+  const a = "/api/v1/orgs/org-a/domains";
+  const b = "/api/v1/orgs/org-b/domains";
+  const hostname = `festival-${crypto.randomUUID()}.example.test`;
+  const payload = { hostname: hostname.toUpperCase(), editionId: "edition-a" };
+
+  expect((await editor.post(a, { data: payload })).status()).toBe(403);
+  expect((await owner.post(a, { data: {
+    hostname: "localhost", editionId: "edition-a",
+  } })).status()).toBe(400);
+  expect((await owner.post(a, { data: {
+    hostname, editionId: "edition-b",
+  } })).status()).toBe(404);
+
+  const created = await owner.post(a, { data: payload });
+  expect(created.status(), await created.text()).toBe(201);
+  const record = await created.json() as { id: string; status: string; version: number };
+  expect(record).toMatchObject({ status: "requested", version: 1 });
+  const detail = await owner.get(`${a}/${record.id}`);
+  expect(detail.status()).toBe(200);
+  expect(await detail.json()).toMatchObject({
+    hostname, status: "requested",
+    ownershipVerified: false, sslStatus: null,
+    hostnameStatus: null, dnsVerified: false,
+  });
+  expect((await other.get(`${b}/${record.id}`)).status()).toBe(404);
+  expect((await other.post(b, { data: {
+    hostname, editionId: "edition-b",
+  } })).status()).toBe(409);
+
+  const suspended = await owner.patch(`${a}/${record.id}`, {
+    data: { operation: "suspend", revision: 1 },
+  });
+  expect(suspended.status(), await suspended.text()).toBe(200);
+  expect(await suspended.json()).toMatchObject({ status: "suspended", version: 2 });
+  expect((await owner.patch(`${a}/${record.id}`, {
+    data: { operation: "retry", revision: 1 },
+  })).status()).toBe(409);
+  const retried = await owner.patch(`${a}/${record.id}`, {
+    data: { operation: "retry", revision: 2 },
+  });
+  expect(retried.status(), await retried.text()).toBe(200);
+  expect(await retried.json()).toMatchObject({ status: "requested", version: 3 });
+  const released = await owner.patch(`${a}/${record.id}`, {
+    data: { operation: "release", revision: 3 },
+  });
+  expect(released.status(), await released.text()).toBe(200);
+  expect(await released.json()).toMatchObject({ status: "released", version: 4 });
+  expect((await owner.post(a, { data: payload })).status()).toBe(409);
+  const listed = await owner.get(a);
+  expect(listed.status()).toBe(200);
+  expect((await listed.json() as { id: string }[])
+    .some((item) => item.id === record.id)).toBe(true);
+});
