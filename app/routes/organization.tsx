@@ -22,6 +22,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       canManageMembers: ["organization_owner", "organization_admin"].includes(
         ctx.member.role,
       ),
+      canManageDomains: ctx.member.role === "organization_owner",
     };
   } catch (error) {
     if (error instanceof Response && error.status === 401)
@@ -31,7 +32,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 export default function Organization({ loaderData }: Route.ComponentProps) {
-  const { organization, events, canCreate, canManageMembers } = loaderData;
+  const { organization, events, canCreate, canManageMembers, canManageDomains } = loaderData;
   return (
     <Panel name={organization.name}>
       <div className="eyebrow">SUA ORGANIZADORA</div>
@@ -62,6 +63,15 @@ export default function Organization({ loaderData }: Route.ComponentProps) {
           <p>Nenhum evento por aqui. Crie o primeiro para começar.</p>
         )}
       </section>
+      {canManageDomains && (
+        <section className="section-card">
+          <h2>Domínios próprios</h2>
+          <p className="muted">Solicite e acompanhe DNS e HTTPS por edição.</p>
+          <a className="button" href={`/admin/${organization.id}/domains`}>
+            Gerenciar domínios ↗
+          </a>
+        </section>
+      )}
       {canCreate && (
         <section className="section-card">
           <h2>Criar um evento</h2>

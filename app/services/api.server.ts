@@ -27,6 +27,7 @@ import { handleOperationsApi } from "./operations.server";
 import type { OperationKind } from "../domain/operations";
 import { handleFormsAdmin, handleApplicationsAdmin } from "./forms.server";
 import { handleReviewerAttachment } from "./application-attachments.server";
+import { handleDomainBindingsAdmin } from "./domain-bindings.server";
 
 const slug = z
   .string()
@@ -172,6 +173,9 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
   const match = path.match(/^\/api\/v1\/orgs\/([^/]+)\/(.+)$/);
   if (!match) return json({ error: "Rota não encontrada" }, 404);
   const [, orgId, resource] = match;
+  const domainRoute = resource.match(/^domains(?:\/([^/]+))?$/);
+  if (domainRoute)
+    return handleDomainBindingsAdmin(request, env, orgId, domainRoute[1]);
   if (resource === "invitations" || resource.startsWith("invitations/"))
     return handleInvitations(request, env, orgId, resource);
   const operationsRoute = resource.match(
