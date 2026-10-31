@@ -80,6 +80,17 @@ export async function reconcileSimulatedHostname(
         ? providerRecord.status
         : "failed"
       : derivedStatus;
+  // Repeated observations of the same snapshot are no-ops: do not inflate
+  // optimistic revisions or append duplicate audit events.
+  if (
+    binding.status === nextStatus &&
+    binding.ownership_verified === Number(next.ownershipVerified) &&
+    binding.hostname_status === next.hostnameStatus &&
+    binding.ssl_status === next.sslStatus &&
+    binding.dns_verified === Number(next.dnsVerified)
+  ) {
+    return { id: bindingId, status: nextStatus, version: expectedVersion, changed: false };
+  }
   const now = new Date().toISOString();
 
   const result = await env.DB.batch([
@@ -99,5 +110,5 @@ export async function reconcileSimulatedHostname(
   ]);
   if (result[0]?.meta.changes !== 1)
     throw new Error("Concurrent domain reconciliation rejected");
-  return { id: bindingId, status: nextStatus, version: expectedVersion + 1 };
+  return { id: bindingId, status: nextStatus, version: expectedVersion + 1, changed: true };
 }
