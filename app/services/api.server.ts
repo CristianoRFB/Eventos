@@ -793,10 +793,10 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
         )
         .parse(await readJsonBody(request));
       const id = crypto.randomUUID();
-      // Only editorial edition fields are copied; no applications, users or PII.
+      // Clone only safe editorial fields. Old ticket links, applications, users, media objects and PII are never inherited.
       await env.DB.batch([
         env.DB.prepare(
-          "INSERT INTO editions(id,organization_id,event_id,edition_key,name,city,time_zone,start_at,end_at,external_ticket_url,tokens_json,brand_profile_id) SELECT ?,organization_id,event_id,?,?,city,time_zone,COALESCE(?,start_at),COALESCE(?,end_at),external_ticket_url,tokens_json,brand_profile_id FROM editions WHERE organization_id=? AND id=?",
+          "INSERT INTO editions(id,organization_id,event_id,edition_key,name,city,time_zone,start_at,end_at,external_ticket_url,tokens_json,brand_profile_id) SELECT ?,organization_id,event_id,?,?,city,time_zone,COALESCE(?,start_at),COALESCE(?,end_at),NULL,tokens_json,brand_profile_id FROM editions WHERE organization_id=? AND id=?",
         ).bind(id, input.editionKey, input.name, input.startAt ?? null, input.endAt ?? null, orgId, editionId),
         auditStatement(
           env.DB,
