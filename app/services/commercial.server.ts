@@ -19,9 +19,9 @@ const assignmentInput = z.object({
   planId: z.literal("internal-demo"),
   subscriptionStatus: z.enum(subscriptionStatuses),
   trialUntil: z.union([z.iso.datetime(), z.null()]).default(null),
-  entitlementOverrides: z.record(z.enum(implementedCapabilities), z.boolean())
+  entitlementOverrides: z.partialRecord(z.enum(implementedCapabilities), z.boolean())
     .default({}),
-  limitOverrides: z.record(
+  limitOverrides: z.partialRecord(
     z.enum(measuredResources),
     z.union([z.number().int().nonnegative().safe(), z.null()]),
   ).default({}),
