@@ -1,6 +1,5 @@
 import {
   deriveDomainStatus,
-  isDomainActive,
   type DomainActivationState,
   type DomainStatus,
 } from "../domain/host";
@@ -54,20 +53,34 @@ export async function reconcileSimulatedHostname(
   if (providerRecord.organizationId !== orgId ||
       providerRecord.hostname !== binding.hostname)
     throw new Error("Provider returned inconsistent hostname ownership");
+  // Never leave a previously active binding published after the provider
+  // reports suspension, failure or removal. Provider terminal states dominate
+  // stale success flags (which may remain present in a provider snapshot).
+  const providerTerminal = ([
+    "suspended", "failed", "releasing", "released",
+  ] as readonly DomainStatus[]).includes(providerRecord.status);
+  const invalidateEvidence = providerTerminal || organization.status !== "active";
   const next: DomainActivationState = {
     status: binding.status,
-    ownershipVerified: providerRecord.ownershipVerified,
-    hostnameStatus: providerRecord.hostnameStatus,
-    sslStatus: providerRecord.sslStatus,
-    dnsVerified: providerRecord.dnsVerified,
+    ownershipVerified: invalidateEvidence ? false : providerRecord.ownershipVerified,
+    hostnameStatus: invalidateEvidence ? null : providerRecord.hostnameStatus,
+    sslStatus: invalidateEvidence ? null : providerRecord.sslStatus,
+    dnsVerified: invalidateEvidence ? false : providerRecord.dnsVerified,
     organizationStatus: organization.status,
   };
-  const nextStatus = deriveDomainStatus(next);
+  const derivedStatus = deriveDomainStatus(next);
+  // An apparently valid set of gates cannot override a provider that has not
+  // independently reached "active". Persist its pending state, not an active
+  // binding, so read-time routing remains fail-closed.
+  const nextStatus: DomainStatus = providerTerminal
+    ? providerRecord.status
+    : derivedStatus === "active" && providerRecord.status !== "active"
+      ? (["requested", "ownership_pending", "tls_pending", "dns_pending"] as
+          readonly DomainStatus[]).includes(providerRecord.status)
+        ? providerRecord.status
+        : "failed"
+      : derivedStatus;
   const now = new Date().toISOString();
-  if (isDomainActive({
-    ...next, status: nextStatus,
-  }) && providerRecord.status !== "active")
-    throw new Error("Provider not yet active");
 
   const result = await env.DB.batch([
     env.DB.prepare(
@@ -81,7 +94,7 @@ export async function reconcileSimulatedHostname(
       "INSERT INTO audit_events(id,organization_id,actor_id,action,resource_type,resource_id,diff_safe_json) SELECT ?,?,NULL,'domain.simulated_reconciliation','domain',?,? WHERE changes()=1",
     ).bind(
       crypto.randomUUID(), orgId, bindingId,
-      JSON.stringify({ status: nextStatus, simulated: true }),
+      JSON.stringify({ status: nextStatus, providerStatus: providerRecord.status, simulated: true }),
     ),
   ]);
   if (result[0]?.meta.changes !== 1)
