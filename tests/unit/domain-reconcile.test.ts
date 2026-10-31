@@ -193,4 +193,24 @@ describe("F7 simulated D1 reconciliation (never hosted)", () => {
       .toMatchObject({ status: "requested" });
   });
 
+  it("keeps version and audit count stable for identical provider observations", async () => {
+    const provider = fake();
+    const host = { organizationId: "org-a", hostname: "festival-a.example.test" };
+    await provider.provision(host);
+    provider.observe(host, {
+      ownershipVerified: true, hostnameStatus: "active",
+      sslStatus: "active", dnsVerified: true, organizationStatus: "active",
+    });
+    const first = await reconcileSimulatedHostname(env(), provider, "org-a", "binding-a", 1);
+    expect(first).toMatchObject({ status: "active", version: 2, changed: true });
+    const repeated = await reconcileSimulatedHostname(env(), provider, "org-a", "binding-a", 2);
+    expect(repeated).toMatchObject({ status: "active", version: 2, changed: false });
+    expect(read(
+      "SELECT COUNT(*) AS total FROM audit_events WHERE organization_id=? AND action=?",
+      "org-a", "domain.simulated_reconciliation",
+    )).toMatchObject({ total: 1 });
+    await expect(reconcileSimulatedHostname(env(), provider, "org-a", "binding-a", 1))
+      .rejects.toThrow("Stale binding version");
+  });
+
 });
