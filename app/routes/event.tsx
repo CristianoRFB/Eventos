@@ -128,6 +128,46 @@ export default function EventPage({ loaderData }: Route.ComponentProps) {
                   Conteúdo e publicação ↗
                 </a>
               )}
+              {canCreate && (
+                <details>
+                  <summary>Preparar nova edição a partir desta</summary>
+                  <p className="muted">
+                    Reaproveita dados editoriais e identidade visual em um
+                    rascunho separado. Não transfere candidaturas, anexos,
+                    participantes privados nem a bilheteria anterior.
+                  </p>
+                  <ApiForm
+                    endpoint={`/api/v1/orgs/${organization.id}/editions/${edition.id}/clone`}
+                    label="Criar nova edição em rascunho"
+                    transform={(form) => ({
+                      name: form.get("name"),
+                      editionKey: form.get("editionKey"),
+                      startAt: `${form.get("startAt")}:00.000Z`,
+                      endAt: `${form.get("endAt")}:00.000Z`,
+                    })}
+                  >
+                    <label>
+                      Nome da nova edição
+                      <input name="name" required minLength={2} maxLength={120}
+                        placeholder="Festival 2027" />
+                    </label>
+                    <label>
+                      Identificador único
+                      <input name="editionKey" required
+                        pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="2027" />
+                    </label>
+                    <label>
+                      Início da nova edição (UTC)
+                      <input type="datetime-local" name="startAt" required />
+                    </label>
+                    <label>
+                      Término da nova edição (UTC)
+                      <input type="datetime-local" name="endAt" required />
+                    </label>
+                  </ApiForm>
+                </details>
+              )}
+
             </div>
           </div>
         ))}
