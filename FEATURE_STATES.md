@@ -15,10 +15,10 @@ NOW integra o escopo solicitado no goal. NEXT continua separado; F8 permite mec�
 | F-03 | audit critical | NOW | F2 | PARTIAL | Auditoria append-only e API; cobertura de mutações ainda parcial |
 | F-04 | memberships / roles | NOW | F2 | PARTIAL | Guard server-side, A/B, papéis e last-owner; tela completa de equipe pendente |
 | F-05 | organization profile | NOW | F2 | PARTIAL | GET/PATCH e revisão concorrente; edição do perfil na UI pendente |
-| F-06 | branding tokens | NOW | F3 | NOT_STARTED | Não executada |
+| F-06 | branding tokens | NOW | F3 | PARTIAL | Editor de tokens acessíveis, API tenant-scoped e testes no PR #6 (CI PASS); branding por evento/edição ainda pendente |
 | F-07 | event CRUD | NOW | F3 | PARTIAL | Lista/criação e API PATCH; edição completa na UI pendente |
 | F-08 | edition CRUD clone | NOW | F3 | PARTIAL | Criação/lista e clone via API; clone ainda sem teste de exclusão de PII e UI |
-| F-09 | domain onboarding | NOW | F7 | NOT_STARTED | Não executada |
+| F-09 | domain onboarding | NOW | F7 | PARTIAL | Solicitação D1 e revisão simulada nos PRs #4–#5; DNS/TLS/Cloudflare reais não homologados |
 | F-10 | home by hostname | NOW | F4 | PARTIAL | CMS/SSR/preview/publish/rollback local; aceite integral pendente |
 | F-11 | SEO meta/sitemap | NOW | F4 | PARTIAL | CMS/SSR/preview/publish/rollback local; aceite integral pendente |
 | F-12 | editions history | NOW | F4 | PARTIAL | CMS/SSR/preview/publish/rollback local; aceite integral pendente |
@@ -40,14 +40,14 @@ NOW integra o escopo solicitado no goal. NEXT continua separado; F8 permite mec�
 | F-28 | activity/audit reporting | NEXT | F9 | NOT_STARTED | Não executada |
 | F-29 | analytics aggregates | NEXT | F9 | NOT_STARTED | Não executada |
 | F-30 | CSV export submissions | NEXT | F9 | NOT_STARTED | Não executada |
-| F-31 | manual plans | NEXT | F8 | NOT_STARTED | Não executada |
+| F-31 | manual plans | NEXT | F8 | PARTIAL | Atribuição manual sintética, owner-only, D1/CAS e auditoria em local; planos comerciais reais NÃO APROVADOS |
 | F-32 | visible quota status | NEXT | F8 | NOT_STARTED | Não executada |
-| F-33 | synthetic demo | NEXT | F8 | NOT_STARTED | Não executada |
+| F-33 | synthetic demo | NEXT | F8 | PARTIAL | Catalogo `internal-demo` em APP_ENV=local e controles administrativos somente teste; publicação comercial bloqueada |
 | F-34 | external ticket link | NOW | F4 | PARTIAL | CMS/SSR/preview/publish/rollback local; aceite integral pendente |
 | F-35 | ticket gateway native | DEFERRED | DEFERRED | DEFERRED | Fora do escopo atual |
 | F-36 | whatsapp/SMS automation | DEFERRED | DEFERRED | DEFERRED | Fora do escopo atual |
 | F-37 | cosplay marketplace | DEFERRED | DEFERRED | DEFERRED | Fora do escopo atual |
-| F-38 | staging/domain provider monitor | NOW | F7 | NOT_STARTED | Não executada |
+| F-38 | staging/domain provider monitor | NOW | F7 | PARTIAL | Status D1 e fake provider com downgrade fail-closed; monitoramento hosted/staging ausente |
 
 
 As 60 telas (51 NOW, 9 NEXT) permanecem em [SCREEN_TRACEABILITY.csv](docs/implementation/SCREEN_TRACEABILITY.csv); os estados implementados têm prova desktop/mobile no [manifesto de screenshots](docs/implementation/screenshots/manifest.json). Exigir loader/action/persistência e estados de UX aplicáveis, com prova PC/mobile antes de PASS. Os 16 diagramas Mermaid representam o design renderizado e ainda não reconciliado integralmente com o runtime.

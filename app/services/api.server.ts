@@ -29,6 +29,7 @@ import type { OperationKind } from "../domain/operations";
 import { handleFormsAdmin, handleApplicationsAdmin } from "./forms.server";
 import { handleReviewerAttachment } from "./application-attachments.server";
 import { handleDomainBindingsAdmin } from "./domain-bindings.server";
+import { handlePlatformCommercial, handleTenantCommercial } from "./commercial.server";
 
 const slug = z
   .string()
@@ -130,6 +131,11 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
         return json({ id }, 201);
       }
     }
+    const commercialRoute = path.match(
+      /^\/api\/v1\/platform\/organizations\/([^/]+)\/commercial$/,
+    );
+    if (commercialRoute)
+      return handlePlatformCommercial(request, env, commercialRoute[1]!);
     const statusRoute = path.match(
       /^\/api\/v1\/platform\/organizations\/([^/]+)\/status$/,
     );
@@ -174,6 +180,8 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
   const match = path.match(/^\/api\/v1\/orgs\/([^/]+)\/(.+)$/);
   if (!match) return json({ error: "Rota não encontrada" }, 404);
   const [, orgId, resource] = match;
+  if (resource === "commercial")
+    return handleTenantCommercial(request, env, orgId);
   const domainRoute = resource.match(/^domains(?:\/([^/]+))?$/);
   if (domainRoute)
     return handleDomainBindingsAdmin(request, env, orgId, domainRoute[1]);

@@ -69,6 +69,51 @@ export const organizations = sqliteTable(
   ],
 );
 
+/**
+ * The global commercial contract is physically tenant-scoped, but the only
+ * assignable catalogue is an internal local-only demo until Eventos approves
+ * plans, features, quotas, pricing and rollout.
+ */
+export const commercialAssignments = sqliteTable(
+  "commercial_assignments",
+  {
+    organizationId: text("organization_id")
+      .primaryKey()
+      .references(() => organizations.id, { onDelete: "restrict" }),
+    planId: text("plan_id").notNull(),
+    subscriptionStatus: text("subscription_status", {
+      enum: ["trial", "active", "past_due", "suspended", "cancelled", "demo"],
+    }).notNull(),
+    trialUntil: text("trial_until"),
+    entitlementOverridesJson: text("entitlement_overrides_json", { mode: "json" })
+      .$type<Record<string, boolean>>()
+      .notNull()
+      .default({}),
+    limitOverridesJson: text("limit_overrides_json", { mode: "json" })
+      .$type<Record<string, number | null>>()
+      .notNull()
+      .default({}),
+    revision: integer("revision").notNull().default(1),
+    ...timestamps(),
+  },
+  (table) => [
+    check("commercial_plan_id_check", sql`length(${table.planId}) BETWEEN 1 AND 80`),
+    check("commercial_revision_check", sql`${table.revision} >= 1`),
+    check(
+      "commercial_subscription_status_check",
+      sql`${table.subscriptionStatus} IN ('trial','active','past_due','suspended','cancelled','demo')`,
+    ),
+    check(
+      "commercial_entitlement_json_check",
+      sql`json_valid(${table.entitlementOverridesJson}) AND json_type(${table.entitlementOverridesJson})='object'`,
+    ),
+    check(
+      "commercial_limit_json_check",
+      sql`json_valid(${table.limitOverridesJson}) AND json_type(${table.limitOverridesJson})='object'`,
+    ),
+  ],
+);
+
 /** Platform access is provisioned out-of-band, never as a tenant role. */
 export const platformOwners = sqliteTable("platform_owners", {
   userId: text("user_id")

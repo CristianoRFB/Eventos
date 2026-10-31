@@ -6,7 +6,20 @@ import { Panel, ApiForm } from "../components/panel";
 export async function loader({ request }: Route.LoaderArgs) {
   try {
     await requirePlatform(request, env);
+    const demoOnly = env.APP_ENV === "local";
+    const demoAssignments = demoOnly
+      ? (await env.DB.prepare(
+          "SELECT organization_id,plan_id,subscription_status,revision FROM commercial_assignments",
+        ).all<{
+          organization_id: string;
+          plan_id: string;
+          subscription_status: string;
+          revision: number;
+        }>()).results
+      : [];
     return {
+      demoOnly,
+      demoAssignments,
       organizations: (
         await env.DB.prepare(
           "SELECT id,name,slug,status,revision FROM organizations ORDER BY created_at DESC LIMIT 200",
@@ -51,6 +64,44 @@ export default function Platform({ loaderData }: Route.ComponentProps) {
             >
               <span className="sr-only">Alterar estado de {org.name}</span>
             </ApiForm>
+            {loaderData.demoOnly && (() => {
+              const assignment = loaderData.demoAssignments.find(
+                (item) => item.organization_id === org.id,
+              );
+              return (
+                <div>
+                  <h3>Contrato de demonstração interna</h3>
+                  <p className="muted">
+                    TEST_ONLY · Sem preço, cobrança ou limites comerciais aprovados.
+                    {assignment ? ` Estado atual: ${assignment.subscription_status}` :
+                      " Nenhuma atribuição de teste."}
+                  </p>
+                  <ApiForm
+                    endpoint={`/api/v1/platform/organizations/${org.id}/commercial`}
+                    method="PATCH"
+                    label="Salvar simulação"
+                    transform={(form) => ({
+                      planId: "internal-demo",
+                      subscriptionStatus: String(form.get("subscriptionStatus")),
+                      trialUntil: null,
+                      entitlementOverrides: {},
+                      limitOverrides: {},
+                      expectedRevision: assignment?.revision ?? 0,
+                    })}
+                  >
+                    <label>
+                      Estado sintético
+                      <select name="subscriptionStatus" defaultValue={assignment?.subscription_status ?? "demo"}>
+                        <option value="demo">Demonstração</option>
+                        <option value="active">Ativo (simulado)</option>
+                        <option value="suspended">Suspenso (simulado)</option>
+                        <option value="cancelled">Cancelado (simulado)</option>
+                      </select>
+                    </label>
+                  </ApiForm>
+                </div>
+              );
+            })()}
           </div>
         ))}
       </section>
