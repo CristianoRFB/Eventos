@@ -366,3 +366,28 @@ test("platform owner sees global organizations and private tenant access stays d
     page.getByText("Encontro A — fictício", { exact: true }),
   ).toHaveCount(0);
 });
+
+
+test("F3 cloned edition is created from the dashboard with new dates and no horizontal overflow", async ({
+  page,
+}, testInfo) => {
+  await signIn(page, "owner-a");
+  await page.goto("/admin/org-a/events/event-a");
+  const details = page.locator("details").filter({
+    has: page.getByText("Preparar nova edição a partir desta"),
+  }).first();
+  await details.locator("summary").click();
+  const name = `Nova edição UI ${testInfo.project.name} ${Date.now()}`;
+  const key = `ui-clone-${testInfo.project.name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}-${Date.now()}`;
+  await details.getByLabel("Nome da nova edição").fill(name);
+  await details.getByLabel("Identificador único").fill(key);
+  await details.getByLabel("Início da nova edição (UTC)").fill("2028-07-10T10:00");
+  await details.getByLabel("Término da nova edição (UTC)").fill("2028-07-11T20:00");
+  const created = page.waitForResponse((response) =>
+    response.url().endsWith("/clone") && response.request().method() === "POST",
+  );
+  await details.getByRole("button", { name: "Criar nova edição em rascunho" }).click();
+  expect((await created).status()).toBe(201);
+  await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});

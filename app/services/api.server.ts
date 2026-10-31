@@ -777,15 +777,27 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
     if (request.method === "GET" && !editionItemRoute[2]) return json(existing);
     if (request.method === "POST" && editionItemRoute[2]) {
       const input = z
-        .object({ editionKey: slug, name: z.string().trim().min(2).max(120) })
+        .object({
+          editionKey: slug,
+          name: z.string().trim().min(2).max(120),
+          startAt: z.iso.datetime().optional(),
+          endAt: z.iso.datetime().optional(),
+        })
         .strict()
+        .refine((value) => Boolean(value.startAt) === Boolean(value.endAt), {
+          message: "Informe ambas as datas da nova edição",
+        })
+        .refine(
+          (value) => !value.startAt || !value.endAt || value.endAt > value.startAt,
+          { message: "O término deve ser posterior ao início" },
+        )
         .parse(await readJsonBody(request));
       const id = crypto.randomUUID();
-      // Only editorial edition fields are copied; no applications, users or PII.
+      // Clone only safe editorial fields. Old ticket links, applications, users, media objects and PII are never inherited.
       await env.DB.batch([
         env.DB.prepare(
-          "INSERT INTO editions(id,organization_id,event_id,edition_key,name,city,time_zone,start_at,end_at,external_ticket_url,tokens_json,brand_profile_id) SELECT ?,organization_id,event_id,?,?,city,time_zone,start_at,end_at,external_ticket_url,tokens_json,brand_profile_id FROM editions WHERE organization_id=? AND id=?",
-        ).bind(id, input.editionKey, input.name, orgId, editionId),
+          "INSERT INTO editions(id,organization_id,event_id,edition_key,name,city,time_zone,start_at,end_at,external_ticket_url,tokens_json,brand_profile_id) SELECT ?,organization_id,event_id,?,?,city,time_zone,COALESCE(?,start_at),COALESCE(?,end_at),NULL,tokens_json,brand_profile_id FROM editions WHERE organization_id=? AND id=?",
+        ).bind(id, input.editionKey, input.name, input.startAt ?? null, input.endAt ?? null, orgId, editionId),
         auditStatement(
           env.DB,
           orgId,
