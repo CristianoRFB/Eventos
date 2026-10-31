@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { publicBranding } from "../domain/branding";
 import {
   requireUser,
   type AuthEnvironment,
@@ -462,6 +463,56 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
         "Content-Disposition": "inline",
       },
     });
+  }
+  if (resource === "branding") {
+    const ctx = await requireTenant(
+      request, env, orgId,
+      request.method === "GET" ? "org.read" : "org.brand.write",
+    );
+    if (request.method === "GET") {
+      let tokens: unknown = {};
+      try {
+        tokens = JSON.parse(ctx.organization.tokens_json);
+      } catch {
+        // Existing malformed tokens never execute user-supplied CSS.
+      }
+      return json({
+        ...publicBranding(tokens),
+        revision: ctx.organization.revision,
+      });
+    }
+    if (request.method === "PATCH") {
+      const input = z.object({
+        primary: z.string().regex(/^#[0-9a-f]{6}$/iu),
+        font: z.enum(["system", "sans", "serif"]),
+        revision,
+      }).strict().parse(await readJsonBody(request));
+      const applied = publicBranding(input);
+      const updated = await env.DB.batch([
+        env.DB.prepare(
+          "UPDATE organizations SET tokens_json=json_set(tokens_json,'$.primary',?,'$.font',?),revision=revision+1,updated_at=? WHERE id=? AND revision=? AND status='active'",
+        ).bind(
+          applied.primaryColor,
+          applied.fontFamily,
+          new Date().toISOString(),
+          orgId,
+          input.revision,
+        ),
+        env.DB.prepare(
+          "INSERT INTO audit_events(id,organization_id,actor_id,action,resource_type,resource_id,diff_safe_json) SELECT ?,?,?,'organization.brand.updated','organization',?,? WHERE changes()=1",
+        ).bind(
+          crypto.randomUUID(),
+          orgId,
+          ctx.identity.user.id,
+          orgId,
+          JSON.stringify({ primary: applied.primaryColor, font: applied.fontFamily }),
+        ),
+      ]);
+      if (updated[0]?.meta.changes !== 1)
+        return json({ error: "Identidade visual alterada. Atualize a página." }, 409);
+      return json({ ...applied, revision: input.revision + 1 });
+    }
+    return new Response(null, { status: 405, headers: privateHeaders() });
   }
   if (resource === "settings") {
     const ctx = await requireTenant(
