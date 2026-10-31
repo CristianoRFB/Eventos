@@ -111,13 +111,16 @@ export function commercialView(
   now = new Date(),
 ) {
   const ready = eligible(appEnv, state, now);
+  const configured = appEnv === "local" && state !== null &&
+    Object.hasOwn(localDemoCatalog, state.planId);
   return {
     mode: "TEST_ONLY" as const,
-    configured: ready,
+    configured,
+    enabled: ready,
     commercialApproved: false,
-    planId: ready ? state!.planId : null,
-    subscriptionStatus: ready ? state!.subscriptionStatus : null,
-    trialUntil: ready ? state!.trialUntil : null,
+    planId: configured ? state!.planId : null,
+    subscriptionStatus: configured ? state!.subscriptionStatus : null,
+    trialUntil: configured ? state!.trialUntil : null,
     capabilities: Object.fromEntries(
       implementedCapabilities.map(key =>
         [key, canUse(appEnv, state, key, true, now)]),
