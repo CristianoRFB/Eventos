@@ -1,4 +1,6 @@
 import { env } from "cloudflare:workers";
+import { useState } from "react";
+import { publicBranding, type PublicFont } from "../domain/branding";
 import { redirect } from "react-router";
 import type { Route } from "./+types/organization";
 import { requireTenant } from "../services/tenant.server";
@@ -15,8 +17,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     )
       .bind(ctx.organization.id, unrestricted ? 1 : 0, ctx.identity.user.id)
       .all<{ id: string; name: string; slug: string; status: string }>();
+    let tokens: unknown = {};
+    try {
+      tokens = JSON.parse(ctx.organization.tokens_json);
+    } catch {
+      // Preview uses a safe accessible default on malformed legacy tokens.
+    }
     return {
       organization: ctx.organization,
+      branding: publicBranding(tokens),
+      canEditBrand: unrestricted,
       events: events.results,
       canCreate: unrestricted,
       canManageMembers: ["organization_owner", "organization_admin"].includes(
@@ -32,7 +42,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 export default function Organization({ loaderData }: Route.ComponentProps) {
-  const { organization, events, canCreate, canManageMembers, canManageDomains } = loaderData;
+  const {
+    organization, events, canCreate, canManageMembers, canManageDomains,
+    branding, canEditBrand,
+  } = loaderData;
   return (
     <Panel name={organization.name}>
       <div className="eyebrow">SUA ORGANIZADORA</div>
@@ -63,6 +76,13 @@ export default function Organization({ loaderData }: Route.ComponentProps) {
           <p>Nenhum evento por aqui. Crie o primeiro para começar.</p>
         )}
       </section>
+      {canEditBrand && (
+        <BrandingEditor
+          orgId={organization.id}
+          revision={organization.revision}
+          initial={branding}
+        />
+      )}
       {canManageDomains && (
         <section className="section-card">
           <h2>Domínios próprios</h2>
@@ -108,5 +128,70 @@ export default function Organization({ loaderData }: Route.ComponentProps) {
         </section>
       )}
     </Panel>
+  );
+}
+
+function BrandingEditor({
+  orgId,
+  revision,
+  initial,
+}: {
+  orgId: string;
+  revision: number;
+  initial: ReturnType<typeof publicBranding>;
+}) {
+  const [primary, setPrimary] = useState(initial.primaryColor);
+  const [font, setFont] = useState<PublicFont>(initial.fontFamily);
+  const preview = publicBranding({ primary, font });
+  return (
+    <section className="section-card" aria-labelledby="brand-editor-heading">
+      <h2 id="brand-editor-heading">Identidade visual da organizadora</h2>
+      <p className="muted">
+        Defina a cor principal e a tipografia. Cores claras são ajustadas para
+        manter o contraste acessível dos textos e botões do site público.
+      </p>
+      <ApiForm
+        endpoint={`/api/v1/orgs/${orgId}/branding`}
+        method="PATCH"
+        label="Salvar identidade visual"
+        transform={() => ({ primary, font, revision })}
+      >
+        <label>
+          Cor principal
+          <input
+            type="color"
+            name="primary"
+            value={primary}
+            onChange={(event) => setPrimary(event.currentTarget.value)}
+            required
+          />
+        </label>
+        <label>
+          Tipografia
+          <select
+            name="font"
+            value={font}
+            onChange={(event) => setFont(event.currentTarget.value as PublicFont)}
+          >
+            <option value="system">Inter / sistema</option>
+            <option value="sans">Sem serifa</option>
+            <option value="serif">Com serifa</option>
+          </select>
+        </label>
+        <div
+          aria-label="Prévia acessível da identidade visual"
+          style={{
+            backgroundColor: preview.primaryColor,
+            color: preview.buttonTextColor,
+            fontFamily: preview.fontStack,
+            padding: "1rem",
+            borderRadius: "0.65rem",
+          }}
+        >
+          <strong>Seu próximo grande evento</strong>
+          <p>Uma prévia de cor e tipografia que o visitante poderá encontrar.</p>
+        </div>
+      </ApiForm>
+    </section>
   );
 }
