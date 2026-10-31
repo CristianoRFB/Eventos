@@ -1456,3 +1456,44 @@ test("F7: domain requests are owner-only, tenant-bound and versioned in D1", asy
   expect((await listed.json() as { id: string }[])
     .some((item) => item.id === record.id)).toBe(true);
 });
+
+
+test("F3 branding editor persists safe tokens, enforces roles and rejects stale revisions", async () => {
+  const owner = client("owner-a");
+  const other = client("owner-b");
+  const endpoint = "/api/v1/orgs/org-a/branding";
+  const initialResponse = await owner.get(endpoint);
+  expect(initialResponse.status()).toBe(200);
+  const initial = await initialResponse.json() as {
+    primaryColor: string; fontFamily: string; revision: number;
+  };
+  const otherBefore = await (await other.get("/api/v1/orgs/org-b/branding")).json();
+  expect((await other.get(endpoint)).status()).toBe(403);
+  expect((await client("editor-a").patch(endpoint, { data: {
+    primary: "#f4bb34", font: "serif", revision: initial.revision,
+  } })).status()).toBe(403);
+  expect((await owner.patch(endpoint, { data: {
+    primary: "url(javascript:alert(1))", font: "serif", revision: initial.revision,
+  } })).status()).toBe(400);
+  expect((await owner.patch(endpoint, { data: {
+    primary: "#f4bb34", font: "javascript:alert(1)", revision: initial.revision,
+  } })).status()).toBe(400);
+  const changed = await owner.patch(endpoint, { data: {
+    primary: "#f4bb34", font: "serif", revision: initial.revision,
+  } });
+  expect(changed.status(), await changed.text()).toBe(200);
+  const applied = await changed.json() as {
+    primaryColor: string; fontFamily: string; revision: number;
+  };
+  expect(applied.revision).toBe(initial.revision + 1);
+  expect(applied.fontFamily).toBe("serif");
+  expect(applied.primaryColor).toMatch(/^#[0-9a-f]{6}$/);
+  expect(applied.primaryColor).not.toBe("#f4bb34"); // contrast correction
+  const persisted = await (await owner.get(endpoint)).json();
+  expect(persisted).toMatchObject(applied);
+  expect((await owner.patch(endpoint, { data: {
+    primary: "#000000", font: "system", revision: initial.revision,
+  } })).status()).toBe(409);
+  const otherAfter = await (await other.get("/api/v1/orgs/org-b/branding")).json();
+  expect(otherAfter).toEqual(otherBefore);
+});
