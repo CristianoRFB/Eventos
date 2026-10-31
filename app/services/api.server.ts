@@ -132,7 +132,7 @@ export async function handleApi(request: Request, env: AuthEnvironment) {
       }
     }
     const commercialRoute = path.match(
-      /^\\/api\\/v1\\/platform\\/organizations\\/([^/]+)\\/commercial$/,
+      /^\/api\/v1\/platform\/organizations\/([^/]+)\/commercial$/,
     );
     if (commercialRoute)
       return handlePlatformCommercial(request, env, commercialRoute[1]!);
