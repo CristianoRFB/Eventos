@@ -1562,3 +1562,47 @@ test("F8 local commercial state: platform-only CAS, scope A/B and no false produ
   });
   expect((await platform.get(platformUrl)).status()).toBe(200);
 });
+
+
+test("F3 clone keeps a private draft, replaces dates, drops stale tickets and creates no applications", async () => {
+  const owner = client("owner-a");
+  const source = "/api/v1/orgs/org-a/editions/edition-a";
+  const original = await (await owner.get(source)).json() as {
+    event_id: string; city: string; time_zone: string;
+    external_ticket_url: string | null;
+  };
+  expect((await client("owner-b").post(source + "/clone", {
+    data: { name: "Inválido", editionKey: unique("denied") },
+  })).status()).toBe(403);
+  expect((await owner.post("/api/v1/orgs/org-b/editions/edition-b/clone", {
+    data: { name: "Inválido", editionKey: unique("denied") },
+  })).status()).toBe(403);
+  const input = {
+    name: "Edição privada clonada",
+    editionKey: unique("clone"),
+    startAt: "2028-01-10T12:00:00.000Z",
+    endAt: "2028-01-11T21:00:00.000Z",
+  };
+  expect((await owner.post(source + "/clone", { data: {
+    ...input, endAt: "2028-01-09T12:00:00.000Z",
+  } })).status()).toBe(400);
+  expect((await owner.post(source + "/clone", { data: {
+    name: input.name, editionKey: unique("invalid"), startAt: input.startAt,
+  } })).status()).toBe(400);
+  const created = await owner.post(source + "/clone", { data: input });
+  expect(created.status(), await created.text()).toBe(201);
+  const { id } = await created.json() as { id: string };
+  const response = await owner.get(`/api/v1/orgs/org-a/editions/${id}`);
+  expect(response.status(), await response.text()).toBe(200);
+  expect(await response.json()).toMatchObject({
+    name: input.name, event_id: original.event_id, city: original.city,
+    time_zone: original.time_zone, start_at: input.startAt,
+    end_at: input.endAt, status: "draft", external_ticket_url: null,
+  });
+  const applications = await owner.get(`/api/v1/orgs/org-a/editions/${id}/applications`);
+  expect(applications.status(), await applications.text()).toBe(200);
+  expect(await applications.json()).toEqual([]);
+  const forms = await owner.get(`/api/v1/orgs/org-a/editions/${id}/forms`);
+  expect(forms.status(), await forms.text()).toBe(200);
+  expect(await forms.json()).toEqual([]);
+});
