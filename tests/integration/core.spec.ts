@@ -1497,3 +1497,68 @@ test("F3 branding editor persists safe tokens, enforces roles and rejects stale 
   const otherAfter = await (await other.get("/api/v1/orgs/org-b/branding")).json();
   expect(otherAfter).toEqual(otherBefore);
 });
+
+
+test("F8 local commercial state: platform-only CAS, scope A/B and no false production plans", async () => {
+  const platform = client("plataforma");
+  const ownerA = client("owner-a");
+  const ownerB = client("owner-b");
+  const platformUrl = "/api/v1/platform/organizations/org-a/commercial";
+  const tenantUrl = "/api/v1/orgs/org-a/commercial";
+  const before = await platform.get(platformUrl);
+  expect(before.status()).toBe(200);
+  expect(await before.json()).toMatchObject({
+    configured: false, enabled: false, revision: 0, commercialApproved: false,
+    limits: { active_events: 0 },
+  });
+  expect((await ownerB.get(tenantUrl)).status()).toBe(403);
+  expect((await client("editor-a").get(tenantUrl)).status()).toBe(403);
+  expect((await platform.get(tenantUrl)).status()).toBe(403);
+  expect((await ownerA.get(tenantUrl)).status()).toBe(200);
+  expect((await ownerA.patch(platformUrl, { data: {} })).status()).toBe(403);
+  expect((await platform.patch(platformUrl, { data: {
+    planId: "essential", subscriptionStatus: "demo", expectedRevision: 0,
+  } })).status()).toBe(400);
+  expect((await platform.patch(platformUrl, { data: {
+    planId: "internal-demo", subscriptionStatus: "demo", expectedRevision: 0,
+    monthlyPriceCents: 9900,
+  } })).status()).toBe(400);
+  expect((await platform.patch(platformUrl, { data: {
+    planId: "internal-demo", subscriptionStatus: "trial", expectedRevision: 0,
+  } })).status()).toBe(400);
+  expect((await platform.patch(platformUrl, { data: {
+    planId: "internal-demo", subscriptionStatus: "demo", expectedRevision: 0,
+    entitlementOverrides: { "security.disable": true },
+  } })).status()).toBe(400);
+
+  const assigned = await platform.patch(platformUrl, { data: {
+    planId: "internal-demo", subscriptionStatus: "demo", expectedRevision: 0,
+    entitlementOverrides: { "branding.manage": false },
+    limitOverrides: { active_events: 0, domains: null },
+  } });
+  expect(assigned.status(), await assigned.text()).toBe(200);
+  expect(await assigned.json()).toMatchObject({
+    configured: true, enabled: true, revision: 1, planId: "internal-demo",
+    subscriptionStatus: "demo", commercialApproved: false,
+    capabilities: { "branding.manage": false, "events.manage": true },
+    limits: { active_events: 0, domains: null },
+  });
+  expect(await (await ownerA.get(tenantUrl)).json()).toMatchObject({
+    revision: 1, subscriptionStatus: "demo",
+  });
+  expect(await (await ownerB.get("/api/v1/orgs/org-b/commercial")).json())
+    .toMatchObject({ configured: false, revision: 0 });
+  expect((await platform.patch(platformUrl, { data: {
+    planId: "internal-demo", subscriptionStatus: "active", expectedRevision: 0,
+  } })).status()).toBe(409);
+
+  const suspended = await platform.patch(platformUrl, { data: {
+    planId: "internal-demo", subscriptionStatus: "suspended", expectedRevision: 1,
+  } });
+  expect(suspended.status(), await suspended.text()).toBe(200);
+  expect(await suspended.json()).toMatchObject({
+    configured: true, enabled: false, revision: 2,
+    capabilities: { "events.manage": false },
+  });
+  expect((await platform.get(platformUrl)).status()).toBe(200);
+});
