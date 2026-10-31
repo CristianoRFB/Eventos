@@ -124,4 +124,93 @@ describe("F7 simulated D1 reconciliation (never hosted)", () => {
     await expect(reconcileSimulatedHostname(env(), provider, "org-a", "binding-a", 2))
       .rejects.toThrow("explicit trusted operator retry");
   });
+  it.each(["suspended", "failed", "released"] as const)(
+    "revokes an active binding when provider reports %s (even with stale success flags)",
+    async (terminalState) => {
+      const provider = fake();
+      const host = { organizationId: "org-a", hostname: "festival-a.example.test" };
+      await provider.provision(host);
+      provider.observe(host, {
+        ownershipVerified: true,
+        hostnameStatus: "active",
+        sslStatus: "active",
+        dnsVerified: true,
+        organizationStatus: "active",
+      });
+      expect(await reconcileSimulatedHostname(env(), provider, "org-a", "binding-a", 1))
+        .toMatchObject({ status: "active", version: 2 });
+      // The fake retains successful gates when suspended/failed, matching a
+      // provider snapshot that has not yet invalidated cached DNS/TLS evidence.
+      if (terminalState === "suspended") provider.suspend(host);
+      if (terminalState === "failed") provider.markFailed(host);
+      if (terminalState === "released") await provider.release(host);
+      const reconciled = await reconcileSimulatedHostname(
+        env(), provider, "org-a", "binding-a", 2,
+      );
+      expect(reconciled).toMatchObject({ status: terminalState, version: 3 });
+      expect(read(
+        "SELECT status,ownership_verified,hostname_status,ssl_status,dns_verified,version FROM domain_bindings WHERE id=?",
+        "binding-a",
+      )).toMatchObject({
+        status: terminalState,
+        ownership_verified: 0,
+        hostname_status: null,
+        ssl_status: null,
+        dns_verified: 0,
+        version: 3,
+      });
+      expect(read("SELECT status,version FROM domain_bindings WHERE id=?", "binding-b"))
+        .toMatchObject({ status: "requested", version: 1 });
+      await expect(reconcileSimulatedHostname(env(), provider, "org-a", "binding-a", 3))
+        .rejects.toThrow("explicit trusted operator retry");
+    },
+  );
+
+  it("does not publish when provider status is pending despite completed DNS/TLS gates", async () => {
+    const provider = fake();
+    const host = { organizationId: "org-a", hostname: "festival-a.example.test" };
+    await provider.provision(host);
+    provider.observe(host, {
+      ownershipVerified: true,
+      hostnameStatus: "active",
+      sslStatus: "active",
+      dnsVerified: true,
+      organizationStatus: "active",
+    });
+    // A stale or inconsistent provider status must not be ignored by the D1
+    // reconciler simply because the individual booleans look ready.
+    const inconsistent = {
+      provision: provider.provision.bind(provider),
+      inspect: async () => ({
+        ...(await provider.inspect(host)),
+        status: "requested" as const,
+      }),
+      release: provider.release.bind(provider),
+    };
+    expect(await reconcileSimulatedHostname(env(), inconsistent, "org-a", "binding-a", 1))
+      .toMatchObject({ status: "requested", version: 2 });
+    expect(read("SELECT status FROM domain_bindings WHERE id=?", "binding-a"))
+      .toMatchObject({ status: "requested" });
+  });
+
+  it("keeps version and audit count stable for identical provider observations", async () => {
+    const provider = fake();
+    const host = { organizationId: "org-a", hostname: "festival-a.example.test" };
+    await provider.provision(host);
+    provider.observe(host, {
+      ownershipVerified: true, hostnameStatus: "active",
+      sslStatus: "active", dnsVerified: true, organizationStatus: "active",
+    });
+    const first = await reconcileSimulatedHostname(env(), provider, "org-a", "binding-a", 1);
+    expect(first).toMatchObject({ status: "active", version: 2, changed: true });
+    const repeated = await reconcileSimulatedHostname(env(), provider, "org-a", "binding-a", 2);
+    expect(repeated).toMatchObject({ status: "active", version: 2, changed: false });
+    expect(read(
+      "SELECT COUNT(*) AS total FROM audit_events WHERE organization_id=? AND action=?",
+      "org-a", "domain.simulated_reconciliation",
+    )).toMatchObject({ total: 1 });
+    await expect(reconcileSimulatedHostname(env(), provider, "org-a", "binding-a", 1))
+      .rejects.toThrow("Stale binding version");
+  });
+
 });
