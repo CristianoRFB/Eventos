@@ -1,3 +1,4 @@
+/* global document, window */
 import assert from "node:assert/strict";
 import { chromium } from "@playwright/test";
 
@@ -34,7 +35,7 @@ try {
     await page.locator("#agenda-time").fill("16:15");
     await page.locator("#agenda-form button").click();
     await page.locator("[data-go=publico]").last().click();
-    await page.getByText("Oficina fictícia de desenho (exemplo)").waitFor();
+    await page.locator("#agenda-list").getByText("Oficina fictícia de desenho (exemplo)", { exact: true }).waitFor();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
     assert.equal(overflow, false, "no overflow at " + width);
     assert.deepEqual(errors, [], "no JS page errors at " + width);
