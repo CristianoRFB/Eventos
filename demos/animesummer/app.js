@@ -1,3 +1,4 @@
+/* global document, sessionStorage, window, location, URLSearchParams, URL, history */
 /* Anime Summer RP — standalone, non-official, browser-only concept.
    Nothing reaches real organizer, database, analytics, payment or messaging services. */
 (() => {
