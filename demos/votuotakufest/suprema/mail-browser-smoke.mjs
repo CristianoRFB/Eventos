@@ -20,7 +20,7 @@ try{
   await page.locator("#buyer-email-real").check();
   await page.locator("#buyer-form button[type=submit]").click();
   await page.locator("#approve-buy").click();
-  await page.locator("#ticket-email-feedback").getByText(/PDF esta anexado|PDF está anexado/i).waitFor({timeout:12000});
+  await page.waitForFunction(()=>document.querySelector("#ticket-email-feedback")?.textContent?.includes("O PDF está anexado"),{timeout:12000});
   let req=calls.at(-1);
   assert.equal(req.kind,"ticket-demo");assert.equal(req.recipient,"comprador@sample.org");
   assert.equal(req.ticket.qty,1);assert.equal(req.ticket.buyer,"Pessoa Demonstracao");
@@ -31,14 +31,14 @@ try{
   await page.locator("#email-recipient").fill("admin@sample.org");
   await page.locator("#email-test-consent").check();
   await page.locator("#test-email-form button[type=submit]").click();
-  await page.locator("#test-email-result").getByText(/PDF esta anexado|PDF está anexado/i).waitFor({timeout:12000});
+  await page.waitForFunction(()=>document.querySelector("#test-email-result")?.textContent?.includes("O PDF está anexado"),{timeout:12000});
   req=calls.at(-1);assert.equal(req.kind,"demo-confirmation");assert.equal(req.recipient,"admin@sample.org");
   await page.goto(base+"?view=contests",{waitUntil:"load"});
   await page.locator("#prefill-contest").click();
   await page.locator("#contest-email").fill("grupo@sample.org");
   await page.locator("#contest-email-real").check();
   await page.locator("#contest-form button[type=submit]").click();
-  await page.locator("#contest-email-feedback").getByText(/PDF esta anexado|PDF está anexado/i).waitFor({timeout:12000});
+  await page.waitForFunction(()=>document.querySelector("#contest-email-feedback")?.textContent?.includes("O PDF está anexado"),{timeout:12000});
   req=calls.at(-1);assert.equal(req.kind,"contest-demo");assert.equal(req.contest.kind,"Cosplay");
   await page.close();
  }
