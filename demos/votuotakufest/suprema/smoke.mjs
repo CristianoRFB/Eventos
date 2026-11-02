@@ -37,7 +37,7 @@ for(const viewport of [{width:320,height:740},{width:390,height:844},{width:768,
  await page.locator('#checkin-code').fill(ticketCode[0]);
  await page.locator('#checkin-form button[type=submit]').click();
  assert.match(await page.locator('#checkin-result').innerText(),/utiliz|segunda|bloque|já/i);
- await page.locator('[data-admin=contests]').first().click();
+ await page.locator('#admin-menu [data-admin=contests]').click();
  assert.ok((await page.locator('#contest-rows tr').count())>=1,"contest visible admin");
  assert.deepEqual(errors,[],"JavaScript errors at "+viewport.width);
  await page.screenshot({path:"/tmp/vof-suprema-"+viewport.width+".png",fullPage:true});
