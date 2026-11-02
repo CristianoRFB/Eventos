@@ -1,0 +1,35 @@
+name: Nipo Fest concept demo smoke
+on:
+  pull_request:
+    paths:
+      - "demos/nipofest/**"
+      - ".github/workflows/nipofest-demo.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Serve demo and smoke mobile/tablet/desktop
+        shell: bash
+        run: |
+          python3 -m http.server 4188 --bind 127.0.0.1 --directory demos/nipofest >/tmp/nipofest-server.log 2>&1 &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID" EXIT
+          sleep 2
+          node demos/nipofest/smoke.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nipofest-responsive-screens
+          path: /tmp/nipofest-*.png
+          if-no-files-found: ignore
