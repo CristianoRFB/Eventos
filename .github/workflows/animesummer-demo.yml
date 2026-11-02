@@ -1,0 +1,36 @@
+name: Anime Summer RP DEMO browser checks
+on:
+  pull_request:
+    paths:
+      - "demos/animesummer/**"
+      - ".github/workflows/animesummer-demo.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Smoke 7 viewport sizes / forms / status / agenda
+        shell: bash
+        run: |
+          python3 -m http.server 4184 --bind 127.0.0.1 --directory demos/animesummer > /tmp/animesummer-http.log 2>&1 &
+          PID=$!
+          trap "kill $PID" EXIT
+          sleep 2
+          node demos/animesummer/smoke.mjs
+      - name: Upload mobile and desktop screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: animesummer-screenshots
+          path: /tmp/animesummer-*.png
+          if-no-files-found: ignore
