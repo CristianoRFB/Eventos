@@ -10,7 +10,7 @@ try {
     const errors=[];
     page.on("pageerror",e=>errors.push(e.message));
     await page.goto(base+"/?view=publico");
-    await expect(page.locator("h1")).toContainText("CADA PARTIDA.");
+    await expect(page.locator("#view-publico h1")).toContainText("CADA PARTIDA.");
     await expect(page.locator("#public-matches .match-card")).toHaveCount(3);
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
     if(overflow>1)throw new Error("Horizontal overflow at "+width+" px: "+overflow+" px");
@@ -27,7 +27,7 @@ try {
     await page.getByRole("link",{name:/Abrir a visão da staff/}).click();
     await expect(page.locator("#view-staff")).toBeVisible();
     await expect(page.locator("#staff-waiting")).toHaveText("02");
-    await expect(page.locator("#staff-queue")).not.toContainText("alert(1)</script>"); // markup must not render
+    await expect(page.locator("#staff-queue script")).toHaveCount(0); // user text remains escaped, never evaluated
     await page.locator('[data-action="approve"][data-id="M-101"]').click();
     await expect(page.locator("#staff-approved")).toHaveText("02");
     await page.getByRole("link",{name:"Arena pública"}).click();
