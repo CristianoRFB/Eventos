@@ -1,4 +1,5 @@
 /* VOF commercial concept. Browser-only fixtures; never contacts real event. */
+/* global document, sessionStorage, clearTimeout, setTimeout, URLSearchParams, window, URL */
 (() => {
   "use strict";
   const STORAGE = "vof-concept-v1-inquiries";
@@ -32,12 +33,12 @@
       const value = JSON.parse(raw);
       if (!Array.isArray(value)) throw new Error("Invalid session fixture");
       return value.filter((item) => item && typeof item.id === "string" && typeof item.brand === "string" && Object.hasOwn(STATUS, item.status) && Object.hasOwn(MODES, item.kind));
-    } catch (_) {
+    } catch {
       return seed.map((item) => ({ ...item }));
     }
   }
   function save() {
-    try { sessionStorage.setItem(STORAGE, JSON.stringify(entries)); } catch (_) {
+    try { sessionStorage.setItem(STORAGE, JSON.stringify(entries)); } catch {
       notify("Armazenamento de sessão indisponível; alterações serão mantidas apenas nesta página.");
     }
   }
@@ -167,7 +168,9 @@
     save();
     form.hidden = true;
     $("#form-success").hidden = false;
-    $("#form-success h3").focus();
+    const successHeading = $("#form-success h3");
+    successHeading.tabIndex = -1;
+    successHeading.focus();
     notify("Interesse fictício adicionado. Abra o painel para classificar.");
   }
   function resetForm() {
