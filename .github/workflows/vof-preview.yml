@@ -18,6 +18,8 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
+      - name: Brevo PDF and Worker API safety unit smoke
+        run: node demos/votuotakufest/suprema/worker-mail-smoke.mjs
       - run: npx playwright install --with-deps chromium
       - name: Browser smoke at mobile and desktop sizes
         shell: bash
