@@ -1,5 +1,5 @@
 /* VOF Suprema — demo gateway. GitHub is source of truth; no secrets in repository. */
-const ASSET_SHA = '02b321f9e15e5489baa9a26eabf7b80d10d03f73';
+const ASSET_SHA = 'c00fd2c3281e095199d8149ef64727fbb777d773';
 const ASSET_ROOT = 'https://raw.githubusercontent.com/CristianoRFB/Eventos/' + ASSET_SHA + '/demos/votuotakufest/suprema/';
 const ASSET_TYPES = {'/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.js':'app.js'};
 const ASSET_MIMES = {'index.html':'text/html; charset=utf-8','style.css':'text/css; charset=utf-8','app.js':'application/javascript; charset=utf-8'};
