@@ -133,7 +133,7 @@
     if (!item) return '<div class="detail-placeholder"><span>✳</span><h3>Selecione uma candidatura</h3><p>Analise o perfil e simule a decisão da organização.</p></div>';
     return '<div class="detail-head"><h3>' + escapeHTML(item.name) + '</h3><span class="state ' + item.status + '">' + LABELS[item.status] + '</span></div>' +
       '<div class="detail-meta"><div><small>Categoria</small><strong>' + escapeHTML(item.category) + '</strong></div><div><small>Cidade</small><strong>' + escapeHTML(item.city) + '</strong></div><div><small>Estrutura</small><strong>' + escapeHTML(item.stand || "A definir") + '</strong></div><div><small>Instagram fictício</small><strong>' + escapeHTML(item.instagram || "Não informado") + '</strong></div></div>' +
-      '<p class="detail-description">' + escapeHTML(item.description) + '</p><p class="detail-rules">✓ Concordância com regras ilustrativas registrada na demo</p>' +
+      '<p class="detail-description">' + escapeHTML(item.description) + '</p><p class="detail-rules">' + (item.consentRecorded ? '✓ Aceite ilustrativo registrado nesta sessão' : '✳ Cadastro fictício de demonstração — sem aceite real') + '</p>' +
       '<div class="detail-actions"><button class="action-approve" data-action="approved" type="button">✓ Aprovar</button>' +
       '<button class="action-adjust" data-action="adjustments" type="button">↩ Pedir ajustes</button>' +
       '<button class="action-pending" data-action="pending" type="button">⟳ Deixar pendente</button></div>';
@@ -182,7 +182,7 @@
     errorBox.hidden = true;
     var item = { id: "demo-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
       name: name, category: category, city: city, description: description,
-      instagram: instagram, stand: stand, status: "pending", demo: true };
+      instagram: instagram, stand: stand, status: "pending", demo: true, consentRecorded: true };
     state.applications.unshift(item);
     persist();
     state.selected = item.id;
