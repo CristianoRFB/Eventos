@@ -102,3 +102,13 @@ html,body{max-width:100%;overflow-x:clip}.ops-metrics{grid-template-columns:repe
 #contest-result #contest-email-feedback{margin-top:15px}
 #ticket-email-feedback{margin:17px 0 0}
 @media(max-width:760px){.email-demo-optin{padding:12px}.pix-fake{width:220px;height:220px;max-width:100%}}
+
+/* Turnstile replaces the former password field; challenge appears only when submitting a real email. */
+.vof-challenge{max-width:100%;min-width:0;margin:14px 0;display:block;overflow:visible}
+.vof-challenge:empty{height:0;margin:0}
+.vof-challenge iframe{max-width:100%!important}
+#buy-step-4 .vof-challenge{display:flex;justify-content:center}
+#ticket-email-feedback,#contest-email-feedback,#test-email-result{line-height:1.65;overflow-wrap:anywhere}
+#ticket-email-feedback:not([hidden]){padding:15px 18px}
+#test-email-form .vof-challenge{margin:12px 0}
+@media(max-width:760px){.vof-challenge{width:100%}.vof-challenge iframe{max-width:calc(100vw - 55px)!important}}
