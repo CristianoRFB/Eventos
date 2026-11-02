@@ -27,6 +27,7 @@ jobs:
           trap "kill $SERVER_PID" EXIT
           sleep 2
           node demos/votuotakufest/smoke.mjs
+          node demos/votuotakufest/suprema/smoke.mjs
       - name: Capture visual evidence
         if: always()
         uses: actions/upload-artifact@v4
