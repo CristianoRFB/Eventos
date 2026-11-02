@@ -1,3 +1,4 @@
+/* global sessionStorage, URL, window, history, document, clearTimeout, setTimeout, FormData, confirm */
 /* AnimeSFest · protótipo comercial independente.
    Exclusivamente dados sintéticos e sessionStorage. Sem API, envio real ou login. */
 (function () {
@@ -29,7 +30,7 @@
     try {
       var saved = JSON.parse(sessionStorage.getItem(KEY) || "null");
       if (Array.isArray(saved) && saved.every(validApplication)) return saved;
-    } catch (error) { /* Restringido: usar apenas a semente local em memória. */ }
+    } catch { /* Restringido: usar apenas a semente local em memória. */ }
     return cloneSeed();
   }
   function cloneSeed() { return seed.map(function (x) { return Object.assign({}, x); }); }
@@ -42,7 +43,7 @@
   }
   function persist() {
     try { sessionStorage.setItem(KEY, JSON.stringify(state.applications)); return true; }
-    catch (error) { return false; }
+    catch { return false; }
   }
   function escapeHTML(value) {
     return String(value == null ? "" : value).replace(/[&<>"']/g, function (char) {
@@ -190,7 +191,8 @@
     var receipt = document.getElementById("vendor-receipt");
     receipt.hidden = false;
     document.getElementById("receipt-summary").innerHTML = '<strong>' + escapeHTML(name) + '</strong><br>Protocolo ilustrativo: ' + escapeHTML(item.id) + '<br>Status: aguardando análise demonstrativa';
-    receipt.querySelector("h3").focus && receipt.querySelector("h3").focus();
+    receipt.setAttribute("tabindex", "-1");
+    receipt.focus();
     toast("Candidatura simulada criada. Abra o painel demo para analisar.");
   }
   document.addEventListener("click", function (event) {
