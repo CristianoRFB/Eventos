@@ -1,3 +1,4 @@
+/* global URL, Response, fetch */
 /* VOF Suprema — demo gateway. GitHub is source of truth; no secrets in repository. */
 const ASSET_SHA = 'c00fd2c3281e095199d8149ef64727fbb777d773';
 const ASSET_ROOT = 'https://raw.githubusercontent.com/CristianoRFB/Eventos/' + ASSET_SHA + '/demos/votuotakufest/suprema/';
@@ -34,7 +35,7 @@ async function testEmail(request, env) {
   const data=await response.json().catch(()=>({}));
   return json({ok:true,messageId:data.messageId||null});
 }
-export default {async fetch(request,env,ctx){
+export default {async fetch(request,env){
  const url=new URL(request.url);
  if(url.pathname==='/api/test-email') return testEmail(request,env);
  if(!(url.pathname in ASSET_TYPES)) return new Response('Não encontrado',{status:404,headers:{'X-Robots-Tag':'noindex, nofollow'}});
