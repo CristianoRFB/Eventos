@@ -1,0 +1,36 @@
+name: AnimeSFest commercial preview smoke
+
+on:
+  pull_request:
+    paths:
+      - "demos/animesfest/**"
+      - ".github/workflows/animesfest-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test isolated static preview at phone and desktop widths
+        shell: bash
+        run: |
+          python3 -m http.server 4177 --bind 127.0.0.1 --directory demos/animesfest > /tmp/animesfest-http.log 2>&1 &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID" EXIT
+          sleep 2
+          node demos/animesfest/smoke.mjs
