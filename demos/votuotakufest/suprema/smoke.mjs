@@ -73,6 +73,14 @@ for(const viewport of [{width:320,height:740},{width:390,height:844},{width:768,
  assert.equal(await page.locator('#email-recipient').getAttribute('type'),'email');
  await page.locator('#email-recipient').fill('pessoa.real@gmail.com');
  assert.equal(await page.locator('#email-recipient').inputValue(),'pessoa.real@gmail.com');
+
+ // Verify at least one genuine archive photo resolves, rather than an empty Drive-only gallery.
+ await page.goto(base+'?view=gallery',{waitUntil:'load'});
+ await page.locator('#gallery-grid img').first().waitFor({state:'attached'});
+ await page.waitForTimeout(1600);
+ const archives=await page.locator('#gallery-grid img').evaluateAll(images=>images.map(img=>({src:img.currentSrc,loaded:img.complete&&img.naturalWidth>0})));
+ console.log('ARCHIVE IMAGES:',archives.filter(x=>x.loaded).length,'/',archives.length);
+ assert.ok(archives.some(x=>x.loaded),'At least one official or editorial archive photo must load');
  await page.screenshot({path:"/tmp/vof-suprema-"+viewport.width+".png",fullPage:true});
  await page.close();
 }
