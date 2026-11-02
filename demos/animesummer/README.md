@@ -32,3 +32,11 @@ Servidor estático basta: python3 -m http.server 4184 --directory demos/animesum
 - Sem imagens oficiais. Google Fonts é serviço externo usado apenas para tipografia, com fallback sem fonte.
 - Integração futura à vertical Eventos 77 deve preservar tenancy, RBAC, D1, log e consentimento reais.
 - CI de PR valida em browser, mas aprovação comercial requer conferência de URL publicável.
+
+## Prévia independente publicada
+
+- Portal: https://77-animesummer-conceito.on7.workers.dev/?view=publico
+- Inscrições demonstrativas: https://77-animesummer-conceito.on7.workers.dev/?view=inscricoes
+- Painel fictício: https://77-animesummer-conceito.on7.workers.dev/?view=gestao
+- Deploy independente em Worker `77-animesummer-conceito`, conta Cloudflare de demonstrações da 77, em 2026-11-02. Subdomínio ativo; verificação read-only da URL retornou a página com o título da prévia.
+- Pipeline GitHub Actions específico da demonstração: browser smoke passou nas sete resoluções em `81dc9110e` (run `41388866300`). O pipeline geral do SaaS deve ser avaliado separadamente. Não se trata de aplicação canônica em produção.
