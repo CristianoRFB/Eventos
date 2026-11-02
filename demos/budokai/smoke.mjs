@@ -15,7 +15,7 @@ for(const width of [320,360,390,430,768,1024,1440]){
  const page = await browser.newPage({viewport:{width,height:900},deviceScaleFactor:1});
  const errors=[];page.on("pageerror",e=>errors.push(e.message));
  await page.goto(url);await page.locator("#hero-title").waitFor();
- const dims=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,view:window.innerWidth}));
+ const dims=await page.evaluate(()=>({scroll:globalThis.document.documentElement.scrollWidth,view:globalThis.innerWidth}));
  if(dims.scroll>dims.view+2)throw Error("Overflow "+width+" "+JSON.stringify(dims));
  if([390,1440].includes(width))await page.screenshot({path:resolve(dir,".screenshots","portal-"+width+".png"),fullPage:true});
  await page.goto(url+"#programacao");if(await page.locator(".schedule-item").count()<2)throw Error("Missing activities");
