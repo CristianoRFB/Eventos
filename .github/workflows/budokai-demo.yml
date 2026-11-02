@@ -1,0 +1,29 @@
+name: Budokai demo smoke
+on:
+  pull_request:
+    paths:
+      - "demos/budokai/**"
+      - ".github/workflows/budokai-demo.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - run: node demos/budokai/smoke.mjs
+      - name: Screenshots reais
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: budokai-demo-screenshots
+          path: demos/budokai/.screenshots/
+          if-no-files-found: ignore
