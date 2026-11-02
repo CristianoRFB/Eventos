@@ -23,13 +23,11 @@ function messageFor(scenario) {
     '<p>Este e-mail é um teste técnico. Não é ingresso, inscrição ou confirmação válida.</p>';
   if (scenario === "ingresso") return {
     subject: "[TESTE DEMO] VOF 2027 — Exemplo de confirmação de ingresso",
-    htmlContent: common + '<p>Seu pedido fictício foi registrado para demonstrar o fluxo de bilheteria.</p>',
-    textContent: "TESTE DEMO VOF 2027. Pedido fictício. Não é ingresso válido."
+    htmlContent: common + '<p>Seu pedido fictício foi registrado para demonstrar o fluxo de bilheteria.</p>'
   };
   if (scenario === "concurso") return {
     subject: "[TESTE DEMO] VOF 2027 — Exemplo de inscrição em concurso",
-    htmlContent: common + '<p>Sua ficha fictícia do concurso foi registrada para demonstração.</p>',
-    textContent: "TESTE DEMO VOF 2027. Inscrição fictícia. Não é confirmação válida."
+    htmlContent: common + '<p>Sua ficha fictícia do concurso foi registrada para demonstração.</p>'
   };
   return null;
 }
@@ -38,7 +36,7 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/api/email/status" && request.method === "GET") {
       return json({ mode: "demo", realSendingEnabled: false,
-        testAdapterConfigured: Boolean(env.BREVO_SEND_ENABLED === "true" &&
+        testSendingEnabled: Boolean(env.BREVO_SEND_ENABLED === "true" &&
           env.BREVO_API_KEY && env.BREVO_SENDER_EMAIL &&
           env.BREVO_TEST_RECIPIENT && env.BREVO_TEST_TOKEN) });
     }
@@ -68,8 +66,7 @@ export default {
         body: JSON.stringify({
           sender: { name: "VOF 2027 — Demonstração", email: env.BREVO_SENDER_EMAIL },
           to: [{ email: env.BREVO_TEST_RECIPIENT }],
-          subject: msg.subject, htmlContent: msg.htmlContent,
-          textContent: msg.textContent, tags: ["vof-2027-demo-test"]
+          subject: msg.subject, htmlContent: msg.htmlContent, tags: ["vof-2027-demo-test"]
         })
       });
       if (!res.ok) return json({ error: "email_provider_rejected_test", httpStatus: res.status }, 502);
