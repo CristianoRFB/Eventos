@@ -1,3 +1,4 @@
+/* global document, sessionStorage, URLSearchParams, location, history, window, clearTimeout, setTimeout */
 /* MatchOps — demonstração sem backend, credenciais, rastreamento ou envio de dados. */
 (() => {
   "use strict";
@@ -18,8 +19,8 @@
   const initial=fixtures();
   let data=load();
   let currentTeam="aurora", filter="todos", timer;
-  function load(){try{const raw=JSON.parse(sessionStorage.getItem(KEY)||"null");if(raw&&raw.version===1&&Array.isArray(raw.matches)&&raw.matches.length===3&&raw.matches.every(m=>initial.some(i=>i.id===m.id)&&["scheduled","pending","approved","returned"].includes(m.state)))return raw.matches;}catch(_){/* storage unavailable */}return fixtures();}
-  function save(){try{sessionStorage.setItem(KEY,JSON.stringify({version:1,matches:data}));}catch(_){/* feature remains interactive in memory */}}
+  function load(){try{const raw=JSON.parse(sessionStorage.getItem(KEY)||"null");if(raw&&raw.version===1&&Array.isArray(raw.matches)&&raw.matches.length===3&&raw.matches.every(m=>initial.some(i=>i.id===m.id)&&["scheduled","pending","approved","returned"].includes(m.state)))return raw.matches;}catch{/* storage unavailable */}return fixtures();}
+  function save(){try{sessionStorage.setItem(KEY,JSON.stringify({version:1,matches:data}));}catch{/* feature remains interactive in memory */}}
   function stateTag(m){if(m.state==="approved")return'<span class="state-label approved">RESULTADO VALIDADO</span>';if(m.state==="pending")return'<span class="state-label waiting">EM ANÁLISE</span>';if(m.state==="returned")return'<span class="state-label">DEVOLVIDO</span>';return'<span class="state-label">AGENDADO · DEMO</span>';}
   function viewFromURL(){const view=new URLSearchParams(location.search).get("view");return ["publico","capitao","staff"].includes(view)?view:"publico";}
   function navigate(view,push=true){if(push)history.pushState({view},"",`?view=${encodeURIComponent(view)}`);$$("[data-page]").forEach(e=>e.hidden=e.dataset.page!==view);$$(".nav-link").forEach(e=>{if(e.dataset.view===view)e.setAttribute("aria-current","page");else e.removeAttribute("aria-current");});render();window.scrollTo({top:0,behavior:"instant"});}
