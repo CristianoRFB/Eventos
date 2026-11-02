@@ -33,4 +33,4 @@ jobs:
           SERVER_PID=$!
           trap "kill $SERVER_PID" EXIT
           sleep 2
-          node demos/animesfest/smoke.cjs
+          node demos/animesfest/smoke.mjs
