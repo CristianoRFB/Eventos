@@ -28,21 +28,16 @@ Firebase Auth/Firestore + Rules, backend com dados bancários restritos, integra
 - O primeiro workflow de smoke da versão Suprema encontrou e permitiu corrigir a navegação inicial; a execução corrigida passou: https://github.com/CristianoRFB/Eventos/actions/runs/41486997014
 - Os preços de 2027, ingressos, dados administrativos e emails públicos são fictícios, e o site ainda não é oficial.
 
-## Revisão Android / integração Brevo (02/11/2026)
-- Layout administrativo adaptado para telas móveis: 1 coluna real, toolbar empilhada, navegação administrativa horizontal rolável, KPIs inteiros na largura do viewport; tabelas roláveis só dentro do painel.
-- QR Code SVG real, conteúdo literal `testetesteteste` (`demo-qr.svg`). Não é QR de Pix, nem copia e cola Pix válido.
-- Ficha de custos: adicionar e excluir custos fictícios, totalizador de receita de teste, despesas e saldo; imprimir e exportar CSV.
-- Fichas de parceiros: imprimir registros de lojas, artistas, patrocinadores e apoios fictícios.
-- Galeria: imagens de arquivo pelo site oficial e reportagens públicas do VOF, com créditos de edição, links de origem e fallback quando fotos de Drive falharem. Autorizações de reprodução continuam pendentes.
-- E-mails de demonstração: em **Gestão → E-mails**, digitar endereço real autorizado, código privado e consentimento; no fluxo de ingressos ou concurso, marcar consentimento e digitar código. O formulário chama `POST /api/test-email` com `X-VOF-Demo-Token`, contendo destinatário e tipo `demo-confirmation`, `ticket-demo` ou `contest-demo`. O servidor nunca envia e-mail sem o segredo e limita chamadas por localidade da Cloudflare; o conteúdo inclui avisos claros de DEMO e não representa comprovante oficial.
-- A conta Brevo conectada possui remetente verificado `crisf.bueno10@gmail.com`, mas **não possui domínio autenticado** no momento da consulta. A aceitação na API não garante chegada à caixa de entrada. Verificar spam e autenticação de domínio antes de qualquer produção.
-- A API key Brevo fica unicamente em `BREVO_API_KEY` (Cloudflare Secret); **nunca colocar no GitHub nem em HTML**. A versão testada não executa envio real sem `VOF_DEMO_EMAIL_TOKEN` cadastrado manualmente como Secret no Worker. O código não é armazenado no navegador.
 
-### Como habilitar e-mail real com segurança
-1. No Cloudflare Dashboard, abra o Worker **77-votuotakufest-piloto** → **Settings** → **Variables and Secrets**.
-2. Em **Production**, adicione o Secret `VOF_DEMO_EMAIL_TOKEN` com valor aleatório de no mínimo 16 caracteres. Guarde-o num gerenciador de senhas e não compartilhe publicamente.
-3. Clique **Deploy**. Sem esse segredo, o backend responderá erro 503 (envio desativado).
-4. Abra o painel de E-mails, informe seu e-mail real, o código privado e confirme o consentimento; clique para testar. O limite está configurado para até cinco pedidos por 60 segundos por localidade Cloudflare e chave; o código continua obrigatório.
-5. **Não testar com e-mails de terceiros sem autorização.** Não usar produção enquanto a conta do remetente e dados do evento não forem validados.
-
-**Nota técnica:** o antigo formato `@example.test` ainda é aceito para percursos puramente simulados. Agora um endereço real também é aceito, mas somente é enviado à Brevo com consentimento e código de teste. Nenhum pagamento ou inscrição real será ativado.
+## Brevo automática, sem código de acesso (02/11/2026)
+**Esta é uma demonstração NÃO OFICIAL. Não existem vendas nem ingressos válidos.**
+- **Conta:** VotuOtakuFest (Brevo) com remetente `crisf.bueno10@gmail.com`, verificado, porém sem domínio autenticado.
+- **Segurança:** Turnstile Managed `0x4AAAAAAFw9XFnxPXNSv-_3` (sitekey pública) com validação obrigatória no servidor (`VOF_TURNSTILE_SECRET`, Secret Cloudflare) e rate limiter `VOF_MAIL_LIMIT`. Não há código administrativo a digitar.
+- **Bilheteria:** depois de selecionar ingressos, marcar o opt-in e simular o pagamento (Pix ou cartão, nenhum pagamento real), a demo chama `POST /api/test-email`. O Worker valida o desafio Turnstile e os dados, calcula preços **fictícios** do catálogo e gera um **PDF anexo** com página individual por acesso, nome fictício do participante, ID do pedido, valor e meio de pagamento simulados, data, códigos individuais e grandes avisos de ausência de validade.
+- **Painel E-mails:** pode enviar um e-mail de exemplo com PDF ilustrativo a um destinatário real informado e consentido.
+- **Concursos:** inscrição simulada pode emitir e-mail com ficha de concurso em PDF.
+- **Entrega:** envio via API transacional da Brevo com `attachment: [{content: <PDF-base64>,name: 'ingressos-....pdf'}]`. O Worker não armazena os PDFs e não inclui chaves no repositório.
+- **Abuso:** challenge Turnstile por envio, checagem de hostname e action, limite por IP, destinatário e região. O código do site só envia depois de ação explícita; Brevo não é um relay público sem proteção.
+- **Verificações:** `worker-mail-smoke.mjs` cobre base64 PDF de várias páginas, valores e conteúdo da mensagem, ficha concurso, destinatários inválidos e proteção contra requisições externas ou robôs. O smoke de Playwright cobre telas e fluxos de compra e painel.
+- **Não confundir com produção:** somente integrar pagamentos reais após Mercado Pago com webhook idempotente validado, base de pedidos persistente, antifraude e autenticação de backoffice. Atualizar autenticação do domínio do remetente (SPF/DKIM/DMARC) para melhor entrega.
+- **Configurado:** Worker `77-votuotakufest-piloto` com secret `BREVO_API_KEY` herdado e `VOF_TURNSTILE_SECRET` cadastrado. Não editar manualmente nem revelar.
