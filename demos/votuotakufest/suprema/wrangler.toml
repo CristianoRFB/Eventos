@@ -1,0 +1,8 @@
+name = "77-votuotakufest-piloto"
+main = "./worker.mjs"
+compatibility_date = "2026-11-02"
+
+[vars]
+VOF_ASSET_REV = "6ec8961b153bdaf09181e21436ddc2f208537ab4"
+
+# Add BREVO_API_KEY and VOF_DEMO_EMAIL_TOKEN only as Cloudflare secrets.
