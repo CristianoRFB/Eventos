@@ -1,3 +1,4 @@
+/* global window, document, sessionStorage, location, history, URL */
 /* Demonstração não oficial: apenas dados sintéticos em sessionStorage. */
 (function () {
   "use strict";
@@ -17,11 +18,11 @@
       if (!raw) return seed.map(x => ({...x}));
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.every(x => x && kinds[x.kind] && statuses[x.status] && typeof x.person === "string")) return parsed;
-    } catch (_) { storageUsable = false; }
+    } catch { storageUsable = false; }
     return seed.map(x => ({...x}));
   }
   let entries = readData();
-  function save() { try { sessionStorage.setItem(KEY, JSON.stringify(entries)); } catch (_) { storageUsable = false; } }
+  function save() { try { sessionStorage.setItem(KEY, JSON.stringify(entries)); } catch { storageUsable = false; } }
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
   const allowedViews = ["festival","concursos","gestao"];
