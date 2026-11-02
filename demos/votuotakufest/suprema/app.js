@@ -1,3 +1,4 @@
+/* global document, window, sessionStorage, setTimeout, clearTimeout, URL, URLSearchParams, location, history, navigator, Blob, confirm, fetch */
 /* VOF 2027 / SUPREMA: all fixtures are fictional. Never store card numbers or accept real payments. */
 (()=>{
 'use strict';
@@ -26,12 +27,12 @@ const blank=()=>({sales:[],contests:[],emails:[],partners:[
 {id:'P-3',name:'ESTÚDIO HOSHI',kind:'Artist Alley',desc:'Arte independente fictícia',active:true},
 {id:'P-4',name:'PIXEL ARENA',kind:'Apoio',desc:'Espaço de jogos fictício',active:true}
 ],photos:photos.map(p=>({id:p.id,visible:true})),activity:[{text:'Demonstração iniciada',when:'agora'}]});
-function load(){try{const s=JSON.parse(sessionStorage.getItem(K));if(s&&Array.isArray(s.sales)&&Array.isArray(s.contests)&&Array.isArray(s.emails)&&Array.isArray(s.partners)&&Array.isArray(s.photos)&&Array.isArray(s.activity))return s;}catch{}return blank();}
-let db=load(),buy={ticket:'individual',qty:1,step:1,pay:'pix',buyer:null,last:null},contestKind='Cosplay',activeView='home',activeAdmin='overview',photoFilter='all';
-const save=()=>{try{sessionStorage.setItem(K,JSON.stringify(db));}catch{}};
+function load(){try{const s=JSON.parse(sessionStorage.getItem(K));if(s&&Array.isArray(s.sales)&&Array.isArray(s.contests)&&Array.isArray(s.emails)&&Array.isArray(s.partners)&&Array.isArray(s.photos)&&Array.isArray(s.activity))return s;}catch { /* Session storage may be unavailable in privacy mode. */ }return blank();}
+let db=load(),buy={ticket:'individual',qty:1,step:1,pay:'pix',buyer:null,last:null},contestKind='Cosplay',activeAdmin='overview',photoFilter='all';
+const save=()=>{try{sessionStorage.setItem(K,JSON.stringify(db));}catch { /* Session storage may be unavailable in privacy mode. */ }};
 const record=text=>{db.activity.unshift({text,when:stamp()});db.activity=db.activity.slice(0,25);save();};
 function toast(message){let el=$('toast');el.textContent=message;el.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.hidden=true,3400);}
-function view(v,admin){if(!VIEWS.includes(v))v='home';activeView=v;$$('.page').forEach(x=>x.hidden=x.id!==('page-'+v));$$('[data-view]').forEach(b=>b.classList.toggle('nav-active',b.dataset.view===v));$('mobile-nav-toggle').setAttribute('aria-expanded','false');document.querySelector('.mainnav')?.classList.remove('is-open');const u=new URL(location.href);u.searchParams.set('view',v);history.replaceState({},'',u);if(v==='admin')showAdmin(admin||activeAdmin);if(v==='gallery')renderGallery();if(v==='home')renderHome();window.scrollTo({top:0,behavior:'instant'});}
+function view(v,admin){if(!VIEWS.includes(v))v='home';$('.page').forEach(x=>x.hidden=x.id!==('page-'+v));$$('[data-view]').forEach(b=>b.classList.toggle('nav-active',b.dataset.view===v));$('mobile-nav-toggle').setAttribute('aria-expanded','false');document.querySelector('.mainnav')?.classList.remove('is-open');const u=new URL(location.href);u.searchParams.set('view',v);history.replaceState({},'',u);if(v==='admin')showAdmin(admin||activeAdmin);if(v==='gallery')renderGallery();if(v==='home')renderHome();window.scrollTo({top:0,behavior:'instant'});}
 function showAdmin(a){if(!ADMINS.includes(a))a='overview';activeAdmin=a;$$('.admin-section').forEach(x=>x.hidden=x.id!=='admin-'+a);$$('[data-admin]').forEach(b=>b.classList.toggle('selected',b.dataset.admin===a));$('admin-crumb').textContent=({overview:'VISÃO GERAL',sales:'BILHETERIA',checkin:'CHECK-IN',contests:'CONCURSOS',partners:'PARCEIROS',media:'GALERIA',emails:'E-MAILS',settings:'AJUSTES'})[a];render();}
 $$('[data-view]').forEach(b=>b.addEventListener('click',()=>view(b.dataset.view,b.dataset.admin)));
 $$('[data-admin]').forEach(b=>b.addEventListener('click',()=>{view('admin',b.dataset.admin);}));
