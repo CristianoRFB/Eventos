@@ -114,7 +114,7 @@ export default {async fetch(request,env){
  const url=new URL(request.url),path=url.pathname;
  if(path==="/api/ingresso-exemplo.pdf"){
   if(request.method!=="GET"&&request.method!=="HEAD")return new Response("Metodo nao permitido",{status:405});
-  const example={...makeSample("exemplo@example.test"),product:CATALOG.duplo,qty:2,total:140,reference:"VOF-DEMO-AMOSTRA"};
+  const example={...makeSample("exemplo@example.test"),product:CATALOG.duplo,qty:2,accesses:CATALOG.duplo.accesses,total:140,reference:"VOF-DEMO-AMOSTRA"};
   const generated=makeTicketPDF(example);
   const bytes=Uint8Array.from(atob(generated.content),c=>c.charCodeAt(0));
   return new Response(request.method==="HEAD"?null:bytes,{headers:{"Content-Type":"application/pdf","Content-Disposition":'inline; filename="VOF-2027-ingressos-DEMO-exemplo.pdf"',"Cache-Control":"no-store","X-Robots-Tag":"noindex,nofollow","X-Content-Type-Options":"nosniff"}});
