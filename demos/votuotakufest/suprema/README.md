@@ -27,3 +27,22 @@ Firebase Auth/Firestore + Rules, backend com dados bancários restritos, integra
 - Sem `VOF_DEMO_MAIL_TOKEN` configurado, o envio real permanece desabilitado; o painel apresenta fila de e-mails simulados. Para habilitar o teste privado, adicionar **Secret** com 32+ caracteres aleatórios e inserir o valor temporariamente no campo do painel. Não incluir esse valor no GitHub, em prints ou na conversa. Nunca usar mensagens reais de clientes neste piloto.
 - O primeiro workflow de smoke da versão Suprema encontrou e permitiu corrigir a navegação inicial; a execução corrigida passou: https://github.com/CristianoRFB/Eventos/actions/runs/41486997014
 - Os preços de 2027, ingressos, dados administrativos e emails públicos são fictícios, e o site ainda não é oficial.
+
+## Revisão Android / integração Brevo (02/11/2026)
+- Layout administrativo adaptado para telas móveis: 1 coluna real, toolbar empilhada, navegação administrativa horizontal rolável, KPIs inteiros na largura do viewport; tabelas roláveis só dentro do painel.
+- QR Code SVG real, conteúdo literal `testetesteteste` (`demo-qr.svg`). Não é QR de Pix, nem copia e cola Pix válido.
+- Ficha de custos: adicionar e excluir custos fictícios, totalizador de receita de teste, despesas e saldo; imprimir e exportar CSV.
+- Fichas de parceiros: imprimir registros de lojas, artistas, patrocinadores e apoios fictícios.
+- Galeria: imagens de arquivo pelo site oficial e reportagens públicas do VOF, com créditos de edição, links de origem e fallback quando fotos de Drive falharem. Autorizações de reprodução continuam pendentes.
+- E-mails de demonstração: em **Gestão → E-mails**, digitar endereço real autorizado, código privado e consentimento; no fluxo de ingressos ou concurso, marcar consentimento e digitar código. O formulário chama `POST /api/test-email` com `X-VOF-Demo-Token`, contendo destinatário e tipo `demo-confirmation`, `ticket-demo` ou `contest-demo`. O servidor nunca envia e-mail sem o segredo e limita chamadas por localidade da Cloudflare; o conteúdo inclui avisos claros de DEMO e não representa comprovante oficial.
+- A conta Brevo conectada possui remetente verificado `crisf.bueno10@gmail.com`, mas **não possui domínio autenticado** no momento da consulta. A aceitação na API não garante chegada à caixa de entrada. Verificar spam e autenticação de domínio antes de qualquer produção.
+- A API key Brevo fica unicamente em `BREVO_API_KEY` (Cloudflare Secret); **nunca colocar no GitHub nem em HTML**. A versão testada não executa envio real sem `VOF_DEMO_EMAIL_TOKEN` cadastrado manualmente como Secret no Worker. O código não é armazenado no navegador.
+
+### Como habilitar e-mail real com segurança
+1. No Cloudflare Dashboard, abra o Worker **77-votuotakufest-piloto** → **Settings** → **Variables and Secrets**.
+2. Em **Production**, adicione o Secret `VOF_DEMO_EMAIL_TOKEN` com valor aleatório de no mínimo 16 caracteres. Guarde-o num gerenciador de senhas e não compartilhe publicamente.
+3. Clique **Deploy**. Sem esse segredo, o backend responderá erro 503 (envio desativado).
+4. Abra o painel de E-mails, informe seu e-mail real, o código privado e confirme o consentimento; clique para testar. O limite está configurado para até cinco pedidos por 60 segundos por localidade Cloudflare e chave; o código continua obrigatório.
+5. **Não testar com e-mails de terceiros sem autorização.** Não usar produção enquanto a conta do remetente e dados do evento não forem validados.
+
+**Nota técnica:** o antigo formato `@example.test` ainda é aceito para percursos puramente simulados. Agora um endereço real também é aceito, mas somente é enviado à Brevo com consentimento e código de teste. Nenhum pagamento ou inscrição real será ativado.
