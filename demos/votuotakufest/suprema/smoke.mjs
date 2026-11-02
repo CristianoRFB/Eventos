@@ -11,7 +11,7 @@ for(const viewport of [{width:320,height:740},{width:390,height:844},{width:768,
  const bad=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
  assert.equal(bad,false,"horizontal overflow on "+viewport.width);
  // Sale fixture: complete simulated wizard, no real payment.
- await page.locator('[data-view=tickets]').first().click();
+ await page.goto(base+'?view=tickets',{waitUntil:'load'});
  await page.locator('#buy-next-1').click();
  await page.locator('#buyer-name').fill("Pessoa de Teste");
  await page.locator('#buyer-email').fill("teste@example.test");
@@ -22,13 +22,13 @@ for(const viewport of [{width:320,height:740},{width:390,height:844},{width:768,
  const ticketCode=(await page.locator('#ticket-issued').innerText()).match(/VOF-DEMO-[A-Z0-9]+/);
  assert.ok(ticketCode,"fake issued code");
  // Contest signup and printable record.
- await page.locator('[data-view=contests]').first().click();
+ await page.goto(base+'?view=contests',{waitUntil:'load'});
  await page.locator('#prefill-contest').click();
  await page.locator('#contest-form button[type=submit]').click();
  assert.equal(await page.locator('#contest-result').isVisible(),true,"contest confirmation");
  // Administration flow and checkin preventing double usage.
- await page.locator('[data-view=admin]').first().click();
- await page.locator('#load-seed').click().catch(()=>{}); // if the app refuses seed with existing data, harmless.
+ await page.goto(base+'?view=admin',{waitUntil:'load'});
+ // Existing fictional records persist across navigation in this browser session.
  await page.locator('[data-admin=checkin]').first().click();
  await page.locator('#checkin-code').fill(ticketCode[0]);
  await page.locator('#checkin-form button[type=submit]').click();
