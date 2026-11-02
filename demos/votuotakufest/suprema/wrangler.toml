@@ -2,7 +2,18 @@ name = "77-votuotakufest-piloto"
 main = "./worker.mjs"
 compatibility_date = "2026-11-02"
 
+# The deployed preview sets VOF_ASSET_REV to an immutable GitHub commit.
+# Keep this illustrative value synced during explicit Cloudflare deployment.
 [vars]
-VOF_ASSET_REV = "6ec8961b153bdaf09181e21436ddc2f208537ab4"
+VOF_ASSET_REV = "22adba177da249b8a18743ad2b763b511c52602c"
+VOF_DEMO_EMAIL_FROM = "crisf.bueno10@gmail.com"
 
-# Add BREVO_API_KEY and VOF_DEMO_EMAIL_TOKEN only as Cloudflare secrets.
+[[ratelimits]]
+name = "VOF_MAIL_LIMIT"
+namespace_id = "770027"
+[ratelimits.simple]
+limit = 5
+period = 60
+
+# Configure BREVO_API_KEY and VOF_DEMO_EMAIL_TOKEN as Cloudflare Secrets only.
+# Never paste secrets or real customer data into git history.
