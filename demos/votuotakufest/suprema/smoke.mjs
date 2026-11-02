@@ -1,3 +1,4 @@
+/* global document, window */
 import assert from "node:assert/strict";
 import { chromium } from "@playwright/test";
 const browser=await chromium.launch({headless:true});
