@@ -1,0 +1,36 @@
+name: VOF commercial demo smoke
+on:
+  pull_request:
+    paths:
+      - "demos/votuotakufest/**"
+      - ".github/workflows/vof-preview.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Browser smoke at mobile and desktop sizes
+        shell: bash
+        run: |
+          python3 -m http.server 4179 --bind 127.0.0.1 --directory demos/votuotakufest > /tmp/vof-http.log 2>&1 &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID" EXIT
+          sleep 2
+          node demos/votuotakufest/smoke.mjs
+      - name: Capture visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vof-responsive-screenshots
+          path: /tmp/vof-*.png
+          if-no-files-found: ignore
