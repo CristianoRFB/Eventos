@@ -30,3 +30,13 @@ Abra Festival (clareza e visual), vá a Concursos (três modalidades), envie ins
 
 ## Antes de produção
 Autorização para a identidade e imagens, fontes e regras oficiais de 2027, fluxos reais de inscrições, política de privacidade/consentimento, segurança por tenant/usuário e plano de hospedagem/aprovação. Nunca implantar o HTML da demo como admin real.
+
+## Preview público verificado (02/11/2026)
+- **Festival:** https://77-nipofest-aracatuba-conceito.on7.workers.dev/?view=festival
+- **Concursos:** https://77-nipofest-aracatuba-conceito.on7.workers.dev/?view=concursos
+- **Organização (somente fixtures):** https://77-nipofest-aracatuba-conceito.on7.workers.dev/?view=gestao
+- Cloudflare Workers na conta da operação 77; script isolado `77-nipofest-aracatuba-conceito`, com subdomínio workers.dev ativado. **Não** altera tenant, domínio, D1 ou Worker do SaaS.
+- Deploy manual de estáticos: Worker serve `index.html`, `app.js` e `style.css` via HTTP, com conteúdo originado no commit `fcbeba2018c6bf4352dd387c248e3a8d72383be7`. Não existe auto-sync GitHub→Cloudflare: mudanças posteriores na branch precisam de publicação explícita e verificação de versão.
+- Verificação externa de URL e conteúdo após publicação; `X-Robots-Tag: noindex, nofollow`, CSP restritiva e `nosniff` no preview. URLs não significam que a organização contratou ou aprovou o projeto.
+- CI específica de browser em Chromium (320, 390, 768, 1440 px): [PASS](https://github.com/CristianoRFB/Eventos/actions/runs/41393047286). Verificação geral da vertical passou lint, typecheck, testes unitários, build e integração, mas **não passou por completo**: um E2E do produto-base em desktop excedeu timeout ao buscar o campo `Nome`; 13 outros E2E passaram ([evidência](https://github.com/CristianoRFB/Eventos/actions/runs/41393047300)). Não interpretar como falha específica da demo ou como CI geral verde.
+- Esta publicação é um **preview conceitual**: apenas dados sintéticos, sem autenticação real, persistência remota, bilheteria, integração, notificação ou inscrição oficial. Registros criados ficam somente na sessão local do navegador.
