@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#090b11">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="MatchOps, uma demonstração não oficial de operações de torneio para a M7 Academy. Todos os dados são fictícios.">
+  <title>M7 MatchOps — demonstração não oficial</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+  <div class="disclosure"><span class="disclosure-light"></span><strong>DEMO CONCEITUAL · NÃO OFICIAL</strong><span>Sem inscrições, campeonatos ou resultados reais.</span></div>
+  <header class="masthead">
+    <a href="?view=publico" data-view="publico" class="brand" aria-label="M7 MatchOps — página pública"><span class="brand-box">M<span>7</span></span><span class="brand-copy"><b>MATCH<span>OPS</span></b><small>UMA EXPERIÊNCIA CONCEITUAL</small></span></a>
+    <nav class="view-nav" aria-label="Navegar entre as experiências">
+      <a href="?view=publico" data-view="publico" class="nav-link">Arena pública</a>
+      <a href="?view=capitao" data-view="capitao" class="nav-link">Área do capitão</a>
+      <a href="?view=staff" data-view="staff" class="nav-link nav-staff"><span class="nav-dot"></span>Central da staff</a>
+    </nav>
+  </header>
+  <main id="conteudo" tabindex="-1">
+    <section id="view-publico" class="view" data-page="publico">
+      <div class="hero page-wrap">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-mark">◆</span> CAMPEONATOS / OPERAÇÃO TRANSPARENTE</div>
+          <h1>CADA PARTIDA.<br><span>UM RESULTADO</span><br>QUE IMPORTA.</h1>
+          <p class="hero-lede">Do check-in à validação do placar, acompanhe cada etapa da competição — com organização para quem joga e clareza para quem torce.</p>
+          <div class="hero-actions"><a class="btn btn-primary" href="#confrontos">Ver confrontos <span aria-hidden="true">↗</span></a><a class="btn btn-quiet" data-view="capitao" href="?view=capitao">Sou capitão de equipe <span aria-hidden="true">→</span></a></div>
+          <div class="hero-meta"><span class="meta-mark">∎</span> Proposta interativa de gestão de partidas <i></i> <span>Dados simulados</span></div>
+        </div>
+        <div class="hero-art" aria-label="Representação gráfica de chaves e placares de campeonato fictício" role="img">
+          <div class="art-noise"></div><div class="art-grid"></div><span class="art-corner">MATCHDAY <b>001</b></span>
+          <div class="art-emblem">M<span>7</span></div>
+          <div class="art-ribbon">ROUND<br><b>01</b></div><span class="art-side">READY / CHECK-IN / REVIEW / FINAL</span>
+          <div class="art-score"><div><small>MATCH 01 / DEMO</small><b>AW <span>×</span> HG</b></div><strong>00:00</strong></div>
+        </div>
+      </div>
+      <div class="ticker" aria-hidden="true"><div>CHECK-IN  ⬥  CONFIRMAÇÃO  ⬥  PLACAR  ⬥  ARBITRAGEM  ⬥  RESULTADO  ⬥  CHECK-IN  ⬥  CONFIRMAÇÃO  ⬥  PLACAR  ⬥  ARBITRAGEM  ⬥  RESULTADO</div></div>
+      <div class="page-wrap section-area" id="confrontos">
+        <div class="section-heading"><div><p class="eyebrow">01 / MATCH CENTER</p><h2>O campeonato em <em>tempo real de demonstração.</em></h2><p class="intro">Acompanhe confrontos fictícios. Quando a staff valida um resultado, o placar aparece aqui nesta mesma sessão.</p></div><span class="section-index">SÉRIE DE EXEMPLO / 2026</span></div>
+        <div class="metric-strip"><div><small>CONFRONTOS</small><strong id="metric-total">03</strong></div><div><small>RESULTADOS VALIDADOS</small><strong id="metric-validated">01</strong></div><div><small>NA MESA DA STAFF</small><strong id="metric-pending">01</strong></div></div>
+        <div class="list-head"><h3>Quadro de partidas</h3><div class="filter-wrap" role="group" aria-label="Filtrar partidas"><button type="button" data-filter="todos" class="pill is-selected" aria-pressed="true">Todas</button><button type="button" data-filter="pendente" class="pill" aria-pressed="false">Em análise</button><button type="button" data-filter="validado" class="pill" aria-pressed="false">Validadas</button></div></div>
+        <div id="public-matches" class="match-list" aria-live="polite"></div><div id="public-empty" class="empty" hidden>Nenhum confronto nesse filtro. Escolha outro status.</div>
+        <div class="explainer"><div class="explainer-head"><p class="eyebrow">02 / FLUXO OPERACIONAL</p><h2>Menos conversas perdidas.<br><em>Mais jogo.</em></h2></div><div class="explainer-steps"><div><span>01</span><strong>Capitão faz check-in</strong><p>Confirma presença sem depender de uma mensagem solta.</p></div><div><span>02</span><strong>Resultado chega à mesa</strong><p>Um placar registrado fica separado de um resultado validado.</p></div><div><span>03</span><strong>Staff revisa e publica</strong><p>A decisão é visível para a organização e refletida no quadro público.</p></div></div></div>
+        <div class="cta-slab"><div><p class="eyebrow">TESTE O CICLO COMPLETO</p><h3>Veja o lado de quem organiza.</h3><p>Alterne entre capitão e staff: os três ambientes se conversam nesta demonstração.</p></div><a class="btn btn-primary" href="?view=staff" data-view="staff">Explorar central da staff ↗</a></div>
+      </div>
+    </section>
+    <section id="view-capitao" class="view page-wrap" data-page="capitao" hidden>
+      <div class="subhead"><p class="eyebrow">02 / PORTAL DO CAPITÃO</p><h1>SEU TIME.<br><span>SEU PRÓXIMO JOGO.</span></h1><p>Um fluxo demonstrativo para confirmar presença e enviar o placar à organização sem papelada.</p></div>
+      <div class="demo-warning"><b>SIMULAÇÃO SEGURA</b><span>Escolha apenas equipes fictícias. Nenhuma mensagem ou resultado será enviado à M7 Academy.</span></div>
+      <div class="captain-layout">
+        <aside class="side-panel"><p class="mini-label">IDENTIFICAÇÃO DE TESTE</p><label for="team-select">Equipe nesta simulação</label><select id="team-select" aria-describedby="team-help"><option value="aurora">Aurora Wolves · AW</option><option value="hex">Hex Guardians · HG</option><option value="cobalto">Cobalto Five · C5</option><option value="eclipse">Eclipse Core · EC</option><option value="neon">Neon Falcons · NF</option><option value="obsidian">Obsidian Team · OT</option></select><p class="field-help" id="team-help">Sem login real. A escolha serve somente para visualizar uma jornada.</p><div class="aside-note"><span class="aside-icon">↳</span><div><strong>Três passos, sem ruído</strong><p>Confirme a equipe, registre o confronto e acompanhe a análise da staff.</p></div></div></aside>
+        <div class="action-panel"><div class="action-header"><p class="mini-label">CONFRONTO ATRIBUÍDO</p><span id="captain-status" class="state-label">AGENDADO</span></div><div id="captain-match"></div>
+          <div class="step-border"><div class="step-title"><span>01</span><div><h3>Confirmar presença</h3><p>Indique que o seu time está pronto para a partida.</p></div></div><button class="btn btn-primary" type="button" id="checkin-btn">Fazer check-in <span>↗</span></button><p id="checkin-note" class="action-note" role="status"></p></div>
+          <form id="score-form" class="step-border" novalidate><div class="step-title"><span>02</span><div><h3>Enviar o placar</h3><p>Resultado hipotético, sujeito à revisão da staff.</p></div></div><div class="score-fields"><label><span id="score-name-a">Equipe A</span><input id="score-a" type="number" inputmode="numeric" min="0" max="5" step="1" value="2" required></label><b>×</b><label><span id="score-name-b">Equipe B</span><input id="score-b" type="number" inputmode="numeric" min="0" max="5" step="1" value="1" required></label></div><label class="evidence-field" for="evidence">Observação para conferência (opcional)</label><textarea id="evidence" rows="3" maxlength="240" placeholder="Ex.: revisão da partida concluída, placar 2 a 1."></textarea><p class="field-help">Não anexe prints nem dados pessoais. Sem envio externo.</p><button type="submit" class="btn btn-primary" id="submit-score">Encaminhar para análise ↗</button><p id="score-note" class="action-note" role="status"></p></form>
+          <div class="step-border final-step"><div class="step-title"><span>03</span><div><h3>Acompanhar decisão</h3><p id="captain-decision">Aguardando ação no confronto.</p></div></div><a href="?view=staff" data-view="staff" class="text-action">Abrir a visão da staff <span>→</span></a></div>
+        </div>
+      </div>
+    </section>
+    <section id="view-staff" class="view page-wrap" data-page="staff" hidden>
+      <div class="subhead staff-head"><div><p class="eyebrow">03 / CONSOLE DE OPERAÇÃO</p><h1>CONTROLE<br><span>NO MATCHDAY.</span></h1><p>Uma fila de análise demonstrativa: autorizar, devolver com motivo e acompanhar o que foi publicado.</p></div><div class="staff-symbol" aria-hidden="true">≡<span>✓</span></div></div>
+      <div class="demo-warning"><b>STAFF · DEMONSTRAÇÃO</b><span>Este painel não possui acesso à plataforma M7, jogadores ou partidas verdadeiras. Não exige senha porque não há backend.</span></div>
+      <div class="staff-grid"><div class="staff-stat"><span>SOLICITAÇÕES PENDENTES</span><strong id="staff-waiting">0</strong><small>Aguardando avaliação</small></div><div class="staff-stat"><span>RESULTADOS HOMOLOGADOS</span><strong id="staff-approved">0</strong><small>Visíveis para o público</small></div><div class="staff-stat"><span>PARTIDAS CADASTRADAS</span><strong id="staff-total">0</strong><small>Fixtures da demonstração</small></div></div>
+      <div class="staff-topline"><div><p class="mini-label">MESA DE RESULTADOS</p><h2>Revisão de confrontos</h2></div><button class="btn btn-outline" type="button" id="reset-btn">↺ Restaurar dados demo</button></div>
+      <div id="staff-queue" class="review-list" aria-live="polite"></div>
+      <div class="staff-bottom"><div class="note-panel"><span class="mini-label">O QUE MUDA NA OPERAÇÃO</span><h3>Toda decisão tem contexto.</h3><p>Check-in, resultados submetidos e validação ficam visíveis em um fluxo único. Em produção, isso exigiria login, autorização por função, evidências e auditoria no servidor.</p></div><div class="note-panel note-secondary"><span class="mini-label">VER A EXPERIÊNCIA</span><h3>O mesmo dado, outra visão.</h3><p>Confira como a aprovação de uma partida altera a tabela que um espectador acompanha.</p><a class="text-action" href="?view=publico" data-view="publico">Ver página pública →</a></div></div>
+    </section>
+  </main>
+  <footer class="footer page-wrap"><div class="footer-lockup">M7 <span>—</span> MATCHOPS <small>ESTUDO DE INTERFACE · 77</small></div><p>Projeto independente, fictício e não oficial. Nenhum vínculo com M7 Academy ou Riot Games é afirmado. Todos os horários, nomes de equipes e placares são de demonstração.</p><a href="https://www.instagram.com/m7academy_/" target="_blank" rel="noopener noreferrer">Conhecer o perfil informado ↗</a></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
