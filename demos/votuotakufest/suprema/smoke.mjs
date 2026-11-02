@@ -13,6 +13,7 @@ for(const viewport of [{width:320,height:740},{width:390,height:844},{width:768,
  assert.equal(bad,false,"horizontal overflow on "+viewport.width);
  // Sale fixture: complete simulated wizard, no real payment.
  await page.goto(base+'?view=tickets',{waitUntil:'load'});
+ console.log('DIAGNOSTIC tickets:',{url:page.url(),ticketsHidden:await page.locator('#page-tickets').getAttribute('hidden'),homeHidden:await page.locator('#page-home').getAttribute('hidden'),pageErrors:errors.slice(),assets:await page.evaluate(()=>[...document.querySelectorAll('script[src]')].map(s=>s.src))});
  if(!(await page.locator('#buy-next-1').isVisible())) { const scripts=await page.locator('script[src]').evaluateAll(nodes=>nodes.map(x=>x.src)); throw new Error('Checkout oculto: '+JSON.stringify({errors,scripts,url:page.url()})); }
  await page.locator('#buy-next-1').click();
  await page.locator('#buyer-name').fill("Pessoa de Teste");
