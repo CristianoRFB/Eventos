@@ -18,3 +18,8 @@ Com dependências do repo e Chromium: node demos/budokai/smoke.mjs
 Capturas reais no diretório .screenshots (não versionar). Projeto principal Eventos 77 não foi modificado.
 ## Evolução
 Incorporar identidade e dados via configuração de tenant e edição do Eventos 77 apenas após contrato, autorização, modelo de dados e aceites. GitHub PR ≠ implantação pública.
+
+## Preview público validado
+https://77-budokai-matsuri-conceito.on7.workers.dev/
+
+Publicação separada no Cloudflare Worker `77-budokai-matsuri-conceito` (conta on7), verificada com requisição pública em 02/11/2026. Demo independente sem sincronização automática de commits do GitHub; alterações futuras exigem nova publicação deliberada. Sem vínculo com a organização, cadastro, transação ou dados reais.
