@@ -205,4 +205,63 @@ function printItems(title,items){if(!items.length){toast('Não há fichas para i
 $('reset').addEventListener('click',function(){if(!confirm('Excluir os registros fictícios desta sessão?'))return;data={tickets:[],contests:[]};save();render();toast('Piloto restaurado.')});
 show(new URLSearchParams(location.search).get('tab')||'publico');
 })();
-</script></body></html>
+</script>
+<script>
+(()=>{'use strict';
+const BASE='vof-piloto-2027-v1',EXT='vof-suprema-extra-v1',$=id=>document.getElementById(id);
+const blank=()=>({partners:[{id:'P1',name:'Órbita Geek · DEMO',kind:'Loja'},{id:'P2',name:'Neon Pixel · DEMO',kind:'Patrocinador'},{id:'P3',name:'Kira Store · DEMO',kind:'Loja'},{id:'P4',name:'Artist Alley · DEMO',kind:'Artista'}],photos:[],mailStatuses:{},checkedTickets:[],checkedContests:[],audit:[]});
+let X=blank();try{const a=JSON.parse(sessionStorage.getItem(EXT)||'null');if(a&&Array.isArray(a.partners)&&Array.isArray(a.photos)&&Array.isArray(a.checkedTickets))X={...blank(),...a}}catch(e){}
+const save=()=>{try{sessionStorage.setItem(EXT,JSON.stringify(X))}catch(e){}};
+const B=()=>{try{const a=JSON.parse(sessionStorage.getItem(BASE)||'{}');return{tickets:a.tickets||[],contests:a.contests||[]}}catch(e){return{tickets:[],contests:[]}}};
+const el=(tag,s,cls)=>{const n=document.createElement(tag);n.textContent=String(s??'');if(cls)n.className=cls;return n},btn=(s,fn)=>{const b=el('button',s);b.type='button';b.addEventListener('click',fn);return b};
+const log=s=>{X.audit.unshift({time:new Date().toLocaleString('pt-BR'),message:s});X.audit=X.audit.slice(0,80);save()};
+const uid=pre=>pre+'-'+Math.random().toString(36).slice(2,8).toUpperCase();
+const money=n=>'R$ '+Number(n||0).toFixed(2).replace('.',',');
+const filteredTickets=()=>B().tickets.filter(t=>{const q=$('ticket-search').value.toLowerCase(),used=X.checkedTickets.includes(t.id),filter=$('ticket-status-filter').value;return(t.id+' '+t.name+' '+t.email).toLowerCase().includes(q)&&(filter==='todos'||(filter==='usado'?used:!used))});
+const filteredContests=()=>B().contests.filter(c=>(c.id+' '+c.name+' '+c.work).toLowerCase().includes($('contest-search').value.toLowerCase())&&($('contest-kind-filter').value==='todos'||$('contest-kind-filter').value===c.kind));
+const emailQueue=()=>B().tickets.map(t=>({id:t.id,to:t.email,subject:'Ingresso DEMO VOF 2027 · '+t.id,body:'Pedido demonstrativo aprovado. Não é ingresso válido.'})).concat(B().contests.map(c=>({id:c.id,to:c.email,subject:'Concurso DEMO '+c.kind+' · '+c.id,body:'Inscrição de teste registrada. Não é inscrição oficial.'})));
+function csv(filename,heads,rows){const text=[heads,...rows].map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(';')).join('\r\n');const u=URL.createObjectURL(new Blob(['\ufeff'+text],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(u),300)}
+function printFiches(rows){if(!rows.length)return alert('Nenhuma ficha para imprimir.');const paper=$('print-paper');paper.replaceChildren(el('h1','VOF 2027 · FICHAS DEMONSTRATIVAS'),el('p','NÃO OFICIAL — DADOS FICTÍCIOS'));rows.forEach(c=>{const box=el('article','','print-item');box.append(el('h2',c.name));[['Protocolo',c.id],['Modalidade',c.kind],['Apresentação',c.work],['Integrantes',c.members],['E-mail',c.email]].forEach(p=>box.append(el('p',p[0]+': '+p[1])));box.append(el('div','Conferência: ____________________   Horário: __________','print-stamp'));paper.append(box)});log('Fichas preparadas para impressão: '+rows.length);window.print()}
+function checkin(id){const t=B().tickets.find(x=>x.id.toLowerCase()===id.trim().toLowerCase());if(!t){$('checkin-result').textContent='Código não encontrado nesta demo.';return}if(X.checkedTickets.includes(t.id)){$('checkin-result').textContent='INGRESSO JÁ UTILIZADO: '+t.id;return}X.checkedTickets.push(t.id);log('Entrada demonstrativa validada: '+t.id);save();$('checkin-result').textContent='Entrada confirmada na DEMO: '+t.name+' — '+t.id;render()}
+function render(){
+ const D=B(),partners=$('partner-list'),pub=$('public-partners');partners.replaceChildren();pub.replaceChildren();
+ X.partners.forEach(p=>{pub.append(el('span','✦ '+p.name+' · '+p.kind));const r=el('div','','record'),info=el('div');info.append(el('strong',p.name),el('small',p.kind));r.append(info,btn('Excluir',()=>{X.partners=X.partners.filter(x=>x.id!==p.id);log('Parceiro demonstrativo excluído');save();render()}));partners.append(r)});
+ $('stat-partners').textContent=X.partners.length;
+ const photoList=$('photo-list'),gallery=$('public-gallery');photoList.replaceChildren();gallery.querySelectorAll('[data-demo-photo]').forEach(e=>e.remove());
+ X.photos.forEach(p=>{const a=document.createElement('a');a.className='gallery-item';a.href=p.url;a.target='_blank';a.rel='noopener noreferrer';a.dataset.demoPhoto='1';const img=document.createElement('img');img.src=p.url;img.loading='lazy';img.alt=p.title+' (imagem adicionada na demo)';const label=el('div','','gallery-label');label.append(el('strong',p.title),el('span',p.edition+' · DEMO'));a.append(img,label);gallery.append(a);const r=el('div','','record'),i=el('div');i.append(el('strong',p.title),el('small',p.edition));r.append(i,btn('Excluir',()=>{X.photos=X.photos.filter(x=>x.id!==p.id);log('Imagem demonstrativa removida');save();render()}));photoList.append(r)});
+ if(!X.photos.length)photoList.append(el('p','Sem fotos adicionais nesta sessão. A galeria de referência permanece visível.','muted'));
+ const tbody=$('tickets-extended');tbody.replaceChildren();filteredTickets().forEach(t=>{const tr=document.createElement('tr');[t.id,t.name,t.method].forEach(s=>tr.append(el('td',s)));const td=el('td'),used=X.checkedTickets.includes(t.id);td.append(el('span',used?'Validado':'Pendente','status-pill'+(used?'':' pending')));const b=btn(used?'Já utilizado':'Dar entrada',()=>checkin(t.id));b.disabled=used;td.append(document.createElement('br'),b);tr.append(td);tbody.append(tr)});
+ if(!tbody.children.length){const tr=document.createElement('tr'),td=el('td','Nenhum pedido encontrado.');td.colSpan=4;tr.append(td);tbody.append(tr)}
+ $('stat-checkins').textContent=X.checkedTickets.length;$('stat-pending').textContent=D.tickets.filter(t=>!X.checkedTickets.includes(t.id)).length;
+ const cbody=$('contests-extended');cbody.replaceChildren();filteredContests().forEach(c=>{const tr=document.createElement('tr');[c.id,c.kind,c.name].forEach(s=>tr.append(el('td',s)));const td=el('td'),used=X.checkedContests.includes(c.id);td.append(el('span',used?'Presente':'Pendente','status-pill'+(used?'':' pending')));td.append(document.createElement('br'),btn(used?'Desmarcar':'Confirmar chegada',()=>{if(used)X.checkedContests=X.checkedContests.filter(x=>x!==c.id);else X.checkedContests.push(c.id);log('Check-in de concurso DEMO: '+c.id);save();render()}));tr.append(td);cbody.append(tr)});
+ if(!cbody.children.length){const tr=document.createElement('tr'),td=el('td','Nenhuma inscrição encontrada.');td.colSpan=4;tr.append(td);cbody.append(tr)}
+ const mailList=$('email-list');mailList.replaceChildren();emailQueue().forEach(m=>{const r=el('div','','record'),i=el('div');i.append(el('strong',m.subject),el('small',m.to+' · '+(X.mailStatuses[m.id]||'Na fila DEMO')));const actions=el('div','','actions');actions.append(btn('Ler',()=>{const p=$('email-preview');p.hidden=false;p.replaceChildren(el('strong',m.subject),el('p','Para: '+m.to),el('p',m.body),el('p','Mensagem demonstrativa, sem validade oficial.'))}),btn('Marcar enviado',()=>{X.mailStatuses[m.id]='Enviado (simulado)';log('E-mail marcado como enviado na DEMO: '+m.id);save();render()}));r.append(i,actions);mailList.append(r)});
+ if(!emailQueue().length)mailList.append(el('p','Nenhum e-mail ainda. Simule uma compra ou inscrição.','muted'));$('stat-mails').textContent=emailQueue().length;
+ const audit=$('audit-list');audit.replaceChildren();X.audit.forEach(a=>audit.append(el('div',a.time+' · '+a.message,'audit-item')));if(!X.audit.length)audit.append(el('p','Histórico vazio nesta sessão.','muted'));
+ const over=$('overview-feed');over.replaceChildren();[['Vendas de teste',D.tickets.length],['Concursos de teste',D.contests.length],['Check-ins',X.checkedTickets.length],['E-mails em fila',emailQueue().length],['Marcas na vitrine',X.partners.length],['Imagens adicionadas',X.photos.length]].forEach(x=>{const r=el('div','','record');r.append(el('strong',x[0]),el('span',x[1],'status-pill'));over.append(r)});
+}
+document.querySelectorAll('[data-admin]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-admin]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.admin-panel').forEach(x=>x.classList.toggle('active',x.id==='admin-'+b.dataset.admin));render()}));
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>setTimeout(render,0)));
+$('ticket-form').addEventListener('submit',()=>setTimeout(()=>{const t=B().tickets[0];if(t){log('Pedido Pix/cartão DEMO: '+t.id);render()}},0),true);
+$('contest-form').addEventListener('submit',()=>setTimeout(()=>{const c=B().contests[0];if(c){log('Inscrição DEMO: '+c.id);render()}},0),true);
+$('payment-kind').addEventListener('change',()=>{$('checkout-visual').hidden=$('payment-kind').value!=='Pix'});
+$('ticket-search').addEventListener('input',render);$('ticket-status-filter').addEventListener('change',render);
+$('contest-search').addEventListener('input',render);$('contest-kind-filter').addEventListener('change',render);
+$('checkin-now').addEventListener('click',()=>checkin($('checkin-code').value));
+$('ticket-export').addEventListener('click',()=>csv('ingressos-VOF-DEMO.csv',['Pedido','Nome','Email','Pagamento','Valor','Entrada'],filteredTickets().map(t=>[t.id,t.name,t.email,t.method,money(t.amount),X.checkedTickets.includes(t.id)?'Validada':'Pendente'])));
+$('contests-export').addEventListener('click',()=>csv('concursos-VOF-DEMO.csv',['ID','Nome','Email','Concurso','Apresentação','Integrantes'],filteredContests().map(c=>[c.id,c.name,c.email,c.kind,c.work,c.members])));
+$('contests-print-filtered').addEventListener('click',()=>printFiches(filteredContests()));
+$('admin-print-cosplay').addEventListener('click',()=>printFiches(B().contests.filter(c=>c.kind==='Cosplay')));
+$('admin-print-kpop').addEventListener('click',()=>printFiches(B().contests.filter(c=>c.kind==='K-pop')));
+$('partner-form').addEventListener('submit',e=>{e.preventDefault();const n=$('partner-name').value.trim();if(n.length<2)return;X.partners.push({id:uid('P'),name:n,kind:$('partner-type').value});log('Parceiro fictício adicionado: '+n);save();e.currentTarget.reset();render()});
+$('photo-form').addEventListener('submit',e=>{e.preventDefault();const u=$('photo-url').value.trim();let good=false;try{const x=new URL(u);good=x.protocol==='https:'&&!x.username&&!x.password}catch(e){}if(!good)return alert('Utilize um endereço HTTPS público.');X.photos.push({id:uid('F'),title:$('photo-title').value.trim(),url:u,edition:$('photo-edition').value});log('Foto ilustrativa adicionada');save();e.currentTarget.reset();render()});
+$('reset-extra').addEventListener('click',()=>{if(!confirm('Limpar as operações adicionais desta sessão?'))return;X=blank();save();render()});
+$('seed-scenario').addEventListener('click',()=>{const d=B();if(d.tickets.length+d.contests.length&&!confirm('Já existem registros. Adicionar novos exemplos?'))return;
+['Akira Exemplo','Luna Exemplo','Kenji Exemplo','Mika Exemplo'].forEach((n,i)=>d.tickets.push({id:uid('D-ING'),name:n,email:'pessoa'+i+'@example.test',method:i%2?'Cartão':'Pix',amount:i%2?70:40,status:'SIMULADO'}));
+[['Cosplay','Equipe Estelar','Cena de personagem'],['K-pop','Grupo Haneul','Coreografia de exemplo'],['Cosplay','Noite Pixel','Apresentação de exemplo']].forEach((x,i)=>d.contests.push({id:uid('D-CON'),kind:x[0],name:x[1],email:'grupo'+i+'@example.test',work:x[2],members:i+1}));
+try{sessionStorage.setItem(BASE,JSON.stringify(d))}catch(e){}log('Cenário fictício carregado: 4 pedidos e 3 inscrições');save();render()});
+$('send-test-email').addEventListener('click',async()=>{const token=$('email-demo-code').value.trim(),res=$('live-email-result');if(!token){res.textContent='É necessário configurar DEMO_EMAIL_TEST_TOKEN como segredo no Worker e inserir esse token aqui.';return}res.textContent='Tentando envio de teste autorizado...';try{const r=await fetch('/api/demo-email',{method:'POST',headers:{'Content-Type':'application/json','X-Demo-Test-Token':token},body:JSON.stringify({intent:'vof-demo-test-v1'})});const j=await r.json();res.textContent=j.message||'HTTP '+r.status;if(r.ok){log('Teste privado de email solicitado');save();render()}}catch(e){res.textContent='Erro de conexão. Nenhum envio confirmado.'}finally{$('email-demo-code').value=''}});
+render();
+})();
+</script>
+</body></html>
