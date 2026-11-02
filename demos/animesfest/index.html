@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#100e19">
+  <meta name="description" content="Protótipo conceitual e não oficial para o AnimeSFest: evento, vitrines de expositores e gestão de inscrições.">
+  <meta name="robots" content="noindex,nofollow">
+  <title>AnimeSFest — Conceito de plataforma de eventos</title>
+  <link rel="stylesheet" href="./demo.css">
+  <script defer src="./demo.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <div class="preview-ribbon"><span class="ribbon-signal"></span> PROTÓTIPO NÃO OFICIAL <span class="ribbon-divider">/</span> Dados e operações simulados. Sem inscrições reais.</div>
+  <header class="site-header">
+    <a class="wordmark" href="?view=inicio" data-view="inicio" aria-label="AnimeSFest — início"><span class="wordmark-mark">✳</span><span>ANIME<span class="wordmark-accent">S</span>FEST<small>UNIVERSO GEEK · SANTA FÉ DO SUL</small></span></a>
+    <button class="menu-toggle" type="button" id="menu-toggle" aria-expanded="false" aria-controls="site-nav">Menu <span aria-hidden="true">☰</span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Navegação principal">
+      <a href="?view=inicio" data-view="inicio">O evento</a>
+      <a href="?view=lojas" data-view="lojas">Explorar lojas</a>
+      <a href="?view=inscricao" data-view="inscricao">Quero expor</a>
+      <a class="admin-link" href="?view=admin" data-view="admin"><span class="admin-dot"></span> Painel demo</a>
+    </nav>
+  </header>
+
+  <main id="conteudo" tabindex="-1">
+    <section class="view-section" id="view-inicio" data-page="inicio">
+      <div class="home-hero">
+        <div class="hero-content">
+          <div class="overline"><span class="star-mini">✳</span> FESTIVAL DE CULTURA GEEK & POP <span class="overline-rule"></span> SANTA FÉ DO SUL · SP</div>
+          <h1>O SEU MUNDO.<br><span class="outline-text">NOSSO</span> <span class="warm-text">UNIVERSO.</span></h1>
+          <p class="lead">Cosplay, cultura japonesa, games, música e os encontros que só acontecem quando todo mundo é fã de alguma coisa.</p>
+          <div class="hero-actions">
+            <a class="button button-accent" href="?view=lojas" data-view="lojas">Conhecer os expositores <span aria-hidden="true">↗</span></a>
+            <a class="button button-outline" href="?view=inscricao" data-view="inscricao">Sou lojista / artista <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="past-event"><span class="past-pulse"></span><span><strong>3ª edição · 20 setembro de 2026</strong><br>Essa edição já aconteceu. Datas futuras ainda não confirmadas.</span></div>
+        </div>
+        <div class="hero-stage" aria-label="Ilustração abstrata original de um ingresso para o AnimeSFest">
+          <div class="stage-star stage-star-one">✴</div><div class="stage-star stage-star-two">✳</div><div class="stage-grid"></div>
+          <div class="stage-circle"><span class="circle-lines"></span><span class="circle-copy">COSPLAY <b>✳</b> K-POP <b>✳</b> GAMES <b>✳</b> ARTES</span></div>
+          <div class="ticket ticket-back"><span>UNIVERSO</span><strong>GEEK</strong></div>
+          <div class="ticket ticket-front"><div class="ticket-top">EXPERIÊNCIA / EVENTO <span>2026 ↗</span></div><div class="ticket-shine">✦</div><div class="ticket-title">Anime<span>SFest</span></div><div class="ticket-subtitle">CONEXÕES DE OUTRO MUNDO</div><div class="ticket-bottom"><span>03ª EDIÇÃO<br><b>20 SET</b></span><span>SEU LUGAR<br><b>NO UNIVERSO</b></span><div class="ticket-bars"></div></div></div>
+          <div class="stage-sticker">SEJA<br><strong>VOCÊ</strong><br>MESMO ✦</div>
+        </div>
+      </div>
+      <div class="marquee" aria-hidden="true"><div>COSPLAY ✳ K-POP ✳ ARTIST ALLEY ✳ GAMES ✳ CULTURA POP ✳ FEIRA GEEK ✳ COSPLAY ✳ K-POP ✳</div></div>
+      <section class="section-wrap split-heading">
+        <div><span class="eyebrow">01 / NOSSO UNIVERSO</span><h2>Não é só um evento.<br>É o seu <em>ponto de encontro.</em></h2></div>
+        <p>O AnimeSFest já reuniu fãs e criadores em Santa Fé do Sul. Esta experiência demonstra como o próximo encontro poderia ter uma casa digital própria — antes, durante e depois do evento.</p>
+      </section>
+      <section class="experience-grid section-wrap" aria-label="Experiências">
+        <article class="experience-card card-cos"><span class="card-index">01 / IDENTIDADE</span><div class="card-graphic cos-graphic">✶</div><h3>Cosplay & criatividade</h3><p>Personagens ganham vida. Pessoas encontram sua comunidade.</p></article>
+        <article class="experience-card card-game"><span class="card-index">02 / ENCONTROS</span><div class="card-graphic game-graphic">⌘</div><h3>Games & cultura pop</h3><p>Histórias, disputas, músicas e descobertas em um só lugar.</p></article>
+        <article class="experience-card card-shop"><span class="card-index">03 / CRIADORES</span><div class="card-graphic shop-graphic">✳</div><h3>Lojas & artistas</h3><p>Uma vitrine para quem faz a feira acontecer, do cadastro à descoberta.</p></article>
+      </section>
+      <section class="section-wrap past-section"><div><span class="eyebrow">EDIÇÃO ANTERIOR</span><h2>Uma história que continua.</h2><p>A edição de 20 de setembro de 2026 aconteceu no Complexo Turístico Cultural e Histórico Deputado Roberto Rollemberg. Consulte sempre o Instagram para datas e confirmações futuras.</p><a class="text-link" href="https://www.instagram.com/anime.sfest/" target="_blank" rel="noopener noreferrer">Instagram oficial ↗</a></div><div class="past-panel"><span>2026</span><strong>20<span>/</span>09</strong><small>SANTA FÉ DO SUL · SP</small><span class="past-panel-spark">✹</span></div></section>
+      <section class="section-wrap cta-band"><div><span class="eyebrow">UM ESPAÇO PARA QUEM CRIA</span><h2>Seu trabalho merece<br>estar em destaque.</h2><p>Teste o processo de candidatura e conheça a vitrine dos expositores. Nesta demo, nada é enviado à organização.</p></div><a class="button button-dark" href="?view=inscricao" data-view="inscricao">Testar inscrição <span>↗</span></a></section>
+    </section>
+
+    <section class="view-section" id="view-lojas" data-page="lojas" hidden>
+      <div class="subhero"><span class="eyebrow">02 / EXPLORAR</span><div class="subhero-row"><h1>A FEIRA É FEITA<br>DE <em>GENTE CRIATIVA.</em></h1><p>Descubra artistas independentes, lojas geek e experiências que fazem parte do universo dos eventos.</p></div><div class="demo-inline">✳ Vitrine ilustrativa. Nomes e perfis iniciais são fictícios; não são expositores oficiais.</div></div>
+      <div class="section-wrap directory-controls"><label class="search-box"><span class="sr-only">Buscar loja</span><span aria-hidden="true">⌕</span><input type="search" id="shop-search" placeholder="Busque uma loja, categoria ou produto…" autocomplete="off"></label><div class="category-filters" id="category-filters" aria-label="Filtrar por categoria"><button type="button" class="chip is-active" data-filter="Todos" aria-pressed="true">Todos</button><button type="button" class="chip" data-filter="Geek" aria-pressed="false">Geek</button><button type="button" class="chip" data-filter="Arte" aria-pressed="false">Artistas</button><button type="button" class="chip" data-filter="Moda" aria-pressed="false">Moda</button><button type="button" class="chip" data-filter="Gastronomia" aria-pressed="false">Gastronomia</button></div></div>
+      <div class="section-wrap"><div class="directory-head"><h2>Vitrine de expositores <span id="shop-count">0</span></h2><span>Perfis de demonstração</span></div><div class="shops-grid" id="shops-grid" aria-live="polite"></div><div class="empty-state" id="shops-empty" hidden><span>✳</span><h3>Nada por aqui ainda.</h3><p>Experimente outra busca ou categoria.</p><button class="button button-accent" id="clear-filters" type="button">Limpar filtros</button></div></div>
+      <div class="section-wrap light-strip"><div><h3>Quer aparecer nesta vitrine?</h3><p>Simule uma candidatura. Quando o painel aprovar, sua loja fictícia aparece aqui.</p></div><a class="button button-dark" href="?view=inscricao" data-view="inscricao">Criar candidatura demo ↗</a></div>
+    </section>
+
+    <section class="view-section" id="view-inscricao" data-page="inscricao" hidden>
+      <div class="subhero subhero-form"><span class="eyebrow">03 / PARTICIPE</span><div class="subhero-row"><h1>SUA MARCA<br>NO <em>PRÓXIMO CAPÍTULO.</em></h1><p>Uma demonstração de como inscrições poderiam funcionar: cadastro organizado, análise transparente e vitrine pública após aprovação.</p></div><div class="demo-inline">✳ Fluxo de teste — não é inscrição para a próxima edição. Não utilize dados pessoais reais.</div></div>
+      <div class="section-wrap form-layout">
+        <aside class="form-aside"><div class="aside-sticky"><span class="eyebrow">COMO FUNCIONARIA</span><h2>Menos planilhas.<br><em>Mais conexão.</em></h2><ol class="steps"><li><span>01</span><div><strong>Envie seu perfil</strong><p>Conte sobre a loja ou produção artística.</p></div></li><li><span>02</span><div><strong>Acompanhe a análise</strong><p>O painel recebe a solicitação para avaliação.</p></div></li><li><span>03</span><div><strong>Apareça na vitrine</strong><p>Após aprovação simulada, o perfil é publicado na demonstração.</p></div></li></ol><a href="https://docs.google.com/forms/d/e/1FAIpQLScNHDgDdtK0G1bQNwmcPLcYWBrT7IUWM_bA2_uyWZHTxQYq2g/viewform" target="_blank" rel="noopener noreferrer" class="official-form-link">Consultar formulário original da 3ª edição ↗</a></div></aside>
+        <div class="form-surface" id="form-surface"><div class="form-heading"><div class="form-heading-icon">✳</div><div><span class="form-overline">INSCRIÇÃO ILUSTRATIVA / DEMO</span><h2>Fale da sua loja.</h2><p>Use apenas informações inventadas. Nada é enviado a servidores.</p></div></div>
+          <form id="vendor-form" novalidate>
+            <div class="field-grid">
+              <label class="field full"><span>Nome da loja / artista <b>*</b></span><input name="name" id="vendor-name" maxlength="72" placeholder="Ex.: Nebulosa Prints" required></label>
+              <label class="field"><span>Categoria <b>*</b></span><select name="category" required><option value="">Selecione uma categoria</option><option>Geek</option><option>Arte</option><option>Moda</option><option>Gastronomia</option></select></label>
+              <label class="field"><span>Cidade de referência <b>*</b></span><input name="city" maxlength="55" placeholder="Ex.: Santa Fé do Sul / SP" required></label>
+              <label class="field full"><span>O que sua marca oferece? <b>*</b></span><textarea name="description" maxlength="280" rows="4" placeholder="Descreva seus produtos, criações e o diferencial da sua marca…" required></textarea><small>Até 280 caracteres</small></label>
+              <label class="field"><span>Instagram fictício (opcional)</span><input name="instagram" maxlength="50" placeholder="@lojademonstracao"></label>
+              <label class="field"><span>Estrutura desejada</span><select name="stand"><option value="Mesa simples">Mesa simples</option><option value="Estande">Estande</option><option value="Espaço de artista">Espaço de artista</option><option value="A definir">A definir</option></select></label>
+            </div>
+            <fieldset class="rules-fieldset"><legend>Regras para participar <span>(simulação baseada no formulário público)</span></legend><p>Produtos devem respeitar a temática geek, a legislação, os direitos autorais e um público familiar. Dividir estande exige autorização. Expositores respondem por seus itens e devem cumprir as orientações de montagem e desmontagem.</p><label class="check-line"><input type="checkbox" name="rules" required><span>Li e aceito as regras ilustradas nesta demonstração. <b>*</b></span></label><label class="check-line"><input type="checkbox" name="privacy" required><span>Entendo que os dados fictícios ficarão somente nesta sessão do navegador e não constituem inscrição real. <b>*</b></span></label></fieldset>
+            <div class="form-errors" id="form-errors" role="alert" hidden></div>
+            <div class="submit-row"><span>✳ Apenas demonstração<br><small>Sem e-mails, cobrança ou envio real.</small></span><button type="submit" class="button button-accent">Enviar simulação <span>↗</span></button></div>
+          </form>
+          <div class="receipt" id="vendor-receipt" hidden role="status" aria-live="polite"><span class="receipt-icon">✓</span><h3>Seu exemplo chegou à fila!</h3><p>Esta candidatura foi registrada somente nesta sessão. O painel demo pode analisá-la, e você poderá ver o resultado na vitrine.</p><div id="receipt-summary" class="receipt-summary"></div><div class="receipt-actions"><a class="button button-accent" href="?view=admin" data-view="admin">Abrir painel demo ↗</a><button class="button button-outline dark-outline" id="register-again" type="button">Criar outra simulação</button></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view-section" id="view-admin" data-page="admin" hidden>
+      <div class="admin-shell">
+        <aside class="admin-sidebar"><a class="admin-brand" href="?view=inicio" data-view="inicio">✳ <strong>anime<span>sfest</span></strong><small>PAINEL · DEMONSTRAÇÃO</small></a><span class="sidebar-label">GESTÃO DO EVENTO</span><div class="sidebar-item selected">◈ &nbsp; Visão geral</div><div class="sidebar-item">▤ &nbsp; Candidaturas</div><div class="sidebar-item">▦ &nbsp; Expositores</div><div class="sidebar-spacer"></div><a class="sidebar-public" href="?view=lojas" data-view="lojas">↗ &nbsp; Ver vitrine pública</a><button class="sidebar-reset" id="reset-demo" type="button">↺ &nbsp; Restaurar dados demo</button></aside>
+        <div class="admin-main">
+          <header class="admin-topbar"><div><span class="eyebrow">BACKOFFICE / APENAS SIMULAÇÃO</span><h1>Painel do evento <span>✳</span></h1><p>Uma visão simples da seleção e divulgação de expositores.</p></div><div class="admin-avatar" title="Gestor fictício">77</div></header>
+          <div class="admin-warning">🔒 <div><strong>Acesso demonstrativo, sem autenticação real.</strong> Tudo aqui usa informações fictícias armazenadas somente nesta sessão. Não gerencia o AnimeSFest.</div></div>
+          <div class="metric-grid"><div class="metric"><span>Candidaturas demo</span><strong id="metric-total">0</strong><small>Recebidas nesta sessão</small></div><div class="metric"><span>Aguardando análise</span><strong id="metric-pending">0</strong><small>Ações da organização</small></div><div class="metric"><span>Perfis aprovados</span><strong id="metric-approved">0</strong><small>Exibidos na vitrine</small></div></div>
+          <div class="admin-content-grid"><section class="admin-card review-card"><div class="card-title-line"><div><span class="eyebrow">FLUXO DE ANÁLISE</span><h2>Solicitações</h2></div><span class="live-mark">● DADOS SIMULADOS</span></div><div class="review-filter"><label for="admin-status">Filtrar:</label><select id="admin-status"><option value="all">Todas</option><option value="pending">Pendentes</option><option value="approved">Aprovadas</option><option value="adjustments">Ajustes</option></select></div><div id="application-list" class="application-list" aria-live="polite"></div></section>
+          <aside class="admin-card detail-card"><span class="eyebrow">DETALHES DA CANDIDATURA</span><div id="application-detail"><div class="detail-placeholder"><span>✳</span><h3>Selecione uma candidatura</h3><p>Analise o perfil e simule a decisão da organização.</p></div></div></aside></div>
+          <footer class="admin-foot">AnimeSFest · Prévia conceitual não oficial <span>Sem acesso a sistemas, dados ou contas do evento</span></footer>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer" id="public-footer"><div class="footer-inner"><div><a class="footer-wordmark" href="?view=inicio" data-view="inicio">✳ Anime<span>SFest</span></a><p>Feito para celebrar encontros e criatividade.</p><small>Protótipo independente de demonstração — não oficial, não afiliado ou autorizado pelo AnimeSFest.</small></div><div class="footer-links"><strong>EXPLORE</strong><a href="?view=lojas" data-view="lojas">Lojas ilustrativas</a><a href="?view=inscricao" data-view="inscricao">Cadastro demonstrativo</a><a href="?view=admin" data-view="admin">Painel demo</a></div><div class="footer-links"><strong>CANAIS OFICIAIS</strong><a href="https://www.instagram.com/anime.sfest/" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="https://docs.google.com/forms/d/e/1FAIpQLScNHDgDdtK0G1bQNwmcPLcYWBrT7IUWM_bA2_uyWZHTxQYq2g/viewform" target="_blank" rel="noopener noreferrer">Formulário da 3ª edição ↗</a><span>Próximos eventos: sem data confirmada</span></div></div><div class="footer-bottom">PROPOSTA VISUAL / EVENTOS 77 <span>2026 · DEMO</span></div></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
