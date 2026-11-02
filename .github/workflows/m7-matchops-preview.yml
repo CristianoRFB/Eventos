@@ -1,0 +1,36 @@
+name: M7 MatchOps commercial demo smoke
+on:
+  pull_request:
+    paths:
+      - "demos/m7-academy/**"
+      - ".github/workflows/m7-matchops-preview.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Simulate captain, public and staff at seven responsive widths
+        run: |
+          python3 -m http.server 4177 --bind 127.0.0.1 --directory demos/m7-academy > /tmp/m7-demo.log 2>&1 &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID" EXIT
+          sleep 2
+          node --check demos/m7-academy/app.js
+          node demos/m7-academy/smoke.mjs
+      - name: Upload real browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m7-matchops-screenshots
+          path: demos/m7-academy/evidence/
+          if-no-files-found: ignore
