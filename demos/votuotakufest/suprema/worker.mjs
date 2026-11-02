@@ -70,7 +70,7 @@ function pdfPages(sheets){
  for(let i=1;i<offsets.length;i++)pdf+=String(offsets[i]).padStart(10,"0")+" 00000 n \n";
  pdf+="trailer\n<< /Size "+(objs.length+1)+" /Root 1 0 R >>\nstartxref\n"+start+"\n%%EOF\n";
  const bytes=new TextEncoder().encode(pdf);
- let base64="";for(let i=0;i<bytes.length;i+=16384){let s="";for(const b of bytes.subarray(i,i+16384))s+=String.fromCharCode(b);base64+=btoa(s);}
+ let base64="";for(let i=0;i<bytes.length;i+=12288){let s="";for(const b of bytes.subarray(i,i+12288))s+=String.fromCharCode(b);base64+=btoa(s);}
  return {content:base64,bytes:bytes.length};
 }
 function makeTicketPDF(order){
