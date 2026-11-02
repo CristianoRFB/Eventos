@@ -13,6 +13,7 @@ for(const viewport of [{width:320,height:740},{width:390,height:844},{width:768,
  assert.equal(bad,false,"horizontal overflow on "+viewport.width);
  // Sale fixture: complete simulated wizard, no real payment.
  await page.goto(base+'?view=tickets',{waitUntil:'load'});
+ if(!(await page.locator('#buy-next-1').isVisible())) { const scripts=await page.locator('script[src]').evaluateAll(nodes=>nodes.map(x=>x.src)); throw new Error('Checkout oculto: '+JSON.stringify({errors,scripts,url:page.url()})); }
  await page.locator('#buy-next-1').click();
  await page.locator('#buyer-name').fill("Pessoa de Teste");
  await page.locator('#buyer-email').fill("teste@example.test");
