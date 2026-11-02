@@ -1,0 +1,51 @@
+name: Crazy Geek Fest — demo browser smoke
+
+on:
+  push:
+    branches:
+      - 'demo/crazygeek-mirassol-20261102'
+    paths:
+      - 'demos/crazygeek/**'
+      - '.github/workflows/crazygeek-demo.yml'
+  pull_request:
+    paths:
+      - 'demos/crazygeek/**'
+      - '.github/workflows/crazygeek-demo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Demo-only Playwright dependencies (isolated from base app lockfile)
+        run: npm install --prefix demos/crazygeek --no-package-lock --no-audit --no-fund
+      - name: Install Chromium
+        run: ./demos/crazygeek/node_modules/.bin/playwright install --with-deps chromium
+      - name: Start static demo
+        run: |
+          python3 -m http.server 4189 --bind 127.0.0.1 --directory demos/crazygeek > /tmp/crazygeek-server.log 2>&1 &
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4189/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/crazygeek-server.log
+          exit 1
+      - name: Browser smoke (7 responsive sizes)
+        run: node demos/crazygeek/smoke.mjs
+      - name: Save real browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crazygeek-actual-browser-screenshots
+          path: demo-screenshots/crazygeek/
+          if-no-files-found: ignore

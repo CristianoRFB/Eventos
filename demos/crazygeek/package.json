@@ -1,0 +1,8 @@
+{
+  "name": "crazygeek-demonstracao-conceitual",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Smoke test isolado; não faz parte do runtime ou dependências de produção do Eventos 77",
+  "devDependencies": { "@playwright/test": "1.64.1" }
+}
