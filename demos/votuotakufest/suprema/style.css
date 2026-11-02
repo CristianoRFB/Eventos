@@ -88,3 +88,17 @@ html,body{max-width:100%;overflow-x:clip}.ops-metrics{grid-template-columns:repe
  .cost-summary{grid-template-columns:minmax(0,1fr)}
  .cost-summary>span{padding:13px}
 }
+
+/* Clear opt-in, reliable archive fallbacks, no hidden image blank space. */
+.email-demo-optin{margin:17px 0 10px;padding:15px;background:#f7f2ff;border:1px solid #e4d8f5;border-radius:6px}
+.email-demo-optin .consent{margin:0 0 12px;font-size:12px}
+.email-demo-optin .fieldlabel{margin:5px 0}
+.email-demo-optin input[type=password]{font-size:16px}
+.photo-card.photo-unavailable{background:radial-gradient(circle at 20% 5%,#fb5bb4,#5e2bb3 65%,#1a0e31);display:flex;min-height:230px}
+.photo-card.photo-unavailable:before{content:"ARQUIVO VOF ✦";position:absolute;top:19px;left:18px;letter-spacing:.12em;font-size:11px;color:#fff;font-weight:900}
+.photo-card.photo-unavailable .photo-content{position:relative;margin-top:auto;width:100%;padding:20px}
+.photo-card img[hidden]{display:none!important}
+.photo-card .photo-content small{display:block;line-height:1.35}
+#contest-result #contest-email-feedback{margin-top:15px}
+#ticket-email-feedback{margin:17px 0 0}
+@media(max-width:760px){.email-demo-optin{padding:12px}.pix-fake{width:220px;height:220px;max-width:100%}}
