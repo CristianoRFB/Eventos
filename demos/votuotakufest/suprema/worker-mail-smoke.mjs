@@ -21,6 +21,15 @@ const send=async payload=>worker.fetch(new Request(URL_BASE+"/api/test-email",{
  body:JSON.stringify({...payload,turnstileToken:"synthetic-test-token-with-characters"})
 }),env);
 try{
+ const preview=await worker.fetch(new Request(URL_BASE+"/api/ingresso-exemplo.pdf"),env);
+ assert.equal(preview.status,200,"PDF preview should be downloadable without calling Brevo");
+ assert.match(preview.headers.get("Content-Type")||"",/application\/pdf/);
+ const previewBuf=Buffer.from(await preview.arrayBuffer());
+ assert.equal(previewBuf.subarray(0,8).toString(),"%PDF-1.4");
+ assert.match(previewBuf.toString(),/\/Count 4/);
+ assert.match(previewBuf.toString(),/VOF-DEMO-AMOSTRA-01/);
+ assert.match(previewBuf.toString(),/VOF-DEMO-AMOSTRA-04/);
+ assert.equal(captured.length,0,"PDF preview must not send email");
  const ticket=await send({recipient:"buyer@sample.org",kind:"ticket-demo",reference:"VOF-DEMO-A1B2C3",ticket:{buyer:"Pessoa Exemplo",typeId:"duplo",qty:2,method:"pix",reference:"VOF-DEMO-A1B2C3"}});
  assert.equal(ticket.status,200,await ticket.text().catch(()=>""));
  assert.equal(captured.length,1);const mail=captured.at(-1);
