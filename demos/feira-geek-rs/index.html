@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0d0f14">
+  <meta name="description" content="Conceito interativo e não oficial de portal para uma feira de cultura geek: programação, expositores e organização.">
+  <title>Feira Geek — Portal demonstrativo (não oficial)</title>
+  <style>
+  :root{--bg:#0d0f14;--panel:#181b22;--panel2:#222631;--paper:#f6f4ee;--ink:#14161c;--text:#f7f7f2;--muted:#b7bac4;--line:#363a43;--lime:#c8ff63;--coral:#ff816c;--lavender:#c3a8ff;--radius:20px;--max:1180px}
+  *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+  button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+  .wrap{width:min(var(--max),calc(100% - 40px));margin-inline:auto}.muted{color:var(--muted)}.eyebrow{font-size:.76rem;letter-spacing:.13em;text-transform:uppercase;font-weight:800}
+  .topline{background:var(--lime);color:#111;padding:8px 16px;text-align:center;font-size:.77rem;font-weight:750;letter-spacing:.03em}
+  header{border-bottom:1px solid #30333b;position:sticky;top:0;background:rgba(13,15,20,.95);backdrop-filter:blur(15px);z-index:30}
+  .head{display:flex;gap:18px;align-items:center;justify-content:space-between;min-height:74px}
+  .wordmark{font-weight:950;letter-spacing:-.065em;font-size:1.4rem;line-height:1}.wordmark span{color:var(--lime)}.wordmark small{font-weight:500;display:block;letter-spacing:.03em;font-size:.65rem;color:var(--muted);margin-top:6px}
+  .roles{display:flex;align-items:center;gap:5px;padding:5px;border-radius:99px;background:#252831;overflow-x:auto}
+  .roles button{border:0;color:#d6d9e0;background:transparent;padding:11px 16px;border-radius:99px;white-space:nowrap;font-size:.82rem;font-weight:800;min-height:44px}
+  .roles button[aria-pressed=true]{color:var(--ink);background:var(--lime)}
+  .outline{display:inline-flex;gap:8px;align-items:center;justify-content:center;border:1px solid #555b67;border-radius:12px;background:transparent;color:inherit;font-weight:750;padding:12px 18px;min-height:46px;text-decoration:none;transition:background .2s,border-color .2s}
+  .outline:hover{border-color:#a5a8af;background:#20232a}.btn{display:inline-flex;justify-content:center;align-items:center;gap:9px;border:0;border-radius:13px;min-height:50px;padding:13px 21px;background:var(--lime);color:#14161a;font-weight:850;text-decoration:none;transition:transform .18s,filter .18s}.btn:hover{transform:translateY(-2px);filter:brightness(1.04)}.btn.secondary{background:#292d37;color:#fff;border:1px solid #444956}.btn.dark{background:var(--bg);color:white}.btn.pink{background:var(--coral)}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  .panelview[hidden]{display:none!important}.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;padding:72px 0 86px}.hero-copy .kicker{display:inline-flex;gap:10px;align-items:center;color:var(--lime);font-size:.75rem;font-weight:850;letter-spacing:.13em;text-transform:uppercase;margin-bottom:20px}.dot{width:8px;height:8px;background:var(--lime);border-radius:50%;box-shadow:0 0 0 5px #c8ff631e}
+  h1,h2,h3,p{margin-top:0}h1{font-size:clamp(3.35rem,6.4vw,6.6rem);line-height:.99;letter-spacing:-.085em;margin-bottom:25px;font-weight:950}h1 em{display:block;font-style:normal;color:var(--lime)}.lead{color:#d6d7dc;font-size:1.09rem;line-height:1.7;max-width:510px}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin:30px 0}.meta-grid{display:flex;gap:30px;flex-wrap:wrap;padding-top:22px;border-top:1px solid var(--line)}.meta-grid strong{display:block;font-size:.83rem}.meta-grid small{color:var(--muted);font-size:.8rem}
+  .poster{min-height:485px;position:relative;border-radius:29px;overflow:hidden;background:#a99bff;isolation:isolate;transform:rotate(1deg);box-shadow:20px 24px 0 #26262e}
+  .poster:before{content:"";position:absolute;inset:-10%;background:repeating-radial-gradient(circle at 45% 50%,transparent 0 36px,rgba(13,15,20,.13) 38px 40px);transform:rotate(15deg)}.poster:after{content:"";position:absolute;width:420px;height:420px;left:15%;top:12%;border-radius:50%;border:70px solid var(--lime);box-shadow:0 0 0 25px #0d0f14,0 0 0 49px #ff806a;transform:rotate(-20deg)}
+  .poster .orbitword{position:absolute;font-size:clamp(5rem,11vw,10rem);line-height:.88;letter-spacing:-.105em;font-weight:1000;color:#101117;z-index:3;top:24%;left:9%;transform:rotate(-10deg);text-shadow:5px 5px 0 #ede7ff}.poster .orbitword b{display:block;color:white;text-shadow:5px 5px 0 #13141a}
+  .sticker{position:absolute;z-index:4;background:#12141a;color:#fff;padding:12px 18px;border-radius:40px;font-size:.74rem;font-weight:900;letter-spacing:.12em;transform:rotate(11deg);right:4%;top:9%;border:2px solid white}.sticker.two{background:var(--coral);color:#161616;top:auto;right:auto;left:3%;bottom:10%;transform:rotate(-11deg)}.poster .foot{position:absolute;bottom:22px;right:20px;font-size:.7rem;letter-spacing:.18em;color:#111;z-index:4;font-weight:900}
+  .section{padding:74px 0}.section.alt{background:var(--paper);color:var(--ink)}.sectionhead{display:flex;gap:20px;justify-content:space-between;align-items:end;margin-bottom:29px}.sectionhead h2{font-size:clamp(2.1rem,4vw,3.6rem);line-height:1.05;letter-spacing:-.065em;margin:8px 0 0}.sectionhead p{max-width:380px;color:#747783;margin-bottom:2px}.section.alt .sectionhead p{color:#555968}
+  .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:13px}.filter{border:1px solid #dddde0;background:white;border-radius:999px;padding:10px 18px;font-size:.82rem;font-weight:750;white-space:nowrap;min-height:42px}.filter.active{background:var(--ink);color:white;border-color:var(--ink)}
+  .program-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.slot{display:grid;grid-template-columns:86px 1fr auto;gap:20px;align-items:center;background:#fff;border:1px solid #e5e3df;border-radius:19px;padding:21px;min-height:132px}.time{font-size:1.35rem;letter-spacing:-.07em;font-weight:950}.time small{display:block;font-size:.7rem;letter-spacing:0;font-weight:700;color:#656a74}.slot h3{font-size:1.1rem;line-height:1.25;margin:5px 0 7px;letter-spacing:-.025em}.slot p{font-size:.78rem;color:#636874;margin:0}.pill{font-size:.7rem;text-transform:uppercase;letter-spacing:.055em;font-weight:850;background:#eeebf8;border-radius:30px;padding:5px 9px;display:inline-flex;width:max-content}.slot .star{background:#f6f4ee;border:1px solid #e1dfdb;border-radius:50%;width:44px;height:44px;font-size:1.15rem;color:#333;display:grid;place-items:center}.slot .star[aria-pressed=true]{background:var(--lime);border-color:#b5e15c}
+  .empty{grid-column:1/-1;padding:30px;text-align:center;border:1px dashed #aaa;border-radius:16px;color:#585858}.journey{margin-top:23px;padding:20px 24px;border-radius:19px;background:#e8f4d3;display:flex;align-items:center;justify-content:space-between;gap:18px}.journey b{font-size:1rem}.journey p{margin:3px 0 0;color:#495448;font-size:.84rem}
+  .cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.feature{border:1px solid var(--line);border-radius:22px;padding:26px;min-height:205px;background:var(--panel)}.feature .num{font-size:.76rem;color:var(--lime);font-weight:850}.feature h3{font-size:1.48rem;margin:22px 0 10px;letter-spacing:-.055em}.feature p{font-size:.9rem;color:var(--muted);margin:0}
+  .stand-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.stand{background:#242730;border:1px solid #3b3d46;border-radius:19px;padding:24px;min-height:190px}.stand .visual{width:58px;height:58px;border-radius:16px;margin-bottom:18px;display:grid;place-items:center;font-size:1.4rem;font-weight:950;color:#101117}.stand h3{font-size:1.18rem;letter-spacing:-.03em;margin-bottom:6px}.stand p{font-size:.84rem;color:var(--muted);margin:0}.stand .tag{font-size:.7rem;color:var(--lime);font-weight:850;margin-top:12px;display:block}
+  .callout{border-radius:25px;background:var(--coral);color:#111;display:flex;gap:30px;justify-content:space-between;align-items:center;padding:38px 44px;margin-top:64px}.callout h2{font-size:clamp(1.8rem,3.2vw,2.7rem);letter-spacing:-.06em;line-height:1.05;margin:0 0 10px}.callout p{margin:0;max-width:530px;font-size:.94rem}
+  .workspace{padding:70px 0 105px;min-height:75vh}.workspace-heading{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:31px}.workspace-heading h1{font-size:clamp(2.7rem,5vw,4.8rem);margin:7px 0 14px}.workspace-heading p{max-width:620px;color:var(--muted);margin:0}
+  .two-col{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(310px,.92fr);gap:20px}.panel{border:1px solid #3b3e49;background:#191c24;border-radius:22px;padding:27px}.panel h2{font-size:1.3rem;letter-spacing:-.04em;margin:0 0 7px}.panel>p{color:var(--muted);font-size:.9rem}.panel .cap{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--lime);font-weight:850;margin-bottom:17px}.field{display:grid;gap:7px;margin:19px 0}.field label{font-size:.85rem;font-weight:750;color:#e7e7e8}.field input,.field textarea,.field select{background:#0f1219;color:#fff;border:1px solid #555963;padding:13px 14px;border-radius:12px;width:100%;min-height:48px;outline:none}.field textarea{min-height:91px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--lime)}.hint{font-size:.78rem;color:#a8acb7;margin-top:13px}.notice{padding:14px 17px;background:#292b35;border-left:3px solid var(--lime);border-radius:9px;color:#d5d7dc;font-size:.82rem;margin:20px 0}
+  .step{display:flex;gap:14px;padding:17px 0;border-bottom:1px solid #373a42}.step:last-child{border:0}.step .step-n{width:35px;height:35px;display:grid;place-items:center;flex-shrink:0;background:#36383f;border-radius:9px;color:var(--lime);font-weight:900}.step strong{display:block}.step span{font-size:.85rem;color:var(--muted)}
+  .tool-header{display:flex;justify-content:space-between;align-items:center;gap:12px}.mini{font-size:.77rem;padding:8px 12px;min-height:34px;border-radius:9px;border:1px solid #666b76;background:transparent;color:inherit;font-weight:750}.mini:hover{background:#30343d}.mini.danger{color:#ffd2c9;border-color:#75524c}.record{display:flex;justify-content:space-between;align-items:center;gap:14px;border-top:1px solid #3a3d47;padding:15px 0}.record:first-of-type{margin-top:12px}.record .record-text{min-width:0}.record strong{display:block;font-size:.89rem;overflow-wrap:anywhere}.record small{color:var(--muted);font-size:.75rem}.record .buttons{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.badge{border-radius:999px;border:1px solid #626571;padding:5px 9px;display:inline-block;font-size:.67rem;color:#dce0e8}.badge.ok{background:#2c4b35;color:#bbffcc;border-color:#4d7357}.stack{display:grid;gap:19px}.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}.kpi{background:#242832;padding:22px;border-radius:18px;border:1px solid #3b3e46}.kpi strong{font-size:2rem;font-weight:950;letter-spacing:-.08em;display:block;color:var(--lime);line-height:1}.kpi span{display:block;color:var(--muted);font-size:.77rem;margin-top:7px}
+  footer{padding:30px 0 40px;border-top:1px solid #373941}.foot-flex{display:flex;justify-content:space-between;gap:20px;align-items:center;color:#b9bdc7;font-size:.78rem}.toast{position:fixed;right:20px;bottom:22px;background:var(--lime);color:#101218;font-weight:850;padding:15px 19px;border-radius:13px;box-shadow:0 14px 50px #0009;max-width:calc(100vw - 40px);z-index:70;opacity:0;pointer-events:none;transform:translateY(20px);transition:.2s}.toast.show{opacity:1;transform:none}
+  @media(max-width:950px){.hero{grid-template-columns:1fr 1fr;gap:24px}.poster{min-height:415px}.program-grid,.stand-grid{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}.cards3{grid-template-columns:1fr 1fr}.hide-tablet{display:none}}
+  @media(max-width:700px){.wrap{width:min(var(--max),calc(100% - 28px))}.head{min-height:112px;flex-direction:column;align-items:flex-start;gap:10px;justify-content:center;padding:12px 0}.roles{width:100%;justify-content:space-between}.roles button{flex:1;font-size:.74rem;padding:9px 7px}.hero{grid-template-columns:1fr;padding:48px 0 52px}.hero h1{font-size:clamp(3.55rem,14vw,5.1rem)}.poster{min-height:330px;max-width:500px;transform:none;box-shadow:10px 10px 0 #252730}.poster .orbitword{font-size:7rem;left:9%;top:21%}.poster:after{height:280px;width:280px;border-width:48px;top:6%}.section{padding:53px 0}.sectionhead,.workspace-heading{display:block}.sectionhead p{margin-top:15px}.program-grid,.stand-grid,.cards3{grid-template-columns:1fr}.slot{grid-template-columns:65px 1fr auto;gap:12px;padding:16px;min-height:117px}.time{font-size:1.08rem}.slot h3{font-size:1rem}.journey,.callout{display:block}.journey .btn,.callout .btn{margin-top:15px}.callout{padding:26px}.workspace{padding:42px 0 75px}.workspace-heading h1{font-size:2.9rem}.panel{padding:20px}.kpis{grid-template-columns:1fr 1fr}.foot-flex{display:block}.foot-flex span{display:block;margin:5px 0}}
+  @media(max-width:365px){.poster .orbitword{font-size:5.7rem}.slot{grid-template-columns:57px 1fr 42px;gap:7px}.slot .star{width:40px;height:40px}.time{font-size:1rem}.hero-actions .btn,.hero-actions .outline{width:100%}.kpis{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+  </style>
+</head>
+<body>
+  <div class="topline">ESTUDO DE EXPERIÊNCIA DIGITAL · DADOS E PROGRAMAÇÃO ILUSTRATIVOS · NÃO OFICIAL</div>
+  <header><div class="wrap head">
+    <div class="wordmark" aria-label="Feira Geek, conceito de portal">feira<span>geek</span><small>PORTAL CONCEITUAL · SEM LOGOTIPO OFICIAL</small></div>
+    <nav class="roles" aria-label="Alternar ambiente da demonstração">
+      <button data-view="visitante" aria-pressed="true" type="button">Visitante</button>
+      <button data-view="expositor" aria-pressed="false" type="button">Expositor</button>
+      <button data-view="gestao" aria-pressed="false" type="button">Organização</button>
+    </nav>
+  </div></header>
+  <main>
+    <div id="view-visitante" class="panelview">
+      <section class="wrap hero" aria-label="Apresentação da feira">
+        <div class="hero-copy">
+          <div class="kicker"><span class="dot" aria-hidden="true"></span> UM UNIVERSO. MIL HISTÓRIAS.</div>
+          <h1>O seu lado <em>geek</em> tem lugar.</h1>
+          <p class="lead">A feira que aproxima fãs, artistas, cosplayers e criadores. Uma forma mais simples de descobrir atrações, explorar expositores e montar sua programação.</p>
+          <div class="hero-actions"><button class="btn" data-scroll="programacao" type="button">Explorar programação <span aria-hidden="true">↗</span></button><button class="outline" data-view="expositor" type="button">Quero ser expositor ↗</button></div>
+          <div class="meta-grid"><div><strong id="hero-date">Data a confirmar</strong><small>Próxima edição · conceito</small></div><div><strong id="hero-place">Local a definir</strong><small>Referência: Porto Alegre, RS</small></div></div>
+        </div>
+        <div class="poster" role="img" aria-label="Arte abstrata original com círculos coloridos e a palavra GEEK, criada exclusivamente para esta demonstração">
+          <span class="sticker">COSPLAY / K-POP / ARTE</span><div class="orbitword">FEIRA<b>GEEK!</b></div><span class="sticker two">SUA COMUNIDADE, SEU UNIVERSO</span><span class="foot">EDIÇÃO DEMONSTRATIVA · 2026</span>
+        </div>
+      </section>
+      <section class="section alt" id="programacao">
+        <div class="wrap">
+          <div class="sectionhead"><div><span class="eyebrow">01 / PROGRAMAÇÃO DEMONSTRATIVA</span><h2>Planeje seu rolê.</h2></div><p>Filtre o dia, salve atrações e crie sua trilha. Horários abaixo são somente exemplos e podem ser editados na organização.</p></div>
+          <div class="filters" role="group" aria-label="Filtrar programação por dia"><button class="filter active" data-day="Todos" aria-pressed="true">Tudo</button><button class="filter" data-day="Sábado" aria-pressed="false">Sábado</button><button class="filter" data-day="Domingo" aria-pressed="false">Domingo</button></div>
+          <div class="program-grid" id="program-grid" aria-live="polite"></div>
+          <div class="journey"><div><b>Minha trilha <span id="saved-count">· 0 atrações salvas</span></b><p id="saved-list">Toque na estrela para guardar suas atrações favoritas.</p></div><button type="button" class="btn dark" id="clear-favorites">Limpar seleção</button></div>
+        </div>
+      </section>
+      <section class="wrap section" id="como-funciona">
+        <div class="sectionhead"><div><span class="eyebrow">02 / PARA TODO MUNDO</span><h2>Mais que uma feira.</h2></div><p>Um único lugar para visitante, comunidade criativa e quem organiza a experiência.</p></div>
+        <div class="cards3"><article class="feature"><span class="num">01 / VISITANTES</span><h3>Não perca nada.</h3><p>Programe seu dia, conheça atividades e descubra marcas antes de chegar.</p></article><article class="feature"><span class="num">02 / EXPOSITORES</span><h3>Vitrine para criar conexões.</h3><p>Uma inscrição simples, informações claras e espaço de divulgação do trabalho.</p></article><article class="feature"><span class="num">03 / ORGANIZAÇÃO</span><h3>Tudo sob controle.</h3><p>Atualização de programação, análise de interesse e organização das candidaturas.</p></article></div>
+      </section>
+      <section class="section" style="background:#161921" id="expositores">
+        <div class="wrap"><div class="sectionhead"><div><span class="eyebrow" style="color:var(--lime)">03 / VITRINE DE EXEMPLO</span><h2>Criatividade em cada stand.</h2></div><p>Expositores e descrições fictícios para ilustrar como um catálogo poderia funcionar.</p></div>
+          <div class="stand-grid"><article class="stand"><div class="visual" style="background:var(--lavender)">✦</div><h3>Ateliê Prisma</h3><p>Ilustrações, pôsteres e colecionáveis autorais.</p><span class="tag">ARTE INDEPENDENTE · EXEMPLO</span></article><article class="stand"><div class="visual" style="background:var(--lime)">◎</div><h3>Pixel Garden</h3><p>Acessórios inspirados no universo dos games.</p><span class="tag">ACESSÓRIOS · EXEMPLO</span></article><article class="stand"><div class="visual" style="background:var(--coral)">★</div><h3>Cometa Craft</h3><p>Criações artesanais e peças para fãs de cosplay.</p><span class="tag">ARTESANATO · EXEMPLO</span></article></div>
+          <div class="callout"><div><h2>Sua marca também pode fazer parte.</h2><p>Simule uma candidatura e veja como a organização receberia as informações no painel demonstrativo.</p></div><button class="btn dark" data-view="expositor" type="button">Simular participação ↗</button></div>
+        </div>
+      </section>
+    </div>
+    <div id="view-expositor" class="panelview" hidden>
+      <section class="wrap workspace">
+        <div class="workspace-heading"><div><span class="eyebrow" style="color:var(--lime)">AMBIENTE 02 / EXPOSITORES</span><h1>Seu espaço na feira.</h1><p>Um processo simples para demonstrar cadastro, análise e retorno ao expositor. Nesta prévia, nenhum dado é enviado para fora do navegador.</p></div><button type="button" class="outline hide-tablet" data-view="visitante">← Ver site do visitante</button></div>
+        <div class="two-col">
+          <div class="panel"><div class="cap">FORMULÁRIO DE INTERESSE · SIMULAÇÃO</div><h2>Apresente seu trabalho</h2><p>Use apenas informações fictícias para testar a experiência.</p>
+            <form id="exhibitor-form">
+              <div class="field"><label for="brand">Nome do projeto / marca fictícia</label><input id="brand" name="brand" placeholder="Ex.: Estúdio das Estrelas" required maxlength="50" autocomplete="off"></div>
+              <div class="field"><label for="category">Área de atuação</label><select id="category" name="category"><option>Arte e ilustração</option><option>Cosplay e acessórios</option><option>Games e colecionáveis</option><option>Produtos geek</option><option>Outra categoria</option></select></div>
+              <div class="field"><label for="pitch">O que você levaria? (opcional)</label><textarea id="pitch" name="pitch" placeholder="Ex.: Prints e adesivos autorais" maxlength="150"></textarea></div>
+              <button class="btn" type="submit">Enviar candidatura de exemplo ↗</button><p class="hint">Não use e-mail, telefone ou dados reais. Uma demonstração local, sem inscrição verdadeira.</p>
+            </form>
+          </div>
+          <div class="stack"><div class="panel"><div class="cap">COMO FUNCIONARIA</div><div class="step"><span class="step-n">01</span><div><strong>Cadastro em poucos passos</strong><span>O expositor apresenta sua atividade e o tipo de espaço desejado.</span></div></div><div class="step"><span class="step-n">02</span><div><strong>Organização centralizada</strong><span>A equipe visualiza as solicitações, aprova ou ajusta o status.</span></div></div><div class="step"><span class="step-n">03</span><div><strong>Vitrine da edição</strong><span>Após confirmação real, os expositores poderiam aparecer no portal.</span></div></div></div>
+          <div class="panel"><div class="cap">CANDIDATURAS SALVAS NESTE NAVEGADOR</div><h2>Seu acompanhamento</h2><div id="my-applications" aria-live="polite"></div></div></div>
+        </div>
+      </section>
+    </div>
+    <div id="view-gestao" class="panelview" hidden>
+      <section class="wrap workspace">
+        <div class="workspace-heading"><div><span class="eyebrow" style="color:var(--lime)">AMBIENTE 03 / ORGANIZAÇÃO · SIMULAÇÃO</span><h1>Painel da edição.</h1><p>Uma demonstração navegável do fluxo de trabalho, sem acesso a sistemas reais. Alterações aparecem na visualização do visitante no mesmo navegador.</p></div><button type="button" class="outline hide-tablet" data-view="visitante">↗ Abrir visão do visitante</button></div>
+        <div class="kpis"><div class="kpi"><strong id="kpi-slots">0</strong><span>Atrações cadastradas (demo)</span></div><div class="kpi"><strong id="kpi-apps">0</strong><span>Candidaturas simuladas</span></div><div class="kpi"><strong id="kpi-approved">0</strong><span>Aprovadas na simulação</span></div></div>
+        <div class="two-col">
+          <div class="stack">
+            <div class="panel"><div class="cap">CONFIGURAÇÃO VISÍVEL NO PORTAL</div><h2>Informações da próxima edição</h2><form id="edition-form"><div class="field"><label for="ed-date">Data / período</label><input id="ed-date" name="date" maxlength="70" required placeholder="Ex.: Em breve"></div><div class="field"><label for="ed-place">Local</label><input id="ed-place" name="place" maxlength="70" required placeholder="Ex.: Local a confirmar"></div><button type="submit" class="btn">Atualizar o portal ↗</button></form></div>
+            <div class="panel"><div class="cap">NOVA ATIVIDADE</div><h2>Adicionar à programação</h2><form id="schedule-form"><div class="field"><label for="s-title">Nome da atração</label><input id="s-title" name="title" maxlength="65" required placeholder="Ex.: Encontro de cosplayers"></div><div class="field"><label for="s-day">Dia</label><select id="s-day" name="day"><option>Sábado</option><option>Domingo</option></select></div><div class="field"><label for="s-time">Horário</label><input id="s-time" name="time" type="time" value="14:00" required></div><div class="field"><label for="s-kind">Categoria</label><select id="s-kind" name="kind"><option>Cosplay</option><option>K-pop</option><option>Games</option><option>Workshop</option><option>Palco</option></select></div><button class="btn pink" type="submit">Adicionar atração ↗</button></form></div>
+          </div>
+          <div class="stack">
+            <div class="panel"><div class="tool-header"><div><div class="cap">EDIÇÃO DE EXEMPLO</div><h2>Programação</h2></div><span class="badge" id="manage-program-count">0 itens</span></div><div id="manage-program" aria-live="polite"></div></div>
+            <div class="panel"><div class="tool-header"><div><div class="cap">FLUXO DEMONSTRATIVO</div><h2>Interesses de expositores</h2></div><span class="badge" id="manage-app-count">0 itens</span></div><div id="manage-applications" aria-live="polite"></div></div>
+            <div class="panel"><div class="cap">CONTROLE DA DEMONSTRAÇÃO</div><h2>Começar novamente</h2><p>Este painel é público apenas porque não há dados reais. Um sistema contratado precisaria de autenticação e permissões.</p><button type="button" class="mini danger" id="reset-demo">Restaurar dados de exemplo</button></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer><div class="wrap foot-flex"><span><strong>Feira Geek — estudo independente de UX</strong><br>Conceito não oficial. Sem vínculo, ingressos, formulários reais ou uso de logos.</span><span>Desenvolvido para demonstração · todos os dados no seu navegador.</span></div></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+  (function(){
+    'use strict';
+    var KEY='demo-feira-geek-rs-77-v1';
+    var defaults={edition:{date:'Data a confirmar',place:'Local a definir'},favorites:[],program:[
+      {id:'p1',day:'Sábado',time:'11:00',title:'Oficina de ilustração',kind:'Workshop',stage:'Área criativa',published:true},
+      {id:'p2',day:'Sábado',time:'13:30',title:'Random dance K-pop',kind:'K-pop',stage:'Palco de apresentações',published:true},
+      {id:'p3',day:'Sábado',time:'16:00',title:'Bate-papo sobre cosplay',kind:'Cosplay',stage:'Espaço de encontros',published:true},
+      {id:'p4',day:'Domingo',time:'11:00',title:'Desafio de jogos retrô',kind:'Games',stage:'Área gamer',published:true},
+      {id:'p5',day:'Domingo',time:'14:00',title:'Desfile cosplay',kind:'Cosplay',stage:'Palco principal',published:true},
+      {id:'p6',day:'Domingo',time:'17:00',title:'Show de dança K-pop',kind:'K-pop',stage:'Palco principal',published:true}
+    ],applications:[{id:'a1',brand:'Estúdio de Exemplo',category:'Arte e ilustração',pitch:'Colecionáveis autorais',status:'Em análise'}]};
+    function clone(x){return JSON.parse(JSON.stringify(x));}
+    var data=clone(defaults),day='Todos',current='visitante',toastTimeout;
+    try{var saved=JSON.parse(localStorage.getItem(KEY));if(saved&&saved.edition&&Array.isArray(saved.program)&&Array.isArray(saved.applications)&&Array.isArray(saved.favorites))data=saved;}catch(e){}
+    function persist(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){}}
+    function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+    function e(id){return document.getElementById(id);}
+    function toast(s){var t=e('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimeout);toastTimeout=setTimeout(function(){t.classList.remove('show');},3000);}
+    function switchView(view){if(!/^(visitante|expositor|gestao)$/.test(view))view='visitante';current=view;document.querySelectorAll('.panelview').forEach(function(el){el.hidden=el.id!=='view-'+view;});document.querySelectorAll('[data-view]').forEach(function(el){if(el.closest('.roles'))el.setAttribute('aria-pressed',String(el.dataset.view===view));});history.replaceState(null,'','#'+view);window.scrollTo({top:0,behavior:'instant'});render();}
+    function visibleSlots(){return data.program.filter(function(x){return x.published&&(day==='Todos'||x.day===day);}).slice().sort(function(a,b){return a.time.localeCompare(b.time);});}
+    function renderProgram(){var items=visibleSlots();e('program-grid').innerHTML=items.length?items.map(function(x){return '<article class="slot"><div class="time">'+esc(x.time)+'<small>'+esc(x.day)+'</small></div><div><span class="pill">'+esc(x.kind)+'</span><h3>'+esc(x.title)+'</h3><p>'+esc(x.stage)+'</p></div><button type="button" class="star" data-star="'+esc(x.id)+'" aria-pressed="'+data.favorites.includes(x.id)+'" aria-label="'+(data.favorites.includes(x.id)?'Remover de favoritos: ':'Salvar atração: ')+esc(x.title)+'">'+(data.favorites.includes(x.id)?'★':'☆')+'</button></article>';}).join(''):'<div class="empty">Nenhuma atividade publicada neste dia. Use o painel de organização para adicionar uma.</div>';
+      var valid=data.program.filter(function(x){return data.favorites.includes(x.id)&&x.published;});
+      e('saved-count').textContent='· '+valid.length+' '+(valid.length===1?'atração salva':'atrações salvas');
+      e('saved-list').textContent=valid.length?valid.map(function(x){return x.day+' '+x.time+' · '+x.title;}).join(' | '):'Toque na estrela para guardar suas atrações favoritas.';
+      document.querySelectorAll('[data-day]').forEach(function(b){var active=b.dataset.day===day;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+    }
+    function renderApps(){var mine=e('my-applications');mine.innerHTML=data.applications.length?data.applications.slice().reverse().map(function(x){return '<div class="record"><div class="record-text"><strong>'+esc(x.brand)+'</strong><small>'+esc(x.category)+'</small></div><span class="badge '+(x.status==='Aprovada'?'ok':'')+'">'+esc(x.status)+'</span></div>';}).join(''):'<p class="muted">Nenhuma candidatura simulada por enquanto.</p>';
+      e('manage-applications').innerHTML=data.applications.length?data.applications.slice().reverse().map(function(x){return '<div class="record"><div class="record-text"><strong>'+esc(x.brand)+'</strong><small>'+esc(x.category)+' · '+esc(x.status)+'</small></div><div class="buttons"><button class="mini" type="button" data-review="'+esc(x.id)+'">'+(x.status==='Em análise'?'Aprovar':'Reanalisar')+'</button></div></div>';}).join(''):'<p class="muted">Sem candidaturas.</p>';
+      e('manage-app-count').textContent=data.applications.length+' itens';
+      e('kpi-apps').textContent=data.applications.length;
+      e('kpi-approved').textContent=data.applications.filter(function(x){return x.status==='Aprovada';}).length;
+    }
+    function renderManage(){e('manage-program').innerHTML=data.program.length?data.program.slice().sort(function(a,b){return a.day.localeCompare(b.day)||a.time.localeCompare(b.time);}).map(function(x){return '<div class="record"><div class="record-text"><strong>'+esc(x.time)+' · '+esc(x.title)+'</strong><small>'+esc(x.day)+' · '+esc(x.kind)+' · '+(x.published?'Publicada':'Oculta')+'</small></div><div class="buttons"><button class="mini" type="button" data-publish="'+esc(x.id)+'">'+(x.published?'Ocultar':'Publicar')+'</button><button class="mini danger" type="button" data-remove="'+esc(x.id)+'" aria-label="Excluir '+esc(x.title)+'">Excluir</button></div></div>';}).join(''):'<p class="muted">Sem programação cadastrada.</p>';
+      e('manage-program-count').textContent=data.program.length+' itens';e('kpi-slots').textContent=data.program.length;
+      e('ed-date').value=data.edition.date;e('ed-place').value=data.edition.place;
+    }
+    function render(){e('hero-date').textContent=data.edition.date;e('hero-place').textContent=data.edition.place;renderProgram();renderApps();renderManage();}
+    document.addEventListener('click',function(ev){var t=ev.target.closest('button');if(!t)return;
+      if(t.dataset.view){switchView(t.dataset.view);return;}
+      if(t.dataset.scroll){e(t.dataset.scroll).scrollIntoView({behavior:'smooth'});return;}
+      if(t.dataset.day){day=t.dataset.day;renderProgram();return;}
+      if(t.dataset.star){var id=t.dataset.star;data.favorites=data.favorites.includes(id)?data.favorites.filter(function(x){return x!==id;}):data.favorites.concat(id);persist();renderProgram();return;}
+      if(t.dataset.review){var app=data.applications.find(function(x){return x.id===t.dataset.review;});if(app){app.status=app.status==='Em análise'?'Aprovada':'Em análise';persist();render();toast('Status atualizado na simulação.');}return;}
+      if(t.dataset.publish){var slot=data.program.find(function(x){return x.id===t.dataset.publish;});if(slot){slot.published=!slot.published;persist();render();toast('Programação do portal atualizada.');}return;}
+      if(t.dataset.remove){data.program=data.program.filter(function(x){return x.id!==t.dataset.remove;});persist();render();toast('Atração removida da demonstração.');return;}
+    });
+    e('clear-favorites').addEventListener('click',function(){data.favorites=[];persist();renderProgram();toast('Trilha limpa.');});
+    e('exhibitor-form').addEventListener('submit',function(ev){ev.preventDefault();var f=ev.target;var name=f.brand.value.trim();if(name.length<2){toast('Informe um nome fictício de pelo menos 2 caracteres.');return;}data.applications.push({id:'a'+Date.now(),brand:name.slice(0,50),category:f.category.value,pitch:f.pitch.value.trim().slice(0,150),status:'Em análise'});persist();f.reset();renderApps();toast('Candidatura de exemplo criada! Confira no painel.');});
+    e('schedule-form').addEventListener('submit',function(ev){ev.preventDefault();var f=ev.target;if(!f.title.value.trim()||!f.time.value)return;data.program.push({id:'p'+Date.now(),day:f.day.value,time:f.time.value,title:f.title.value.trim().slice(0,65),kind:f.kind.value,stage:'Espaço a definir',published:true});persist();f.reset();e('s-time').value='14:00';render();toast('Atração publicada na programação da demo.');});
+    e('edition-form').addEventListener('submit',function(ev){ev.preventDefault();data.edition.date=e('ed-date').value.trim().slice(0,70)||'Data a confirmar';data.edition.place=e('ed-place').value.trim().slice(0,70)||'Local a definir';persist();render();toast('Informações atualizadas para a visão do visitante.');});
+    e('reset-demo').addEventListener('click',function(){if(!confirm('Restaurar os dados ilustrativos deste navegador?'))return;data=clone(defaults);day='Todos';persist();render();toast('Demonstração restaurada.');});
+    var hash=window.location.hash.replace('#','');switchView(/^(visitante|expositor|gestao)$/.test(hash)?hash:'visitante');
+  })();
+  </script>
+</body>
+</html>
