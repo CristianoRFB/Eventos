@@ -76,7 +76,23 @@ try {
         return {scroll:document.documentElement.scrollWidth,viewport:innerWidth,images:imgs.map(img=>({ok:img.complete&&img.naturalWidth>0,src:img.currentSrc||img.src}))};
       },route);
       check(probe.scroll<=probe.viewport+2,'overflow '+route+' '+width+' (scroll='+probe.scroll+')');
-      if(width===390){check(probe.images.every(x=>x.ok),'image loading '+route+' '+JSON.stringify(probe.images));}
+      if(width===390){
+        const activePage=route==='/publico'?'#public':route==='/gestao'?'#admin':'#home';
+        const pictures=page.locator(activePage+' img');
+        const checks=[];
+        for(let i=0;i<await pictures.count();i++){
+          const current=pictures.nth(i);
+          await current.scrollIntoViewIfNeeded();
+          const result=await current.evaluate(async image=>{try{await image.decode()}catch(e){}return {ok:image.complete&&image.naturalWidth>0,src:image.currentSrc||image.src}});
+          checks.push(result);
+        }
+        check(checks.every(x=>x.ok),'image loading after scroll '+route+' '+JSON.stringify(checks));
+        await page.evaluate(()=>window.scrollTo(0,0));
+        if(route==='/publico'){
+          const shot=await page.screenshot({type:'jpeg',quality:35,fullPage:false});
+          console.log('VISUAL_QA_PUBLIC_JPEG_BASE64:'+shot.toString('base64'));
+        }
+      }
       if(width===390&&route==='/'){
         const bytes=await page.screenshot({type:'jpeg',quality:35,fullPage:false});
         console.log('VISUAL_QA_MOBILE_JPEG_BASE64:'+bytes.toString('base64'));
