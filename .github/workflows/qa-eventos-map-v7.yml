@@ -20,7 +20,7 @@ jobs:
       - name: Install browser test dependencies
         run: |
           npm install --no-save playwright
-          npx playwright install --with-deps chromium
+          google-chrome --version
       - name: Run V7 acceptance tests against Cloudflare preview
         run: node demos/eventos-map-v7/qa.test.mjs
       - name: Save visual QA screenshots
