@@ -66,6 +66,24 @@ try {
   check((await page.locator('#public-notice').innerText()).includes('Aviso QA alterado'),'notice update visible in public');
   await page.goto(BASE+'/gestao',{waitUntil:'domcontentloaded'});
   await page.screenshot({path:'qa-screenshots/admin-mobile.png',fullPage:true});
+
+  for(const route of ['/','/publico','/gestao']){
+    for(const width of [320,360,390,430,768,1024,1440]){
+      await page.setViewportSize({width,height:width<=430?844:900});
+      await page.goto(BASE+route,{waitUntil:'load'});
+      const probe=await page.evaluate((route)=>{
+        const imgs=Array.from(document.querySelectorAll((route==='/publico'?'#public':route==='/gestao'?'#admin':'#home')+' img'));
+        return {scroll:document.documentElement.scrollWidth,viewport:innerWidth,images:imgs.map(img=>({ok:img.complete&&img.naturalWidth>0,src:img.currentSrc||img.src}))};
+      },route);
+      check(probe.scroll<=probe.viewport+2,'overflow '+route+' '+width+' (scroll='+probe.scroll+')');
+      if(width===390){check(probe.images.every(x=>x.ok),'image loading '+route+' '+JSON.stringify(probe.images));}
+      if(width===390&&route==='/'){
+        const bytes=await page.screenshot({type:'jpeg',quality:35,fullPage:false});
+        console.log('VISUAL_QA_MOBILE_JPEG_BASE64:'+bytes.toString('base64'));
+      }
+    }
+  }
+
   check(jsErrors.length===0,'no uncaught browser JavaScript errors: '+JSON.stringify(jsErrors));
   await page.close();
   const desktop=await browser.newPage({viewport:{width:1440,height:900}});
