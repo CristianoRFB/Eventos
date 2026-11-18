@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const BASE = 'https://77-eventos-map-v7-demo.on7.workers.dev';
 fs.mkdirSync('qa-screenshots', { recursive:true });
-const browser = await chromium.launch({ headless:true, args:['--no-sandbox'] });
+const browser = await chromium.launch({ channel:'chrome', headless:true, args:['--no-sandbox'] });
 const problems=[];
 function check(ok,label){ if(!ok)problems.push(label); console.log((ok?'PASS':'FAIL')+' :: '+label); }
 try {
