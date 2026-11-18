@@ -75,6 +75,10 @@ try {
         const imgs=Array.from(document.querySelectorAll((route==='/publico'?'#public':route==='/gestao'?'#admin':'#home')+' img'));
         return {scroll:document.documentElement.scrollWidth,viewport:innerWidth,images:imgs.map(img=>({ok:img.complete&&img.naturalWidth>0,src:img.currentSrc||img.src}))};
       },route);
+      if(probe.scroll>probe.viewport+2&&width===390){
+        const culprits=await page.evaluate(()=>Array.from(document.querySelectorAll('body *')).filter(el=>getComputedStyle(el).display!=='none').map(el=>{const r=el.getBoundingClientRect();return {tag:el.tagName,class:String(el.className).slice(0,75),text:(el.textContent||'').trim().slice(0,60),left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width)}}).filter(x=>x.right>innerWidth+2&&x.width>0).sort((a,b)=>b.right-a.right).slice(0,15));
+        console.log('OVERFLOW_DIAGNOSTIC '+route+' '+width+' '+JSON.stringify(culprits));
+      }
       check(probe.scroll<=probe.viewport+2,'overflow '+route+' '+width+' (scroll='+probe.scroll+')');
       if(width===390){
         const activePage=route==='/publico'?'#public':route==='/gestao'?'#admin':'#home';
