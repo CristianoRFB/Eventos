@@ -1,0 +1,32 @@
+name: QA demo Eventos MAP V7
+on:
+  push:
+    branches:
+      - demo/eventos-map-20261118-v7
+    paths:
+      - 'demos/eventos-map-v7/**'
+      - '.github/workflows/qa-eventos-map-v7.yml'
+permissions:
+  contents: read
+jobs:
+  browser-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test dependencies
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Run V7 acceptance tests against Cloudflare preview
+        run: node demos/eventos-map-v7/qa.test.mjs
+      - name: Save visual QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eventos-map-v7-qa-screenshots
+          path: qa-screenshots/
+          if-no-files-found: ignore
