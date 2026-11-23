@@ -1,0 +1,68 @@
+{
+  "method": "RFB Method — Demos Comerciais V1",
+  "lead": "Eventos MAP",
+  "instagram": "@eventosmapoficial",
+  "leadStatus": "DEMO_PRONTA_NAO_ENVIADA",
+  "communication": {
+    "contacted": false,
+    "replyReceived": false,
+    "demoSent": false
+  },
+  "scope": "Demonstração independente e não oficial; sem vagas ou inscrições reais",
+  "repository": "CristianoRFB/Eventos",
+  "branch": "rfb/eventos-map-v7-20261123",
+  "pullRequest": "https://github.com/CristianoRFB/Eventos/pull/24",
+  "worker": {
+    "name": "77-eventos-map-v7-demo",
+    "url": "https://77-eventos-map-v7-demo.on7.workers.dev/",
+    "deploymentId": "13780f8d-bc1e-4114-8315-6918ee6812ac",
+    "workerVersionId": "2d7aa1dc-16a5-44fd-a1da-f19996ad3ba2",
+    "deployedAtUtc": "2026-11-23T14:57:19Z",
+    "status": "DEPLOYED_VERIFIED"
+  },
+  "build": {
+    "sourcePath": "demos/eventos-map-v7/worker.js",
+    "flow": "GitHub branch → Cloudflare Worker API → Playwright GitHub Actions URL real"
+  },
+  "qa": {
+    "status": "PASS",
+    "runId": 45199973733,
+    "runUrl": "https://github.com/CristianoRFB/Eventos/actions/runs/45199973733",
+    "tests": 11,
+    "passed": 11,
+    "visualArtifactId": 14830971706,
+    "viewports": [
+      320,
+      360,
+      390,
+      430,
+      768,
+      1024,
+      1440
+    ],
+    "remoteE2E": true
+  },
+  "features": {
+    "homeCommercial": true,
+    "exactSlogan": true,
+    "twoCtas": true,
+    "twoComparisonTables": true,
+    "startingPrice": true,
+    "publicAgendaDemo": true,
+    "opportunitiesSandbox": true,
+    "opportunitiesCrud": true,
+    "clientManagerReflection": true,
+    "manualInstagramConsult": true,
+    "licensedIllustrativeImages": true
+  },
+  "limits": {
+    "localStorage": true,
+    "realSignups": false,
+    "payment": false,
+    "realAdminAuth": false,
+    "multiuserSync": false,
+    "brandAuthorization": false,
+    "realEventDatesVerified": false
+  },
+  "next": "Enviar mensagem curta após resposta do lead, sem afirmar contrato ou vínculo com a organização."
+}
