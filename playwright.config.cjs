@@ -1,0 +1,1 @@
+module.exports={testDir:'./demos/eventos-map-v7',timeout:30000,use:{browserName:'chromium',headless:true,baseURL:'https://demo.test'},workers:1,retries:0,projects:[{name:'chromium',use:{browserName:'chromium'}}]};
