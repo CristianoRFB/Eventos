@@ -1,0 +1,28 @@
+name: RFB QA Demo Eventos MAP
+on:
+  push:
+    branches:
+      - rfb/eventos-map-v7-20261123
+  pull_request:
+    paths:
+      - demos/eventos-map-v7/**
+      - .github/workflows/rfb-eventos-map-qa.yml
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar sintaxe do Worker
+        run: node --check demos/eventos-map-v7/worker.js
+      - name: Preparar Playwright
+        run: |
+          npm install --no-save @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Validar landing, público, gestão e responsividade
+        run: npx playwright test demos/eventos-map-v7/qa.spec.cjs --project=chromium --reporter=line
+        env:
+          CI: 'true'
